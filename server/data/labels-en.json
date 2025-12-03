@@ -15,5 +15,13 @@
 	"back": "Back",
 	"namePlaceholder": "Nickname",
 	"codePlaceholder": "Room code",
-	"join": "Join"
+	"join": "Join",
+	"maxNumPlayers": "Max player count:",
+	"lobbyNamePlaceholder": "Enter lobby name",
+	"setGameRules":"Set game rules",
+	"numOfRounds":"Number of rounds:",
+	"cardsOnHand":"Cards on hand:",
+	"openLobby": "Open lobby",
+	"gameCode": "Gamecode:",
+	"gameRules": "Gamerules"
 }

@@ -15,5 +15,18 @@
 	"namePlaceholder": "Smeknamn",
 	"codePlaceholder": "Rumskod",
 	"join": "Gå med",
-	"lobbyName": "Lobby Namn"
+	"lobbyName": "Lobby Namn",
+	"maxNumPlayers": "Max antal spelare:",
+	"lobbyNamePlaceholder": "Skriv in lobbynamn",
+	"setGameRules":"Välj spelregler",
+	"numOfRounds":"Antal omgångar:",
+	"cardsOnHand":"Antal kort:",
+	"openLobby": "Öppna lobby",
+	"gameCode": "Spelkod:",
+	"gameRules": "Spelregler"
+
+
+
+
+
 }

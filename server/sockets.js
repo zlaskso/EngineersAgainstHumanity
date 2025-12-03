@@ -41,6 +41,20 @@ function sockets(io, socket, data) {
     data.submitAnswer(d.pollId, d.answer);
     io.to(d.pollId).emit('submittedAnswersUpdate', data.getSubmittedAnswers(d.pollId));
   }); 
+
+  socket.on('createGameRoom',function(d) {
+    data.createGameRoom(d.gameID, d.gameSettings);
+    socket.join(d.gameID);
+    // console.log("gameRoomCreated -> sockets.js")
+    io.to(d.gameID).emit('gameRoomCreated', {
+      gameID: d.gameID,
+      gameSettings: d.gameSettings
+      });
+  });
+  socket.on("getGameSettings", (gameID) => {
+  const room = data.getGameRoom(gameID);  
+  socket.emit("gameSettings", room);      
+  });
 }
 
 export { sockets };

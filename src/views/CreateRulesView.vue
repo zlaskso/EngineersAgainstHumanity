@@ -4,17 +4,18 @@
     <span v-else>🇬🇧</span>
   </div>
   <section id="gameRules">
-    <h1>Set Game Rules</h1>
+    <h1>{{ uiLabels.setGameRules }}</h1>
     <div id="maxNumPlayers">
-      <label>Max player amount:</label>
+      <label>{{ uiLabels.maxNumPlayers }}</label>
       {{ maxPlayerAmount }}
+
       <div class="gameRuleButtonsContainer">
         <button class="gameRuleButton" @click="addOne('maxPlayerAmount')">↑</button>
         <button class="gameRuleButton" @click="removeOne('maxPlayerAmount')">↓</button>
       </div>
     </div>
     <div id="numRounds">
-      <label>Number of rounds:</label>
+      <label>{{ uiLabels.numOfRounds }}</label>
       {{ numOfRounds }}
       <div class="gameRuleButtonsContainer">
         <button class="gameRuleButton" @click="addOne('numOfRounds')">↑</button>
@@ -22,7 +23,7 @@
       </div>
     </div>
     <div id="cardsOnHand">
-      <label>Cards on hand:</label>
+      <label>{{ uiLabels.cardsOnHand }}</label>
       {{ cardsOnHand }}
       <div class="gameRuleButtonsContainer">
         <button class="gameRuleButton" @click="addOne('cardsOnHand')">↑</button>
@@ -32,16 +33,16 @@
   </section>
 
   <div class="lobby-name">
-    <label for="lobby-name">{{ uiLabels.lobbyName }}</label>
     <input
       type="text"
       id="lobbyName"
       v-model="lobbyName"
-      placeholder="Enter lobby name"
+      v-bind:placeholder="uiLabels.lobbyNamePlaceholder"
+      required
     />
   </div>
   <div>
-    <button class="openRoomButton" @click="openRoom">Open room</button>
+    <button class="openLobbyButton" @click="openLobby">{{ uiLabels.openLobby }}</button>
   </div>
 </template>
 
@@ -68,10 +69,10 @@ export default {
     };
   },
   created: function () {
-    this.socket = io("http://localhost:3000", { autoConnect: true });
-    this.socket.on("connect_error", (err) => console.error("socket err", err));
-    this.socket.on("uiLabels", (labels) => (this.uiLabels = labels));
-    this.socket.emit("getUILabels", this.lang);
+    // socket = io("http://localhost:3000", { autoConnect: true });
+    socket.on("connect_error", (err) => console.error("socket err", err));
+    socket.on("uiLabels", (labels) => (this.uiLabels = labels));
+    socket.emit("getUILabels", this.lang);
     this.gameID = this.getGameID();
   },
   methods: {
@@ -99,14 +100,18 @@ export default {
         this[gameRulesField]--;
       }
     },
-    openRoom() {
+    openLobby() {
+      if (!this.lobbyName || this.lobbyName.trim() === "") {
+        alert("Please enter a lobby name!");
+        return;
+      }
       const gameSettings = {
         lobbyName: this.lobbyName,
         maxPlayerAmount: this.maxPlayerAmount,
         numOfRounds: this.numOfRounds,
         cardsOnHand: this.cardsOnHand,
       };
-      this.socket.emit("createGameRoom", {
+      socket.emit("createGameRoom", {
         gameID: this.gameID,
         gameSettings: gameSettings,
       });
@@ -153,17 +158,17 @@ h1 {
 .lang-switch:active {
   transform: scale(0.9);
 }
-.openRoomButton {
+.openLobbyButton {
   margin: 3rem 0;
   background: none;
   border: none;
-  color: black;
+  color: gray;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 2rem;
   transition-duration: 1.4s;
 }
-.openRoomButton:hover {
-  color: gray;
+.openLobbyButton:hover {
+  color: black;
   transform: scale(1.5);
 }
 .gameRuleButton {
@@ -188,5 +193,20 @@ h1 {
   flex-direction: column;
   gap: 0.5rem;
   align-items: center;
+}
+input[type="text"] {
+  margin: 20px;
+  padding: 10px;
+  height: 50px;
+  width: 350px;
+  font-size: 20pt;
+  border-radius: 10px;
+  outline: none;
+  border: 2px solid gray;
+}
+input[type="text"] {
+  border-color: black;
+  border-radius: 10px;
+  outline: none;
 }
 </style>

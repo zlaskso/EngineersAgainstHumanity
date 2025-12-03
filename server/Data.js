@@ -18,6 +18,7 @@ function Data() {
     currentQuestion: 0,
     participants: []
   }
+  this.gameRooms = {};
 }
 
 /***********************************************
@@ -131,6 +132,17 @@ Data.prototype.submitAnswer = function(pollId, answer) {
     console.log("answers looks like ", answers, typeof answers);
   }
 }
+
+Data.prototype.createGameRoom = function(gameId, gameSettings) {
+  if (gameId && gameSettings) {
+    this.gameRooms[gameId] = {
+      gameSettings,
+    }
+  }
+}
+Data.prototype.getGameRoom = function(gameID) {
+  return this.gameRooms[gameID] || null;
+};
 
 export { Data };
 
