@@ -14,12 +14,9 @@
       <span v-else>🇸🇪</span>
     </div>
   </header>
-    <p>{{ aboutExplanations.explanation1 }}</p>
-    <img class="explanationImg" src="/img/explanation1.png"></img>
-    <p>{{ aboutExplanations.explanation2 }}</p>
-    <router-link to="/">
-    <button id="back">{{uiLabels.back}}</button>
-    </router-link>
+  <input id="nameInput" type="text" v-bind:placeholder= "uiLabels.namePlaceholder">
+  <input id="roomInput" type="text" v-bind:placeholder= "uiLabels.codePlaceholder"></input><br>
+  <button id="join">{{uiLabels.join}}</button>
 </template>
 
 <script>
@@ -28,25 +25,21 @@ import io from 'socket.io-client';
 const socket = io("localhost:3000");
 
 export default {
-    name: "AboutView",
-    components: {
+  name: 'JoinView',
+  components: {
     ResponsiveNav
   },
-    data: function () {
-        return {
-            aboutExplanations: {},
-            uiLabels: {},
-            lang: localStorage.getItem( "lang") || "en",
-            hideNav: true
-        }
-    },
-    created: function () {
-    socket.on( "aboutExplanations", explanations => this.aboutExplanations = explanations );
-    socket.emit( "getaboutExplanations", this.lang );
+  data: function () {
+    return {
+      uiLabels: {},
+      lang: localStorage.getItem( "lang") || "en",
+      hideNav: true
+    }
+  },
+  created: function () {
     socket.on( "uiLabels", labels => this.uiLabels = labels );
     socket.emit( "getUILabels", this.lang );
-    },
-    
+  },
   methods: {
     switchLanguage: function() {
       if (this.lang === "en") {
@@ -57,10 +50,8 @@ export default {
       }
       localStorage.setItem( "lang", this.lang );
       socket.emit( "getUILabels", this.lang );
-      localStorage.setItem( "lang", this.lang );
-      socket.emit( "getaboutExplanations", this.lang );
     }
-}
+  }
 }
 </script>
 
@@ -72,7 +63,7 @@ header {
        2em (hamburger) | auto (logo, tar upp all plats) | 5rem (flagga) */
     grid-template-columns: 2em auto 5rem;
     align-items: center;
-    margin-bottom: 50px;
+    margin-bottom: 100px;
   }
   .logo {
     letter-spacing: 0.08em;
@@ -101,41 +92,58 @@ header {
     font-size: 1.5rem;
   }
   .lang-switch {
-    font-size: 3rem;
-    cursor: pointer;
+    font-size: 3rem;   /* Gör flaggan stor */
+    cursor: pointer;   /* Visar hand-ikon vid hover */
     display: flex;
     justify-content: center;
-    user-select: none;
-    user-select: none;
+    user-select: none; /* Förhindrar att man markerar texten vid snabba klick */
+    user-select: none; /* <-- Denna rad stoppar markering/highlighting */
   -webkit-user-select: none;
   }
   .lang-switch:active {
-    transform: scale(0.9);
+    transform: scale(0.9); /* Liten animation när man klickar */
   }
-p {
-    color: black;
-}
-.explanationImg {
-    width: 500px;
-}
-#back {
-    background: transparent;
-    border: 0px;
-    margin-top: 140px;
-    font-size: 14pt;
-    color: gray;
+  button {
     cursor: pointer;
   }
+  input[type=text] {
+    margin: 20px;
+    padding: 10px;
+    height: 50px;
+    width: 350px;
+    font-size: 20pt;
+    border-radius: 10px;
+    outline: none;
+    border: 2px solid gray;
+  }
+  input[type=text] {
+    border-color: black;
+    border-radius: 10px;
+    outline: none;
+  }
 
-#back:hover {
+  #join {
+    background: white;
+    border-radius: 10px;
+    border: 2px solid black;
+    outline: none;
+    width: 200px;
+    height: 50px;
+    margin-top: 100px;
+    font-size: 20pt;
+    font-weight: bold;
+    color: black;
+    cursor: pointer;
+  }
+  #join:hover {
     animation-name: grayToBlack;
     animation-duration: 0.5s;
     animation-fill-mode: forwards;
   }
 
  @keyframes grayToBlack {
-    from {color:gray}
-    to {color: black}
+    from {scale: 1;}
+    to {scale: 1.05;}
   }
 
   button {

@@ -3,33 +3,30 @@
     <div v-bind:class="['hamburger', {'close': !hideNav}]" 
          v-on:click="toggleNav">
     </div>
-    <div class="logo">
+    <button class="logo">
       <img src="/img/logo.png">
       Engineers Against Humanity
-    </div>
+    </button>
     <div class="lang-switch" v-on:click="switchLanguage">
-      <span v-if="lang === 'sv'">🇸🇪</span>
-      <span v-else>🇬🇧</span>
+      <span v-if="lang === 'sv'">🇬🇧</span>
+      <span v-else>🇸🇪</span>
     </div>
   </header>
-  <ResponsiveNav v-bind:hideNav="hideNav">
-    <router-link to="/create/">
-      {{ uiLabels.createPoll }}
-    </router-link>
-    <a href="">
-      {{ uiLabels.about }}
-    </a>
-    <a href="">FAQ</a>
-  </ResponsiveNav>
-  <h1>{{ uiLabels["sales-pitch"] }}</h1>
-  <h2>{{ uiLabels.subHeading }}</h2>
-  <label>
-    Write poll id: 
-    <input type="text" v-model="newPollId">
-  </label>
-  <router-link v-bind:to="'/lobby/' + newPollId">
-    {{ uiLabels.participatePoll }}
+  <router-link to="/create/">
+  <button class="startButton" id="createButton">
+    {{uiLabels.createGame}}
+  </button>
   </router-link>
+  <router-link to="/join/">
+  <button class="startButton" id="joinButton">
+    {{uiLabels.joinGame}}
+  </button>
+  </router-link>
+  <footer>
+    <router-link to="/about/">
+    <button id="htp">{{uiLabels.htp}}</button>
+    </router-link>
+  </footer>
 </template>
 
 <script>
@@ -73,7 +70,6 @@ export default {
 </script>
 <style scoped>
   header {
-    background-color: gray;
     width: 100%;
     display: grid;
     /* Uppdaterad grid: 3 kolumner. 
@@ -82,11 +78,12 @@ export default {
     align-items: center;
   }
   .logo {
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
-    font-size: 2.5rem;
-    color: white;
+    letter-spacing: 0.08em;
+    font-size: 3rem;
+    font-weight: bold;
     padding-top:0.2em;
+    border: 0;
+    background: transparent;
   }
   .logo img {
     height:2.5rem;
@@ -105,6 +102,65 @@ export default {
     height: 2rem;
     cursor: pointer;
     font-size: 1.5rem;
+  }
+
+  @keyframes growAnimation {
+    from {scale: 1;}
+    to {scale: 1.05;}
+  }
+
+  @keyframes grayToBlack {
+    from {color:gray}
+    to {color: black}
+  }
+
+  .startButton {
+    border-radius: 15px;
+    width: 300px;
+    height: 422px;
+    margin-top: 100px;
+    padding: 40px;
+    padding-bottom: 300px;
+    font-size: 26pt;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  #createButton {
+    background-color: black;
+    color: white;
+    border: 2px solid black;
+    text-align: left;
+    rotate: -10deg;
+  }
+
+  #joinButton {
+    background-color: white;
+    color: black;
+    border: 2px solid black;
+    rotate: 10deg;
+  }
+
+  .startButton:hover {
+    animation-name: growAnimation;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+  }
+
+  #htp:hover {
+    animation-name: grayToBlack;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+  }
+
+  #htp {
+    background: transparent;
+    border: 0px;
+    margin-top: 140px;
+    font-size: 14pt;
+    color: gray;
+    cursor: pointer;
   }
   
   /* CSS för den nya flaggan */

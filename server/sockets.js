@@ -4,6 +4,10 @@ function sockets(io, socket, data) {
     socket.emit('uiLabels', data.getUILabels(lang));
   });
 
+  socket.on('getaboutExplanations', function(lang) {
+    socket.emit('aboutExplanations', data.getaboutExplanations(lang));
+  });
+
   socket.on('createPoll', function(d) {
     data.createPoll(d.pollId, d.lang)
     socket.emit('pollData', data.getPoll(d.pollId));

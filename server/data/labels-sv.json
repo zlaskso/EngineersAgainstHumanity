@@ -7,5 +7,12 @@
 	"question": "Fråga",
 	"changeLanguage": "Change to English",
 	"about": "Om oss",
-	"participateInPoll": "Delta i enkäten"
+	"participateInPoll": "Delta i enkäten",
+	"createGame": "Skapa spel",
+	"joinGame": "Delta",
+	"htp": "Hur man spelar",
+	"back": "Tillbaka",
+	"namePlaceholder": "Smeknamn",
+	"codePlaceholder": "Rumskod",
+	"join": "Gå med"
 }

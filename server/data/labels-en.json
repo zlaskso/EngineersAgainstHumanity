@@ -7,5 +7,12 @@
 	"question": "Question",
 	"changeLanguage": "Byt till svenska",
 	"about": "About",
-	"participateInPoll": "Participate in poll"
+	"participateInPoll": "Participate in poll",
+	"createGame": "Create game",
+	"joinGame": "Join game",
+	"htp": "How to play",
+	"back": "Back",
+	"namePlaceholder": "Nickname",
+	"codePlaceholder": "Room code",
+	"join": "Join"
 }

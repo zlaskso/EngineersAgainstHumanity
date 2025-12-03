@@ -28,6 +28,16 @@ const router = createRouter({
       path: '/result/:id',
       name: 'ResultView',
       component: () => import('../views/ResultView.vue')
+    },
+    {
+      path: '/about/',
+      name: 'About',
+      component: () => import('../views/AboutView.vue')
+    },
+    {
+      path: '/join/',
+      name: 'Join',
+      component: () => import('../views/JoinView.vue')
     }
   ]
 })

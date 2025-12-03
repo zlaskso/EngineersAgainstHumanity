@@ -38,6 +38,14 @@ Data.prototype.getUILabels = function (lang) {
   return JSON.parse(labels);
 }
 
+Data.prototype.getaboutExplanations = function (lang) {
+  //check if lang is valid before trying to load the dictionary file
+  if (!["en", "sv"].some( el => el === lang))
+    lang = "en";
+  const labels = readFileSync("./server/data/about-" + lang + ".json");
+  return JSON.parse(labels);
+}
+
 Data.prototype.createPoll = function(pollId, lang="en") {
   if (!this.pollExists(pollId)) {
     let poll = {};
