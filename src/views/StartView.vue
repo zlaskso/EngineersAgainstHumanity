@@ -163,18 +163,18 @@ export default {
     cursor: pointer;
   }
   
-  /* CSS för den nya flaggan */
+
   .lang-switch {
-    font-size: 3rem;   /* Gör flaggan stor */
-    cursor: pointer;   /* Visar hand-ikon vid hover */
+    font-size: 3rem;
+    cursor: pointer;
     display: flex;
     justify-content: center;
-    user-select: none; /* Förhindrar att man markerar texten vid snabba klick */
-    user-select: none; /* <-- Denna rad stoppar markering/highlighting */
+    user-select: none;
+    user-select: none;
   -webkit-user-select: none;
   }
   .lang-switch:active {
-    transform: scale(0.9); /* Liten animation när man klickar */
+    transform: scale(0.9);
   }
 
 @media screen and (max-width:50em) {
