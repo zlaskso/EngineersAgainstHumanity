@@ -8,7 +8,7 @@
 	"changeLanguage": "Byt till svenska",
 	"about": "About",
 	"participateInPoll": "Participate in poll",
-<<<<<<< HEAD
+	"lobbyName": "Lobby Name",
 	"createGame": "Create game",
 	"joinGame": "Join game",
 	"htp": "How to play",
@@ -17,9 +17,3 @@
 	"codePlaceholder": "Room code",
 	"join": "Join"
 }
-=======
-	"lobbyName": "Lobby Name",
-	"createGame": "Create Game"
-}
-
->>>>>>> 44206502e70b8c638b5f36b49917a40208b2852d

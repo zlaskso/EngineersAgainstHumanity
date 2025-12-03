@@ -26,7 +26,6 @@ export default {
       gameID: "inactive poll",
       uiLabels: {},
       joined: false,
-      lang: localStorage.getItem("lang") || "en",
       participants: []
     }
   },
