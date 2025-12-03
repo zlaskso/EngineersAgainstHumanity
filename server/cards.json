@@ -1,7 +1,8 @@
 {
   "blackCards": [
     "När tentan kändes som värst, räddade ____ min dag.",
-    "På första dagen som ingenjörsstudent lär man sig att ____ är viktigast."
+    "På första dagen som ingenjörsstudent lär man sig att ____ är viktigast.",
+    "När man kommer in till bibblan men den är fullsatt med folk, säger jag något om ____ ."
   ],
   "whiteCards": [
     "en trasig labbutrustning",
@@ -9,5 +10,6 @@
     "en överambitiös projektgrupp",
     "Stack Overflow",
     "en group chat utan svar"
+    
   ]
 }
