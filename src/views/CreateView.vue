@@ -1,78 +1,85 @@
 <template>
   <div>
-    Poll link: 
-    <input type="text" v-model="pollId">
-    <button v-on:click="createPoll">
-      Create poll
-    </button>
-    <div>
-      {{ uiLabels.question }}:
-      <input type="text" v-model="question">
-      <div>
-        Answers:
-        <input v-for="(_, i) in answers" 
-               v-model="answers[i]" 
-               v-bind:key="'answer' + i">
-        <button v-on:click="addAnswer">
-          Add answer alternative
-        </button>
+    <div class="create">
+      <h1>{{ uiLabels.createGame }}</h1>
+      <div class="lobby-name">
+        <label for="lobby-name">{{ uiLabels.lobbyName }}:</label>
+        <input type="text" id="lobby-name" v-model="lobbyName" placeholder="Enter lobby name" />
       </div>
     </div>
-    <button v-on:click="addQuestion">
-      Add question
-    </button>
-    <input type="number" v-model="questionNumber">
-    <button v-on:click="startPoll">
-      Start poll
-    </button>
-    <button v-on:click="runQuestion">
-      Run question
-    </button>
-    <router-link v-bind:to="'/result/' + pollId">Check result</router-link>
-    Data: {{ pollData }}
+
+    <div class="lang-switch" v-on:click="switchLanguage">
+      <span v-if="lang === 'sv'">🇸🇪</span>
+      <span v-else>🇬🇧</span>
+    </div>
   </div>
 </template>
 
-<script>
+<script>    
+import ResponsiveNav from '@/components/ResponsiveNav.vue';
 import io from 'socket.io-client';
 const socket = io("localhost:3000");
 
 export default {
   name: 'CreateView',
+  components: {
+    ResponsiveNav
+  },
   data: function () {
     return {
-      lang: localStorage.getItem("lang") || "en",
-      pollId: "",
-      question: "",
-      answers: ["", ""],
-      questionNumber: 0,
-      pollData: {},
+      lobbyName: '',
       uiLabels: {},
+      newPollId: "",
+      lang: localStorage.getItem( "lang") || "en",
+      hideNav: true,
+      gameID: null
     }
   },
   created: function () {
-    socket.on( "uiLabels", labels => this.uiLabels = labels );
-    socket.on( "pollData", data => this.pollData = data );
-    socket.on( "participantsUpdate", p => this.pollData.participants = p );
-    socket.emit( "getUILabels", this.lang );
+    this.socket = io("http://localhost:3000", { autoConnect: true });
+    this.socket.on("connect_error", err => console.error("socket err", err));
+    this.socket.on( "uiLabels", labels => this.uiLabels = labels );
+    this.socket.emit( "getUILabels", this.lang );
+    this.gameID = this.getGameID();
   },
   methods: {
-    createPoll: function () {
-      socket.emit("createPoll", {pollId: this.pollId, lang: this.lang })
-      socket.emit("joinPoll", this.pollId);
+    switchLanguage: function() {
+      if (this.lang === "en") {
+        this.lang = "sv"
+      }
+      else {
+        this.lang = "en"
+      }
+      localStorage.setItem( "lang", this.lang );
+      socket.emit( "getUILabels", this.lang );
     },
-    startPoll: function () {
-      socket.emit("startPoll", this.pollId)
+    toggleNav: function () {
+      this.hideNav = ! this.hideNav;
     },
-    addQuestion: function () {
-      socket.emit("addQuestion", {pollId: this.pollId, q: this.question, a: this.answers } )
+    
+    getGameID: function() {
+      return Math.floor(Math.random() * 100000);
     },
-    addAnswer: function () {
-      this.answers.push("");
-    },
-    runQuestion: function () {
-      socket.emit("runQuestion", {pollId: this.pollId, questionNumber: this.questionNumber})
-    }
+
+
   }
 }
 </script>
+
+<style scoped>
+
+.lang-switch {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 3rem;
+    cursor: pointer;
+    display: flex;
+    user-select: none;
+    user-select: none;
+  -webkit-user-select: none;
+  }
+  .lang-switch:active {
+    transform: scale(0.9);
+  }
+</style>
