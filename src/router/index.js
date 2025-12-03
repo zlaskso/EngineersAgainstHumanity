@@ -21,8 +21,8 @@ const router = createRouter({
     },
     {
       path: '/create/',
-      name: 'CreateView',
-      component: () => import('../views/CreateView.vue')
+      name: 'CreateRulesView',
+      component: () => import('../views/CreateRulesView.vue')
     },
     {
       path: '/result/:id',

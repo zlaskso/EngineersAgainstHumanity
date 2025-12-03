@@ -1,6 +1,6 @@
 <template>
   <div>
-    {{pollId}}
+    {{gameID}}
     <div v-if="!joined">
       <input type="text" v-model="userName">
       <button v-on:click="participateInPoll">
@@ -23,7 +23,7 @@ export default {
   data: function () {
     return {
       userName: "",
-      pollId: "inactive poll",
+      gameID: "inactive poll",
       uiLabels: {},
       joined: false,
       lang: localStorage.getItem("lang") || "en",
@@ -31,16 +31,16 @@ export default {
     }
   },
   created: function () {
-    this.pollId = this.$route.params.id;
+    this.gameID = this.$route.params.id;
     socket.on( "uiLabels", labels => this.uiLabels = labels );
     socket.on( "participantsUpdate", p => this.participants = p );
-    socket.on( "startPoll", () => this.$router.push("/poll/" + this.pollId) );
-    socket.emit( "joinPoll", this.pollId );
+    socket.on( "startPoll", () => this.$router.push("/poll/" + this.gameID) );
+    socket.emit( "joinPoll", this.gameID );
     socket.emit( "getUILabels", this.lang );
   },
   methods: {
     participateInPoll: function () {
-      socket.emit( "participateInPoll", {pollId: this.pollId, name: this.userName} )
+      socket.emit( "participateInPoll", {gameID: this.gameID, name: this.userName} )
       this.joined = true;
     }
   }
