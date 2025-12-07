@@ -9,58 +9,33 @@
       Engineers Against Humanity
     </button>
     </router-link>
-    <div class="lang-switch" v-on:click="switchLanguage">
-      <span v-if="lang === 'sv'">🇬🇧</span>
-      <span v-else>🇸🇪</span>
-    </div>
   </header>
-    <p>{{ aboutExplanations.explanation1 }}</p>
+    <p>{{ uiLabels.aboutView?.explanation1 }}</p>
     <img class="explanationImg" src="/img/explanation1.png"></img>
-    <p>{{ aboutExplanations.explanation2 }}</p>
+    <p>{{ uiLabels.aboutView?.explanation2 }}</p>
     <router-link to="/">
-    <button id="back">{{uiLabels.back}}</button>
+    <button id="back">{{uiLabels.common?.back}}</button>
     </router-link>
 </template>
 
 <script>
 import ResponsiveNav from '@/components/ResponsiveNav.vue';
-import io from 'socket.io-client';
-const socket = io("localhost:3000");
 
 export default {
     name: "AboutView",
     components: {
     ResponsiveNav
   },
+
+  props: {
+    uiLabels: Object
+  },
     data: function () {
         return {
             aboutExplanations: {},
-            uiLabels: {},
-            lang: localStorage.getItem( "lang") || "en",
             hideNav: true
         }
-    },
-    created: function () {
-    socket.on( "aboutExplanations", explanations => this.aboutExplanations = explanations );
-    socket.emit( "getaboutExplanations", this.lang );
-    socket.on( "uiLabels", labels => this.uiLabels = labels );
-    socket.emit( "getUILabels", this.lang );
-    },
-    
-  methods: {
-    switchLanguage: function() {
-      if (this.lang === "en") {
-        this.lang = "sv"
-      }
-      else {
-        this.lang = "en"
-      }
-      localStorage.setItem( "lang", this.lang );
-      socket.emit( "getUILabels", this.lang );
-      localStorage.setItem( "lang", this.lang );
-      socket.emit( "getaboutExplanations", this.lang );
     }
-}
 }
 </script>
 

@@ -1,12 +1,8 @@
 <template>
-  <div class="lang-switch" v-on:click="switchLanguage">
-    <span v-if="lang === 'sv'">🇸🇪</span>
-    <span v-else>🇬🇧</span>
-  </div>
   <section id="gameRules">
-    <h1>{{ uiLabels.setGameRules }}</h1>
+    <h1>{{ uiLabels.createView?.setGameRules }}</h1>
     <div id="maxNumPlayers">
-      <label>{{ uiLabels.maxNumPlayers }}</label>
+      <label>{{ uiLabels.createView?.maxNumPlayers }}</label>
       {{ maxPlayerAmount }}
 
       <div class="gameRuleButtonsContainer">
@@ -15,7 +11,7 @@
       </div>
     </div>
     <div id="numRounds">
-      <label>{{ uiLabels.numOfRounds }}</label>
+      <label>{{ uiLabels.createView?.numOfRounds }}</label>
       {{ numOfRounds }}
       <div class="gameRuleButtonsContainer">
         <button class="gameRuleButton" @click="addOne('numOfRounds')">↑</button>
@@ -23,7 +19,7 @@
       </div>
     </div>
     <div id="cardsOnHand">
-      <label>{{ uiLabels.cardsOnHand }}</label>
+      <label>{{ uiLabels.createView?.cardsOnHand }}</label>
       {{ cardsOnHand }}
       <div class="gameRuleButtonsContainer">
         <button class="gameRuleButton" @click="addOne('cardsOnHand')">↑</button>
@@ -37,12 +33,12 @@
       type="text"
       id="lobbyName"
       v-model="lobbyName"
-      v-bind:placeholder="uiLabels.lobbyNamePlaceholder"
+      v-bind:placeholder="uiLabels.createView?.lobbyNamePlaceholder"
       required
     />
   </div>
   <div>
-    <button class="openLobbyButton" @click="openLobby">{{ uiLabels.openLobby }}</button>
+    <button class="openLobbyButton" @click="openLobby">{{ uiLabels.createView?.openLobby }}</button>
   </div>
 </template>
 
@@ -56,11 +52,14 @@ export default {
   components: {
     ResponsiveNav,
   },
+
+  props: {
+    uiLabels: Object
+  },
+
   data: function () {
     return {
       lobbyName: "",
-      uiLabels: {},
-      lang: localStorage.getItem("lang") || "en",
       hideNav: true,
       gameID: null,
       maxPlayerAmount: 0,
@@ -71,20 +70,9 @@ export default {
   created: function () {
     // socket = io("http://localhost:3000", { autoConnect: true });
     socket.on("connect_error", (err) => console.error("socket err", err));
-    socket.on("uiLabels", (labels) => (this.uiLabels = labels));
-    socket.emit("getUILabels", this.lang);
     this.gameID = this.getGameID();
   },
   methods: {
-    switchLanguage: function () {
-      if (this.lang === "en") {
-        this.lang = "sv";
-      } else {
-        this.lang = "en";
-      }
-      localStorage.setItem("lang", this.lang);
-      socket.emit("getUILabels", this.lang);
-    },
     toggleNav: function () {
       this.hideNav = !this.hideNav;
     },
@@ -144,20 +132,7 @@ h1 {
   gap: 1rem;
   margin: 2rem 0;
 }
-.lang-switch {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: 3rem;
-  cursor: pointer;
-  display: flex;
-  user-select: none;
-  user-select: none;
-  -webkit-user-select: none;
-}
-.lang-switch:active {
-  transform: scale(0.9);
-}
+
 .openLobbyButton {
   margin: 3rem 0;
   background: none;

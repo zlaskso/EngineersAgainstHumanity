@@ -1,27 +1,45 @@
 {
-	"sales-pitch": "Terrific",
-	"subHeading": "A simple polling tool",
-	"invite": "Invite participants with this link:",
-	"createPoll": "Create poll",
-	"participatePoll": "Participate in poll",
-	"question": "Question",
-	"changeLanguage": "Byt till svenska",
-	"about": "About",
-	"participateInPoll": "Participate in poll",
-	"lobbyName": "Lobby Name",
-	"createGame": "Create game",
-	"joinGame": "Join game",
-	"htp": "How to play",
-	"back": "Back",
-	"namePlaceholder": "Nickname",
-	"codePlaceholder": "Room code",
-	"join": "Join",
-	"maxNumPlayers": "Max player count:",
-	"lobbyNamePlaceholder": "Enter lobby name",
-	"setGameRules":"Set game rules",
-	"numOfRounds":"Number of rounds:",
-	"cardsOnHand":"Cards on hand:",
-	"openLobby": "Open lobby",
-	"gameCode": "Gamecode:",
-	"gameRules": "Gamerules"
+	"common": {
+		"language": "Language",
+		"english": "English",
+		"swedish": "Swedish",
+		"back": "Back",
+		"home": "Home",
+		"lobby": "Lobby",
+		"rules": "Game Rules"
+	},
+	"startView": {
+		"createGame": "Create game",
+		"joinGame": "Join game",
+		"htp": "How to play"
+	},
+	"joinView": {
+		"join": "Join",
+		"namePlaceholder": "Nickname",
+		"codePlaceholder": "Room code"
+	},
+	"createView": {
+		"lobbyName": "Lobby Name",
+		"maxNumPlayers": "Max player count:",
+		"lobbyNamePlaceholder": "Enter lobby name",
+		"setGameRules":"Set game rules",
+		"numOfRounds":"Number of rounds:",
+		"cardsOnHand":"Cards on hand:",
+		"openLobby": "Open lobby",
+		"gameCode": "Gamecode:",
+		"gameRules": "Gamerules"
+	},
+	"aboutView": {
+		"explanation1": "Create a game on a screen that all players can see. You choose how many players are participating and how many rounds you play, etc.", 
+		"explanation2": "Players join the game from their own devices",
+		"explanation3": "The screen shows a card…", 
+		"explanation4": "...with a statement on it. You can fill in the blank with anything ____",
+		"explanation5": "Players choose what fits.", 
+		"explanation6": "Option 1",
+		"explanation7": "The choices are shown anonymously, and you vote for which one is the funniest.",
+		"explanation8": "The player with the voted option wins the round.",
+		"explanation9": "The one with the most won rounds wins"
+		
+		
+	}
 }

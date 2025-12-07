@@ -7,61 +7,44 @@
       <img src="/img/logo.png">
       Engineers Against Humanity
     </button>
-    <div class="lang-switch" v-on:click="switchLanguage">
-      <span v-if="lang === 'sv'">🇬🇧</span>
-      <span v-else>🇸🇪</span>
-    </div>
   </header>
   <router-link to="/create/">
   <button class="startButton" id="createButton">
-    {{uiLabels.createGame}}
+    {{uiLabels.startView?.createGame}}
   </button>
   </router-link>
   <router-link to="/join/">
   <button class="startButton" id="joinButton">
-    {{uiLabels.joinGame}}
+    {{uiLabels.startView?.joinGame}}
   </button>
   </router-link>
   <footer>
     <router-link to="/about/">
-    <button id="htp">{{uiLabels.htp}}</button>
+    <button id="htp">{{uiLabels.startView?.htp}}</button>
     </router-link>
   </footer>
 </template>
 
 <script>
 import ResponsiveNav from '@/components/ResponsiveNav.vue';
-import io from 'socket.io-client';
-const socket = io("localhost:3000");
 
 export default {
   name: 'StartView',
   components: {
     ResponsiveNav
   },
+
+  props: {
+    uiLabels: Object
+  },
+
   data: function () {
     return {
-      uiLabels: {},
       newPollId: "",
-      lang: localStorage.getItem( "lang") || "en",
-      hideNav: true
+      hideNav: true,
     }
   },
-  created: function () {
-    socket.on( "uiLabels", labels => this.uiLabels = labels );
-    socket.emit( "getUILabels", this.lang );
-  },
   methods: {
-    switchLanguage: function() {
-      if (this.lang === "en") {
-        this.lang = "sv"
-      }
-      else {
-        this.lang = "en"
-      }
-      localStorage.setItem( "lang", this.lang );
-      socket.emit( "getUILabels", this.lang );
-    },
     toggleNav: function () {
       this.hideNav = ! this.hideNav;
     }
@@ -72,8 +55,6 @@ export default {
   header {
     width: 100%;
     display: grid;
-    /* Uppdaterad grid: 3 kolumner. 
-       2em (hamburger) | auto (logo, tar upp all plats) | 5rem (flagga) */
     grid-template-columns: 2em auto 5rem;
     align-items: center;
   }
@@ -161,20 +142,6 @@ export default {
     font-size: 14pt;
     color: gray;
     cursor: pointer;
-  }
-  
-
-  .lang-switch {
-    font-size: 3rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    user-select: none;
-    user-select: none;
-  -webkit-user-select: none;
-  }
-  .lang-switch:active {
-    transform: scale(0.9);
   }
 
 @media screen and (max-width:50em) {

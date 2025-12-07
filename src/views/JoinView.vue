@@ -9,49 +9,32 @@
       Engineers Against Humanity
     </button>
     </router-link>
-    <div class="lang-switch" v-on:click="switchLanguage">
-      <span v-if="lang === 'sv'">🇬🇧</span>
-      <span v-else>🇸🇪</span>
-    </div>
   </header>
-  <input id="nameInput" type="text" v-bind:placeholder= "uiLabels.namePlaceholder">
-  <input id="roomInput" type="text" v-bind:placeholder= "uiLabels.codePlaceholder"></input><br>
-  <button id="join">{{uiLabels.join}}</button>
+  <input id="nameInput" type="text" v-bind:placeholder= "uiLabels.joinView?.namePlaceholder">
+  <input id="roomInput" type="text" v-bind:placeholder= "uiLabels.joinView?.codePlaceholder"></input><br>
+  <button id="join">{{uiLabels.joinView?.join}}</button>
 </template>
 
 <script>
 import ResponsiveNav from '@/components/ResponsiveNav.vue';
-import io from 'socket.io-client';
-const socket = io("localhost:3000");
 
 export default {
   name: 'JoinView',
   components: {
     ResponsiveNav
   },
+
+  props: {
+    uiLabels: Object
+  },
+
   data: function () {
     return {
-      uiLabels: {},
-      lang: localStorage.getItem( "lang") || "en",
       hideNav: true
     }
   },
-  created: function () {
-    socket.on( "uiLabels", labels => this.uiLabels = labels );
-    socket.emit( "getUILabels", this.lang );
-  },
   methods: {
-    switchLanguage: function() {
-      if (this.lang === "en") {
-        this.lang = "sv"
-      }
-      else {
-        this.lang = "en"
-      }
-      localStorage.setItem( "lang", this.lang );
-      socket.emit( "getUILabels", this.lang );
     }
-  }
 }
 </script>
 
