@@ -1,12 +1,7 @@
 {
 	"common": {
-		"language": "Language",
-		"english": "English",
-		"swedish": "Swedish",
 		"back": "Back",
-		"home": "Home",
-		"lobby": "Lobby",
-		"rules": "Game Rules"
+		"home": "Home"
 	},
 	"startView": {
 		"createGame": "Create game",
@@ -41,5 +36,10 @@
 		"explanation9": "The one with the most won rounds wins"
 		
 		
+	},
+	"lobbyView": {
+		"joinInstructions": "Enter your nickname and press Join to participate in the game.",
+		"participants": "Participants",
+		"startGame": "Start game"
 	}
 }

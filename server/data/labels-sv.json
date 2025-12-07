@@ -1,12 +1,7 @@
 {
 	"common": {
-		"language": "Språk",
-		"english": "Engelska",
-		"swedish": "Svenska",
 		"back": "Tillbaka",
-		"home": "Hem",
-		"lobby": "Lobby",
-		"rules": "Spelregler"
+		"home": "Hem"
 	},
 
 	"startView": {
@@ -42,5 +37,10 @@
 		"explanation9": "Den med flest vunna rundor vinner"
 		
 		
+	},
+	"lobbyView": {
+		"joinInstructions": "Skriv in ditt smeknamn och tryck på Gå med för att delta i spelet.",
+		"participants": "Deltagare",
+		"startGame": "Starta spel"
 	}
 }
