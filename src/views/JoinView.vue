@@ -12,7 +12,7 @@
   </header>
   <input id="nameInput" type="text" v-model="nickname" v-bind:placeholder= "uiLabels.joinView?.namePlaceholder">
   <input id="roomInput" type="text" v-model="roomCode" v-bind:placeholder= "uiLabels.joinView?.codePlaceholder"></input><br>
-  <button id="join">{{uiLabels.joinView?.join}}</button>
+  <button id="join" @click="joinGame">{{uiLabels.joinView?.join}}</button>
 </template>
 
 
@@ -43,6 +43,7 @@ export default {
         alert("Please enter a nickname and a room code.");
         return;
     }
+  
 
     socket.emit('joinGameRoom', {
         nickname: this.nickname,
