@@ -10,13 +10,17 @@
     </button>
     </router-link>
   </header>
-  <input id="nameInput" type="text" v-bind:placeholder= "uiLabels.joinView?.namePlaceholder">
-  <input id="roomInput" type="text" v-bind:placeholder= "uiLabels.joinView?.codePlaceholder"></input><br>
+  <input id="nameInput" type="text" v-model="nickname" v-bind:placeholder= "uiLabels.joinView?.namePlaceholder">
+  <input id="roomInput" type="text" v-model="roomCode" v-bind:placeholder= "uiLabels.joinView?.codePlaceholder"></input><br>
   <button id="join">{{uiLabels.joinView?.join}}</button>
 </template>
 
+
 <script>
 import ResponsiveNav from '@/components/ResponsiveNav.vue';
+import io from "socket.io-client"; 
+const socket = io("localhost:3000");
+
 
 export default {
   name: 'JoinView',
@@ -28,13 +32,37 @@ export default {
     uiLabels: Object
   },
 
-  data: function () {
-    return {
-      hideNav: true
-    }
-  },
+  
+  
   methods: {
+    toggleNav: function () {
+        this.hideNav = ! this.hideNav;},
+
+    joinGame: function() {
+    if (!this.nickname || !this.roomCode) {
+        alert("Please enter a nickname and a room code.");
+        return;
     }
+
+    socket.emit('joinGameRoom', {
+        nickname: this.nickname,
+        gameID: this.roomCode
+    });
+
+    this.$router.push(`/lobby/${this.roomCode}`);
+
+  }},
+
+
+
+data: function () {
+  return {
+    hideNav: true,
+    nickname: '',
+    roomCode: ''
+
+    }
+  }
 }
 </script>
 
