@@ -10,6 +10,7 @@
         <button class="gameRuleButton" @click="removeOne('maxPlayerAmount')">↓</button>
       </div>
     </div>
+
     <div id="numRounds">
       <label>{{ uiLabels.createView?.numOfRounds }}</label>
       {{ numOfRounds }}
@@ -18,12 +19,31 @@
         <button class="gameRuleButton" @click="removeOne('numOfRounds')">↓</button>
       </div>
     </div>
+
     <div id="cardsOnHand">
       <label>{{ uiLabels.createView?.cardsOnHand }}</label>
       {{ cardsOnHand }}
       <div class="gameRuleButtonsContainer">
         <button class="gameRuleButton" @click="addOne('cardsOnHand')">↑</button>
         <button class="gameRuleButton" @click="removeOne('cardsOnHand')">↓</button>
+      </div>
+    </div>
+
+    <div id="answerTime">
+      <label>{{ uiLabels.createView?.answerTime }}</label>
+      {{ answerTime }}
+      <div class="gameRuleButtonsContainer">
+        <button class="gameRuleButton" @click="addFifteen('answerTime')">↑</button>
+        <button class="gameRuleButton" @click="removeFifteen('answerTime')">↓</button>
+      </div>
+    </div>
+
+    <div id="nrOfRerolls">
+      <label>{{ uiLabels.createView?.nrOfRerolls }}</label>
+      {{ nrOfRerolls }}
+      <div class="gameRuleButtonsContainer">
+        <button class="gameRuleButton" @click="addOne('nrOfRerolls')">↑</button>
+        <button class="gameRuleButton" @click="removeOne('nrOfRerolls')">↓</button>
       </div>
     </div>
   </section>
@@ -37,9 +57,13 @@
       required
     />
   </div>
+
   <div>
-    <button class="openLobbyButton" @click="openLobby">{{ uiLabels.createView?.openLobby }}</button>
+    <button class="openLobbyButton" @click="openLobby">
+      {{ uiLabels.createView?.openLobby }}
+    </button>
   </div>
+
 </template>
 
 <script>
@@ -54,7 +78,7 @@ export default {
   },
 
   props: {
-    uiLabels: Object
+    uiLabels: Object,
   },
 
   data: function () {
@@ -65,6 +89,8 @@ export default {
       maxPlayerAmount: 0,
       numOfRounds: 0,
       cardsOnHand: 0,
+      answerTime: 0,
+      nrOfRerolls: 0,
     };
   },
   created: function () {
@@ -88,6 +114,14 @@ export default {
         this[gameRulesField]--;
       }
     },
+    addFifteen(gameRulesField) {
+      this[gameRulesField] += 15;
+    },
+    removeFifteen(gameRulesField) {
+      if (this[gameRulesField] > 0) {
+        this[gameRulesField] -= 15;
+      }
+    },
     openLobby() {
       if (!this.lobbyName || this.lobbyName.trim() === "") {
         alert("Please enter a lobby name!");
@@ -98,6 +132,8 @@ export default {
         maxPlayerAmount: this.maxPlayerAmount,
         numOfRounds: this.numOfRounds,
         cardsOnHand: this.cardsOnHand,
+        answerTime: this.answerTime,
+        nrOfRerolls: this.nrOfRerolls,
       };
       socket.emit("createGameRoom", {
         gameID: this.gameID,
@@ -153,8 +189,8 @@ h1 {
   background: none;
   border: none;
   color: black;
-  font-size: 1.4rem;
-  padding: 10px 20px;
+  font-size: 0.9rem;
+  padding: 5px 10px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
