@@ -55,6 +55,23 @@ function sockets(io, socket, data) {
   const room = data.getGameRoom(gameID);  
   socket.emit("gameSettings", room);      
   });
+
+socket.on('checkLobby', (d) => {
+    const { gameID } = d;
+    const exists = !!data.getGameRoom(gameID); 
+    
+    socket.emit('checkLobbyStatus', { gameID, exists });
+});
+
+socket.on("getGameSettings", (gameID) => {
+    const room = data.getGameRoom(gameID);
+    
+    if (room) {
+        socket.emit("gameSettings", room);
+    } else {
+        socket.emit("lobbyNotFound"); 
+    }
+});
 }
 
 export { sockets };

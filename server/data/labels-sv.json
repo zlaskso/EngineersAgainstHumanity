@@ -43,6 +43,7 @@
 	"lobbyView": {
 		"joinInstructions": "Skriv in ditt smeknamn och tryck på Gå med för att delta i spelet.",
 		"participants": "Deltagare",
-		"startGame": "Starta spel"
+		"startGame": "Starta spel",
+		"gameCode": "Spelkod: "
 	}
 }
