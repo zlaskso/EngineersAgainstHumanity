@@ -30,4 +30,9 @@ export default {
   font-size: 1.2rem;
   text-align: center;
 }
+.card:hover {
+  background: lightgray;
+  transform: scale(1.1);
+  transition-duration: 1s;
+}
 </style>

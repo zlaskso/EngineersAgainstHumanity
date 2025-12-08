@@ -39,12 +39,12 @@ Data.prototype.getUILabels = function (lang) {
   return JSON.parse(labels);
 }
 
-Data.prototype.getUICardsLabels = function (lang) {
+Data.prototype.getUICardLabels = function (lang) {
   //check if lang is valid before trying to load the dictionary file
   if (!["en", "sv"].some( el => el === lang))
     lang = "en";
-  const cardsLabel = readFileSync("./server/data/cards-" + lang + ".json");
-  return JSON.parse(cardsLabel);
+  const cardLabels = readFileSync("./server/cards-" + lang + ".json");
+  return JSON.parse(cardLabels);
 }
 
 Data.prototype.getaboutExplanations = function (lang) {
