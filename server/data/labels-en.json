@@ -22,7 +22,9 @@
 		"cardsOnHand":"Cards on hand:",
 		"openLobby": "Open lobby",
 		"gameCode": "Gamecode:",
-		"gameRules": "Gamerules"
+		"gameRules": "Gamerules",
+		"answerTime": "Answer time:",
+		"nrOfRerolls": "Number of rerolls:"
 	},
 	"aboutView": {
 		"explanation1": "Create a game on a screen that all players can see. You choose how many players are participating and how many rounds you play, etc.", 
