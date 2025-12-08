@@ -44,5 +44,11 @@
 		"joinInstructions": "Skriv in ditt smeknamn och tryck på Gå med för att delta i spelet.",
 		"participants": "Deltagare",
 		"startGame": "Starta spel"
+	},
+	"cardView": {
+		"pickFavourite" : "Välj din favorit",
+		"reroll" : "Slå igen",
+		"left" : "kvar"
+
 	}
 }

@@ -43,5 +43,11 @@
 		"joinInstructions": "Enter your nickname and press Join to participate in the game.",
 		"participants": "Participants",
 		"startGame": "Start game"
+	},
+	"cardView": {
+		"pickFavourite" : "Pick your favourite", 
+		"reroll" : "Reroll",
+		"left" : "left"
 	}
+	
 }

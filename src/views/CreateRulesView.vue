@@ -4,7 +4,6 @@
     <div id="maxNumPlayers">
       <label>{{ uiLabels.createView?.maxNumPlayers }}</label>
       {{ maxPlayerAmount }}
-      
 
       <div class="gameRuleButtonsContainer">
         <button class="gameRuleButton" @click="addOne('maxPlayerAmount')">↑</button>
@@ -59,20 +58,12 @@
     />
   </div>
 
-  
-<div class="lobby-actions">
-    
-  <button class="back-button-aligned" @click="goBack">
-      Back
-    </button>
+  <div class="lobby-actions">
+    <button class="back-button-aligned" @click="goBack">Back</button>
     <button class="openLobbyButton" @click="openLobby">
       {{ uiLabels.createView?.openLobby }}
     </button>
-    
-    
-    
   </div>
-
 </template>
 
 <script>
@@ -183,11 +174,11 @@ h1 {
 }
 
 .openLobbyButton {
-position: absolute; 
+  position: absolute;
   right: 40;
   background: none;
   border: none;
-  color: gray; 
+  color: gray;
   cursor: pointer;
   font-size: 2rem;
   transition-duration: 1.4s;
@@ -197,16 +188,15 @@ position: absolute;
   transform: scale(1.4);
 }
 
-.back-button-aligned{
-position: absolute; 
+.back-button-aligned {
+  position: absolute;
   left: 0;
-    background: none;
+  background: none;
   border: none;
-  color: gray; 
+  color: gray;
   cursor: pointer;
   font-size: 2rem;
   transition-duration: 1.4s;
-
 }
 
 .back-button-aligned:hover {
@@ -254,9 +244,9 @@ input[type="text"] {
 }
 
 .lobby-actions {
-  display: flex; 
-  justify-content: center; 
-  gap: 40px; 
-  margin-top: 3rem; 
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 3rem;
 }
 </style>
