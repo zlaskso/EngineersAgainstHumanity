@@ -24,7 +24,8 @@
 		"gameCode": "Gamecode:",
 		"gameRules": "Gamerules",
 		"answerTime": "Answer time:",
-		"nrOfRerolls": "Number of rerolls:"
+		"nrOfRerolls": "Number of rerolls:",
+		"back": "Back"
 	},
 	"aboutView": {
 		"explanation1": "Create a game on a screen that all players can see. You choose how many players are participating and how many rounds you play, etc.", 

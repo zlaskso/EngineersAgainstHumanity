@@ -59,7 +59,7 @@
   </div>
 
   <div class="lobby-actions">
-    <button class="back-button-aligned" @click="goBack">Back</button>
+    <button class="back-button-aligned" @click="goBack">{{ uiLabels.createView?.back }}</button>
     <button class="openLobbyButton" @click="openLobby">
       {{ uiLabels.createView?.openLobby }}
     </button>
@@ -139,9 +139,13 @@ export default {
         answerTime: this.answerTime,
         nrOfRerolls: this.nrOfRerolls,
       };
+
+      const participants = [];
+
       socket.emit("createGameRoom", {
         gameID: this.gameID,
         gameSettings: gameSettings,
+        participants: participants
       });
       this.$router.push(`/lobby/${this.gameID}`);
     },

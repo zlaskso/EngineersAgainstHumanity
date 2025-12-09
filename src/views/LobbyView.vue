@@ -78,7 +78,7 @@ export default {
   methods: {
     fetchLobbyData: function() {
         socket.emit("getGameSettings", this.gameID);
-        socket.emit("getParticipantsList", this.gameID);
+        socket.emit("joinLobbyScreen", this.gameID);
     },
     participateInPoll: function () {
       socket.emit("participateInPoll", { gameID: this.gameID, name: this.userName });
