@@ -1,20 +1,20 @@
 <script>
-import { RouterView } from 'vue-router'
-import LanguageComponent from './components/LanguageComponent.vue';
-import io from 'socket.io-client';
+import { RouterView } from "vue-router";
+import LanguageComponent from "./components/LanguageComponent.vue";
+import io from "socket.io-client";
 const socket = io("localhost:3000");
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    LanguageComponent
+    LanguageComponent,
   },
-  data: function() {
+  data: function () {
     return {
-    lang: localStorage.getItem("lang") || "en",
-    uiLabels: {},
-    uiCardLabels: {},
-    }
+      lang: localStorage.getItem("lang") || "en",
+      uiLabels: {},
+      uiCardLabels: {},
+    };
   },
   created: function () {
     socket.on("uiLabels", (labels) => {
@@ -24,7 +24,7 @@ export default {
       socket.emit("getUILabels", this.lang);
     }
     socket.on("connect", () => {
-      socket.emit("getUILabels", this.lang); 
+      socket.emit("getUILabels", this.lang);
     });
 
     socket.on("uiCardLabels", (cardLabels) => {
@@ -38,32 +38,23 @@ export default {
     });
   },
   methods: {
-    switchLanguage: function() {
+    switchLanguage: function () {
       if (this.lang === "en") {
-        this.lang = "sv"
-      }
-      else {
+        this.lang = "sv";
+      } else {
         this.lang = "en";
       }
       localStorage.setItem("lang", this.lang);
       socket.emit("getUILabels", this.lang);
-      socket.emit("getUICardLabels", this.lang)
-    }
-    }
-  };
+      socket.emit("getUICardLabels", this.lang);
+    },
+  },
+};
 </script>
 
 <template>
-  <LanguageComponent
-    v-bind:lang="lang" 
-    v-on:switch-language="switchLanguage"
-  />
-
-  <RouterView v-bind:uiLabels="uiLabels":uiCardLabels="uiCardLabels" />
-
-
+  <LanguageComponent v-bind:lang="lang" v-on:switch-language="switchLanguage" />
+  <RouterView v-bind:uiLabels="uiLabels" :uiCardLabels="uiCardLabels" />
 </template>
 
-<style>
-
-</style>
+<style></style>

@@ -3,19 +3,19 @@
   <h1 id="gameCode">{{ uiLabels.lobbyView?.gameCode }} {{ gameID }}</h1>
 
   <section class="gridLayout">
+    <div class="playersName">
+      <p>Waiting for players <span class="loading"> ...</span></p>
+      {{ participants }}
+    </div>
 
-  <div class="playersName">
-    <p>Waiting for players <span class="loading"> ...</span></p>
-    {{ participants }}
-  </div>
-
-  <div class="finalGameRules">
-  <h2>{{ uiLabels.createView?.gameRules }}</h2>
-  <p> {{ uiLabels.createView?.maxNumPlayers }} {{ gameSettings.maxPlayerAmount }}</p>
-  <p>{{ uiLabels.createView?.numOfRounds }} {{ gameSettings.numOfRounds }}</p>
-  <p> {{ uiLabels.createView?.cardsOnHand }} {{ gameSettings.cardsOnHand }}</p>
-  </div>
-
+    <div class="finalGameRules">
+      <h2>{{ uiLabels.createView?.gameRules }}</h2>
+      <p>{{ uiLabels.createView?.maxNumPlayers }} {{ gameSettings.maxPlayerAmount }}</p>
+      <p>{{ uiLabels.createView?.numOfRounds }} {{ gameSettings.numOfRounds }}</p>
+      <p>{{ uiLabels.createView?.cardsOnHand }} {{ gameSettings.cardsOnHand }}</p>
+      <p>{{ uiLabels.createView?.answerTime }} {{ gameSettings.answerTime }}</p>
+      <p>{{ uiLabels.createView?.nrOfRerolls }} {{ gameSettings.nrOfRerolls }}</p>
+    </div>
   </section>
 </template>
 
@@ -25,9 +25,9 @@ const socket = io("localhost:3000");
 
 export default {
   name: "LobbyView",
-  
+
   props: {
-    uiLabels: Object
+    uiLabels: Object,
   },
 
   data: function () {
@@ -42,6 +42,8 @@ export default {
         maxPlayerAmount: 0,
         numOfRounds: 0,
         cardsOnHand: 0,
+        answerTime: 0,
+        nrOfRerolls: 0,
       },
     };
   },
@@ -49,18 +51,18 @@ export default {
     this.gameID = this.$route.params.id;
 
     const handleLobbyNotFound = () => {
-        alert(`Lobby med kod ${this.gameID} hittades inte. Omdirigerar.`);
-        this.$router.push("/join/");
+      alert(`Lobby med kod ${this.gameID} hittades inte. Omdirigerar.`);
+      this.$router.push("/join/");
     };
 
     socket.on("checkLobbyStatus", (data) => {
-        if (!data.exists) {
-            handleLobbyNotFound();
-        } else {
-            // Lobbyn finns! Fortsätt med att hämta data och ansluta.
-            this.isValidLobby = true;
-            this.fetchLobbyData();
-        }
+      if (!data.exists) {
+        handleLobbyNotFound();
+      } else {
+        // Lobbyn finns! Fortsätt med att hämta data och ansluta.
+        this.isValidLobby = true;
+        this.fetchLobbyData();
+      }
     });
 
     socket.emit("checkLobby", { gameID: this.gameID });
@@ -68,17 +70,17 @@ export default {
     socket.on("updateParticipants", (p) => (this.participants = p));
     socket.on("startPoll", () => this.$router.push("/poll/" + this.gameID));
     socket.on("gameSettings", (room) => {
-            if (room && room.gameSettings) {
-                this.gameSettings = room.gameSettings;
-            } else {
-                console.error("Kunde inte hämta spelinställningar trots giltigt ID.");
-            }
-        });
+      if (room && room.gameSettings) {
+        this.gameSettings = room.gameSettings;
+      } else {
+        console.error("Kunde inte hämta spelinställningar trots giltigt ID.");
+      }
+    });
   },
   methods: {
-    fetchLobbyData: function() {
-        socket.emit("getGameSettings", this.gameID);
-        socket.emit("joinLobbyScreen", this.gameID);
+    fetchLobbyData: function () {
+      socket.emit("getGameSettings", this.gameID);
+      socket.emit("joinLobbyScreen", this.gameID);
     },
     participateInPoll: function () {
       socket.emit("participateInPoll", { gameID: this.gameID, name: this.userName });
@@ -94,7 +96,7 @@ export default {
     socket.off("participantsUpdate");
     socket.off("startPoll");
     socket.off("gameSettings");
-  }
+  },
 };
 </script>
 
@@ -114,10 +116,11 @@ export default {
   margin-top: 60px;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px; 
+  gap: 40px;
 }
 
-.playersName, .finalGameRules{
+.playersName,
+.finalGameRules {
   font-size: 20pt;
 }
 
@@ -131,7 +134,9 @@ export default {
   clip-path: inset(0 100% 0 0);
   animation: l1 1s steps(4) infinite;
 }
-@keyframes l1 {to{clip-path: inset(0 -34% 0 0)}}
- 
-
+@keyframes l1 {
+  to {
+    clip-path: inset(0 -34% 0 0);
+  }
+}
 </style>

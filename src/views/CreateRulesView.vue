@@ -140,12 +140,12 @@ export default {
         nrOfRerolls: this.nrOfRerolls,
       };
 
-      const participants = new Array(5);
+      const participants = [];
 
       socket.emit("createGameRoom", {
         gameID: this.gameID,
         gameSettings: gameSettings,
-        participants: participants
+        participants: participants,
       });
       this.$router.push(`/lobby/${this.gameID}`);
     },

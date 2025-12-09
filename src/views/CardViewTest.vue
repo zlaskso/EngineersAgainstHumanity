@@ -40,6 +40,14 @@ export default {
       roundUsedIndexes: [],
       nrOfRerolls: 10,
       selectedIndex: null,
+      gameSettings: {
+        lobbyName: "",
+        maxPlayerAmount: 0,
+        numOfRounds: 0,
+        cardsOnHand: 0,
+        answerTime: 0,
+        nrOfRerolls: 0,
+      },
     };
   },
   props: {
