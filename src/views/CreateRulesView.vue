@@ -59,7 +59,7 @@
   </div>
 
   <div class="lobby-actions">
-    <button class="back-button-aligned" @click="goBack">Back</button>
+    <button class="back-button-aligned" @click="goBack">{{ uiLabels.createView?.back }}</button>
     <button class="openLobbyButton" @click="openLobby">
       {{ uiLabels.createView?.openLobby }}
     </button>
