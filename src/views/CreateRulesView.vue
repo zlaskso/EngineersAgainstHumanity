@@ -58,12 +58,12 @@
     />
   </div>
 
-  <div>
+  <div class="lobby-actions">
+    <button class="back-button-aligned" @click="goBack">Back</button>
     <button class="openLobbyButton" @click="openLobby">
       {{ uiLabels.createView?.openLobby }}
     </button>
   </div>
-
 </template>
 
 <script>
@@ -101,6 +101,10 @@ export default {
   methods: {
     toggleNav: function () {
       this.hideNav = !this.hideNav;
+    },
+
+    goBack: function () {
+      this.$router.go(-1);
     },
 
     getGameID: function () {
@@ -170,7 +174,8 @@ h1 {
 }
 
 .openLobbyButton {
-  margin: 3rem 0;
+  position: absolute;
+  right: 40;
   background: none;
   border: none;
   color: gray;
@@ -180,8 +185,25 @@ h1 {
 }
 .openLobbyButton:hover {
   color: black;
-  transform: scale(1.5);
+  transform: scale(1.4);
 }
+
+.back-button-aligned {
+  position: absolute;
+  left: 0;
+  background: none;
+  border: none;
+  color: gray;
+  cursor: pointer;
+  font-size: 2rem;
+  transition-duration: 1.4s;
+}
+
+.back-button-aligned:hover {
+  color: black;
+  transform: scale(1.15);
+}
+
 .gameRuleButton {
   display: flex;
   font-weight: bold;
@@ -219,5 +241,12 @@ input[type="text"] {
   border-color: black;
   border-radius: 10px;
   outline: none;
+}
+
+.lobby-actions {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 3rem;
 }
 </style>

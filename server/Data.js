@@ -39,6 +39,14 @@ Data.prototype.getUILabels = function (lang) {
   return JSON.parse(labels);
 }
 
+Data.prototype.getUICardLabels = function (lang) {
+  //check if lang is valid before trying to load the dictionary file
+  if (!["en", "sv"].some( el => el === lang))
+    lang = "en";
+  const cardLabels = readFileSync("./server/cards-" + lang + ".json");
+  return JSON.parse(cardLabels);
+}
+
 Data.prototype.getaboutExplanations = function (lang) {
   //check if lang is valid before trying to load the dictionary file
   if (!["en", "sv"].some( el => el === lang))

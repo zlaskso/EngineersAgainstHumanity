@@ -12,7 +12,8 @@ export default {
   data: function() {
     return {
     lang: localStorage.getItem("lang") || "en",
-    uiLabels: {}
+    uiLabels: {},
+    uiCardLabels: {},
     }
   },
   created: function () {
@@ -22,9 +23,18 @@ export default {
     if (socket.connected) {
       socket.emit("getUILabels", this.lang);
     }
-
     socket.on("connect", () => {
       socket.emit("getUILabels", this.lang); 
+    });
+
+    socket.on("uiCardLabels", (cardLabels) => {
+      this.uiCardLabels = cardLabels;
+    });
+    if (socket.connected) {
+      socket.emit("getUICardLabels", this.lang);
+    }
+    socket.on("connect", () => {
+      socket.emit("getUICardLabels", this.lang);
     });
   },
   methods: {
@@ -37,6 +47,7 @@ export default {
       }
       localStorage.setItem("lang", this.lang);
       socket.emit("getUILabels", this.lang);
+      socket.emit("getUICardLabels", this.lang)
     }
     }
   };
@@ -48,7 +59,9 @@ export default {
     v-on:switch-language="switchLanguage"
   />
 
-  <RouterView v-bind:uiLabels="uiLabels" />
+  <RouterView v-bind:uiLabels="uiLabels":uiCardLabels="uiCardLabels" />
+
+
 </template>
 
 <style>

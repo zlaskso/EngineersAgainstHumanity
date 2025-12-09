@@ -8,6 +8,10 @@ function sockets(io, socket, data) {
     socket.emit('aboutExplanations', data.getaboutExplanations(lang));
   });
 
+  socket.on('getUICardLabels', function(lang) {
+    socket.emit('uiCardLabels', data.getUICardLabels(lang));
+  });
+
   socket.on('createPoll', function(d) {
     data.createPoll(d.pollId, d.lang)
     socket.emit('pollData', data.getPoll(d.pollId));
