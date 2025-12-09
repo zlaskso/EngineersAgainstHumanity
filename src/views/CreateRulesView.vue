@@ -140,7 +140,7 @@ export default {
         nrOfRerolls: this.nrOfRerolls,
       };
 
-      const participants = new Array(5);
+      const participants = [];
 
       socket.emit("createGameRoom", {
         gameID: this.gameID,
