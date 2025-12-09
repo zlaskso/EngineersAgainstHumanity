@@ -11,7 +11,7 @@
       :selected="selectedIndex === idx"
       @select="setSelected"
     />
-    <BlackCard :prompt="uiCardLabels.blackCards[0]" />
+    <!--<BlackCard :prompt="uiCardLabels.blackCards[0]" />-->
   </div>
   {{ gameSettings.nrOfRerolls }} {{ gameSettings.cardsOnHand }}
 
@@ -133,6 +133,7 @@ export default {
       if (this.gameSettings.nrOfRerolls > 0) {
         this.gameSettings.nrOfRerolls--;
         this.generateHand();
+        this.selectedIndex = null;
       }
     },
     fetchLobbyData: function () {

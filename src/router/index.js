@@ -45,9 +45,9 @@ const router = createRouter({
       component: () => import('../views/cardViewTest.vue')
     },
     {
-      path: '/share/',
-      name: 'SharedView',
-      component: () => import('../views/SharedView.vue')
+      path: '/black/',
+      name: 'BlackCardView',
+      component: () => import('../views/BlackCardView.vue')
     }
   ]
 })

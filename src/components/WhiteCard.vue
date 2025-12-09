@@ -5,15 +5,12 @@
 </template>
 <script>
 export default {
-  data: function () {
-    return {
-      isSelected: false,
-    };
-  },
+  data: function () {},
   props: {
     //  uiLabels: Object,   user-select: none;
-
     prompt: String,
+    index: Number,
+    selected: Boolean,
   },
   methods: {
     toggleSelect() {
