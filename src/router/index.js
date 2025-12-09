@@ -40,7 +40,7 @@ const router = createRouter({
       component: () => import('../views/JoinView.vue')
     },
     {
-      path: '/cards/',
+      path: '/cards/:id',
       name: 'CardView',
       component: () => import('../views/cardViewTest.vue')
     }

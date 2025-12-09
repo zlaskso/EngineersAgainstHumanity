@@ -11,11 +11,17 @@
       :selected="selectedIndex === idx"
       @select="setSelected"
     />
-    <BlackCard :prompt="'test kort'" />
+    <BlackCard :prompt="uiCardLabels.blackCards[0]" />
   </div>
+  {{ gameSettings.nrOfRerolls }} {{ gameSettings.cardsOnHand }}
 
-  <button class="rerollButton" @click="reroll" :disabled="nrOfRerolls <= 0">
-    {{ uiLabels.cardView?.reroll }} ({{ nrOfRerolls }} {{ uiLabels.cardView?.left }})
+  <button
+    class="rerollButton"
+    @click="reroll"
+    :disabled="this.gameSettings.nrOfRerolls <= 0"
+  >
+    {{ uiLabels.cardView?.reroll }} ({{ this.gameSettings.nrOfRerolls }}
+    {{ uiLabels.cardView?.left }})
   </button>
 </template>
 <script>
@@ -34,11 +40,12 @@ export default {
   },
   data: function () {
     return {
+      gameID: "inactive poll",
       ResponsiveNav,
-      nrOfWhiteCardsOnHand: 7,
+      //nrOfWhiteCardsOnHand: 7,
       currentHandIndexes: [],
       roundUsedIndexes: [],
-      nrOfRerolls: 10,
+      //nrOfRerolls: 10,
       selectedIndex: null,
       gameSettings: {
         lobbyName: "",
@@ -60,7 +67,19 @@ export default {
       this.generateHand();
     }
   },
-  /* 
+  created: function () {
+    this.gameID = this.$route.params.id;
+    this.fetchLobbyData();
+
+    socket.on("gameSettings", (room) => {
+      if (room && room.gameSettings) {
+        this.gameSettings = room.gameSettings;
+      } else {
+        console.error("Kunde inte hämta spelinställningar trots giltigt ID.");
+      }
+    });
+  },
+  /*
   watch: {
     // Kör generateHand när whiteCards laddats
     uiCardLabels: {
@@ -84,7 +103,7 @@ export default {
       this.currentHandIndexes = [];
 
       //const totalCards = this.uiCardLabels.whiteCards;
-      while (this.currentHandIndexes.length < this.nrOfWhiteCardsOnHand) {
+      while (this.currentHandIndexes.length < this.gameSettings.cardsOnHand) {
         const randomIndex = Math.floor(Math.random() * totalCards.length);
         if (
           !this.currentHandIndexes.includes(randomIndex) &&
@@ -111,10 +130,13 @@ export default {
     },
 
     reroll() {
-      if (this.nrOfRerolls > 0) {
-        this.nrOfRerolls--;
+      if (this.gameSettings.nrOfRerolls > 0) {
+        this.gameSettings.nrOfRerolls--;
         this.generateHand();
       }
+    },
+    fetchLobbyData: function () {
+      socket.emit("getGameSettings", this.gameID);
     },
 
     toggleNav: function () {
