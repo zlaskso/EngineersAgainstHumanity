@@ -4,9 +4,12 @@
   </h1>
   <div class="card-view">
     <WhiteCard
-      v-for="i in currentHandIndexes"
+      v-for="(i, idx) in currentHandIndexes"
       :key="i"
+      :index="idx"
       :prompt="uiCardLabels.whiteCards[i]"
+      :selected="selectedIndex === idx"
+      @select="setSelected"
     />
     <BlackCard :prompt="'test kort'" />
   </div>
@@ -36,6 +39,7 @@ export default {
       currentHandIndexes: [],
       roundUsedIndexes: [],
       nrOfRerolls: 10,
+      selectedIndex: null,
     };
   },
   props: {
@@ -44,9 +48,9 @@ export default {
     uiCardLabels: Object,
   },
   mounted() {
-    //if (this.uiCardLabels?.whiteCards?.length) {
-    this.generateHand();
-    //}
+    if (this.uiCardLabels?.whiteCards?.length) {
+      this.generateHand();
+    }
   },
   /* 
   watch: {
@@ -107,6 +111,9 @@ export default {
 
     toggleNav: function () {
       this.hideNav = !this.hideNav;
+    },
+    setSelected(index) {
+      this.selectedIndex = index;
     },
   },
 };
