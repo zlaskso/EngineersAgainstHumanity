@@ -1,13 +1,54 @@
 {
-	"sales-pitch": "Spektakulärt",
-	"subHeading": "Ett enkelt enkätverktyg",
-	"invite": "Bjud in deltagare med den här länken:",
-	"createPoll": "Skapa röstning",
-	"participatePoll": "Delta i röstning",
-	"question": "Fråga",
-	"changeLanguage": "Change to English",
-	"about": "Om oss",
-	"participateInPoll": "Delta i enkäten",
-	"lobbyName": "Lobby Namn",
-	"createGame": "Skapa spel"
+	"common": {
+		"back": "Tillbaka",
+		"home": "Hem"
+	},
+
+	"startView": {
+		"createGame": "Skapa spel",
+		"joinGame": "Delta",
+		"htp": "Hur man spelar"
+	},
+	"joinView": {
+		"namePlaceholder": "Smeknamn",
+		"codePlaceholder": "Rumskod",
+		"join": "Gå med"
+	},
+	"createView": {
+		"lobbyName": "Lobby Namn",
+		"maxNumPlayers": "Max antal spelare:",
+		"lobbyNamePlaceholder": "Skriv in lobbynamn",
+		"setGameRules":"Välj spelregler",
+		"numOfRounds":"Antal omgångar:",
+		"cardsOnHand":"Antal kort:",
+		"openLobby": "Öppna lobby",
+		"gameCode": "Spelkod:",
+		"gameRules": "Spelregler",
+		"answerTime": "Svarstid:",
+		"nrOfRerolls": "Antal omkast"
+	},
+	"aboutView": {
+		"explanation1": "Skapa ett spel på en skärm som alla spelare kan se. Du väljer hur många spelare som deltar och hur många rundor ni kör, mm.", 
+		"explanation2": "Spelarna deltar i spelet från sina egna enheter",
+		"explanation3": "Skärmen visar ett kort…", 
+		"explanation4": "...där det står ett påstende. Du kan fylla luckan med vad som helst ____",
+		"explanation5": "Spelarna väljer vad som passar.", 
+		"explanation6": "Alternativ 1",
+		"explanation7": "Valen visas anonymt, och man röstar vilken som är roligast.",
+		"explanation8": "Spelaren med det framröstade alternativet vinner rundan.",
+		"explanation9": "Den med flest vunna rundor vinner"
+
+
+	},
+	"lobbyView": {
+		"joinInstructions": "Skriv in ditt smeknamn och tryck på Gå med för att delta i spelet.",
+		"participants": "Deltagare",
+		"startGame": "Starta spel"
+	},
+	"cardView": {
+		"pickFavourite" : "Välj din favorit",
+		"reroll" : "Slå igen",
+		"left" : "kvar"
+
+	}
 }

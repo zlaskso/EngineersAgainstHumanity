@@ -139,9 +139,13 @@ export default {
         answerTime: this.answerTime,
         nrOfRerolls: this.nrOfRerolls,
       };
+
+      const participants = new Array(5);
+
       socket.emit("createGameRoom", {
         gameID: this.gameID,
         gameSettings: gameSettings,
+        participants: participants
       });
       this.$router.push(`/lobby/${this.gameID}`);
     },

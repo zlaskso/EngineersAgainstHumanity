@@ -25,7 +25,9 @@ const socket = io("localhost:3000");
 export default {
   name: 'JoinView',
   components: {
-    ResponsiveNav
+    ResponsiveNav,
+    nickname: "",
+    roomCode: ""
   },
 
   props: {
@@ -45,10 +47,7 @@ export default {
     }
   
 
-    socket.emit('joinGameRoom', {
-        nickname: this.nickname,
-        gameID: this.roomCode
-    });
+    socket.emit('attemptJoinGame', {gameID: this.roomCode, name: this.nickname});
 
     this.$router.push(`/lobby/${this.roomCode}`);
 

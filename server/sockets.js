@@ -30,7 +30,7 @@ function sockets(io, socket, data) {
 
   socket.on('participateInPoll', function(d) {
     data.participateInPoll(d.pollId, d.name);
-    io.to(d.pollId).emit('participantsUpdate', data.getParticipants(d.pollId));
+    io.to(d.pollId).emit('updateParticipants', data.getParticipants(d.pollId));
   });
   socket.on('startPoll', function(pollId) {
     io.to(pollId).emit('startPoll');
@@ -111,6 +111,17 @@ socket.on('attemptJoinGame', (d) => {
     // Detta uppdaterar alla host-flikar/väntande flikar
     console.log(updatedParticipants)
     io.to(gameID).emit('updateParticipants', updatedParticipants); 
+});
+
+socket.on('joinLobbyScreen', function(gameID) {
+    // Låt Socket.IO-anslutningen (LobbyView) gå med i rummet
+    socket.join(gameID);
+    
+    // Skärmen måste omedelbart hämta den aktuella listan (synkronisering)
+    const participants = data.getParticipants(gameID);
+    socket.emit('updateParticipants', participants);
+    
+    console.log(`Lobby Screen anslöt till rum ${gameID}`);
 });
 }
 
