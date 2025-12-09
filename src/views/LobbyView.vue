@@ -65,28 +65,20 @@ export default {
 
     socket.emit("checkLobby", { gameID: this.gameID });
 
-    socket.on("participantsUpdate", (p) => (this.participants = p));
+    socket.on("updateParticipants", (p) => (this.participants = p));
     socket.on("startPoll", () => this.$router.push("/poll/" + this.gameID));
-    socket.on("PlayerJoined", (nickname) => this.participants.push(nickname));
-    socket.emit("getGameSettings", this.gameID);
     socket.on("gameSettings", (room) => {
-    if (room) {
-      this.gameSettings = room.gameSettings;
-    }
-    });
-  },
-  methods: {
-    fetchLobbyData: function() {
-        socket.emit("joinPoll", this.gameID); // Borde vara joinGameRoom
-        socket.emit("getGameSettings", this.gameID);
-        
-        socket.on("gameSettings", (room) => {
             if (room && room.gameSettings) {
                 this.gameSettings = room.gameSettings;
             } else {
                 console.error("Kunde inte hämta spelinställningar trots giltigt ID.");
             }
         });
+  },
+  methods: {
+    fetchLobbyData: function() {
+        socket.emit("getGameSettings", this.gameID);
+        socket.emit("getParticipantsList", this.gameID);
     },
     participateInPoll: function () {
       socket.emit("participateInPoll", { gameID: this.gameID, name: this.userName });

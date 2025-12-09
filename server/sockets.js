@@ -72,6 +72,42 @@ socket.on("getGameSettings", (gameID) => {
         socket.emit("lobbyNotFound"); 
     }
 });
+
+socket.on('getParticipantsList', function(gameID) {
+    const participants = data.getParticipants(gameID);
+    socket.emit('updateParticipants', participants);
+});
+
+// sockets.js, in attemptJoinGame-hanteraren:
+
+socket.on('attemptJoinGame', (d) => {
+    const { gameID, name } = d;
+    
+    // 1. Validera om lobbyn existerar
+    if (!data.getGameRoom(gameID)) {
+        console.log(`Lobby ${gameID} Not Found for player ${name}`);
+        socket.emit("lobbyNotFound"); 
+        return; 
+    }
+    
+    // 2. Registrera spelaren i Data.js (Måste vara en funktion som lägger till permanent!)
+    // Om data.participateInPoll inte sparar spelare permanent i GameRoom-objektet, 
+    // MÅSTE du justera den metoden i din Data.js-fil.
+    data.participateInPoll(gameID, name);
+    
+    // 3. Låt den anslutande socketen gå med i Socket.IO-rummet
+    socket.join(gameID);
+    
+    console.log(`Spelare ${name} gick med i lobby ${gameID}`);
+    
+    // 4. Hämta den kompletta uppdaterade listan
+    const updatedParticipants = data.getParticipants(gameID);
+    
+    // 5. Skicka listan till ALLA i rummet (inklusive den nya spelaren)
+    // Detta uppdaterar alla host-flikar/väntande flikar
+    console.log(updatedParticipants)
+    io.to(gameID).emit('updateParticipants', updatedParticipants); 
+});
 }
 
 export { sockets };

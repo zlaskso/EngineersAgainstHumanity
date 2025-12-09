@@ -10,13 +10,15 @@
     </button>
     </router-link>
   </header>
-  <input id="nameInput" type="text" v-bind:placeholder= "uiLabels.joinView?.namePlaceholder">
-  <input id="roomInput" type="text" v-bind:placeholder= "uiLabels.joinView?.codePlaceholder"></input><br>
-  <button id="join">{{uiLabels.joinView?.join}}</button>
+  <input id="nameInput" type="text" v-bind:placeholder= "uiLabels.joinView?.namePlaceholder" v-model="nickname">
+  <input id="roomInput" type="text" v-bind:placeholder= "uiLabels.joinView?.codePlaceholder" v-model="gameCode"><br>
+  <button id="join" v-on:click="joinButton">{{uiLabels.joinView?.join}}</button>
 </template>
 
 <script>
 import ResponsiveNav from '@/components/ResponsiveNav.vue';
+import io from "socket.io-client";
+const socket = io("localhost:3000");
 
 export default {
   name: 'JoinView',
@@ -30,10 +32,21 @@ export default {
 
   data: function () {
     return {
-      hideNav: true
+      hideNav: true,
+      nickname: "",
+      gameCode: ""
     }
   },
   methods: {
+    joinButton: function() {
+    // 1. Spara nickname och skicka join-försök till servern
+    localStorage.setItem('game_nickname', this.nickname); 
+    socket.emit("attemptJoinGame", {gameID: this.gameCode, name: this.nickname});
+    
+    // 2. Ändra destinationen till den nya vänteskärmen!
+    // OBS! /waiting/ måste vara konfigurerad i din Vue Router
+    this.$router.push(`/join/${this.gameCode}`); 
+}
     }
 }
 </script>
