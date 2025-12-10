@@ -3,9 +3,20 @@
   <h1 id="gameCode">{{ uiLabels.lobbyView?.gameCode }} {{ gameID }}</h1>
 
   <section class="gridLayout">
-    <div class="playersName">
+    <div class="left-column">
       <p>Waiting for players <span class="loading"> ...</span></p>
       {{ participants }}
+
+      <Player
+        v-for="p in participants"
+        :key="p.id"
+        :id="p.id"
+        :userName="p.name"
+        :isHost="p.isHost"
+        :hasPickedCard="p.hasPickedCard"
+        :totalNumPoints="p.points"
+        :isActive="p.isActive"
+      />
     </div>
 
     <div class="finalGameRules">
@@ -22,6 +33,8 @@
 <script>
 import io from "socket.io-client";
 const socket = io("localhost:3000");
+import Player from "@/components/Player.vue";
+import Player from "../components/Player.vue";
 
 export default {
   name: "LobbyView",
@@ -49,6 +62,10 @@ export default {
   },
   created: function () {
     this.gameID = this.$route.params.id;
+
+    socket.on("updateParticipants", (p) => {
+      this.participants = p;
+    });
 
     const handleLobbyNotFound = () => {
       alert(`Lobby med kod ${this.gameID} hittades inte. Omdirigerar.`);
@@ -121,6 +138,13 @@ export default {
 
 .playersName,
 .finalGameRules {
+  font-size: 20pt;
+}
+.left-column {
+  /* Använd Flexbox eller en intern Grid för att stapla elementen i VÄNSTER kolumn */
+  display: flex;
+  flex-direction: column; /* Stapla .playersName och alla Player-komponenter vertikalt */
+  gap: 20px; /* Lägg till lite utrymme mellan spelarna */
   font-size: 20pt;
 }
 

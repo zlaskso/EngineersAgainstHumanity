@@ -27,11 +27,12 @@ function sockets(io, socket, data) {
     socket.emit('questionUpdate', data.activateQuestion(pollId))
     socket.emit('submittedAnswersUpdate', data.getSubmittedAnswers(pollId));
   });
-
-  socket.on('participateInPoll', function(d) {
+/*
+  socket.on('participateInGame', function(d) {
     data.participateInPoll(d.pollId, d.name);
     io.to(d.pollId).emit('updateParticipants', data.getParticipants(d.pollId));
   });
+  */
   socket.on('startPoll', function(pollId) {
     io.to(pollId).emit('startPoll');
   })
@@ -82,8 +83,47 @@ socket.on('getParticipantsList', function(gameID) {
     socket.emit('updateParticipants', participants);
 });
 
+//test1
+socket.on('attemptJoinGame', (d) => {
+    const { gameID, name, reconnectID } = d;
+
+    const room = data.getGameRoom(gameID);
+    if (!room) {
+        socket.emit("lobbyNotFound");
+        return;
+    }
+
+    // 1. Registrera eller reconnecta spelaren.
+    // OBS: Skickar med socket.id här!
+    const player = data.participateInGame(
+        gameID,
+        name,
+        socket.id, // SOCKET
+        reconnectID
+    );
+    
+    if (!player) {
+      // Borde inte hända om getGameRoom lyckas, men bra säkerhetsåtgärd.
+      socket.emit("lobbyNotFound");
+      return;
+    }
+
+    // 2. Låt den anslutande socketen gå med i Socket.IO-rummet
+    socket.join(gameID);
+
+    // 3. Spara permanent ID till klienten (viktigt för reconnect)
+    socket.emit("playerRegistered", { id: player.id });
+
+    // 4. Hämta den kompletta uppdaterade listan
+    const updatedParticipants = data.getParticipants(gameID);
+
+    // 5. Uppdatera listan till ALLA i rummet (inklusive den nya/återanslutande spelaren)
+    io.to(gameID).emit('updateParticipants', updatedParticipants);
+});
+
 // sockets.js, in attemptJoinGame-hanteraren:
 
+/*
 socket.on('attemptJoinGame', (d) => {
     const { gameID, name } = d;
     
@@ -112,6 +152,7 @@ socket.on('attemptJoinGame', (d) => {
     console.log(updatedParticipants)
     io.to(gameID).emit('updateParticipants', updatedParticipants); 
 });
+*/
 
 socket.on('joinLobbyScreen', function(gameID) {
     // Låt Socket.IO-anslutningen (LobbyView) gå med i rummet
@@ -120,7 +161,6 @@ socket.on('joinLobbyScreen', function(gameID) {
     // Skärmen måste omedelbart hämta den aktuella listan (synkronisering)
     const participants = data.getParticipants(gameID);
     socket.emit('updateParticipants', participants);
-    
     console.log(`Lobby Screen anslöt till rum ${gameID}`);
 });
 }

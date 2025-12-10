@@ -43,22 +43,52 @@ Data.prototype.getaboutExplanations = function (lang) {
 Data.prototype.createPoll = function(pollId, lang="en") {
   
 }
-
+/*
 Data.prototype.participateInPoll = function(pollId, name) {
   console.log("participant will be added to", pollId, name);
   if (this.pollExists(pollId)) {
     console.log(this.gameRooms[pollId].participants.push(name))
   }
 }
+*/
+//test 1
+Data.prototype.participateInGame = function(gameID, name, socketID, reconnectID = null) {
+    const room = this.getGameRoom(gameID);
+    if (!room) return null;
 
-Data.prototype.getParticipants = function(pollId) {
-  const poll = this.gameRooms[pollId];
-  console.log("participants requested for", pollId);
-  if (this.pollExists(pollId)) { 
-    return this.gameRooms[pollId].participants
+    // 1. Reconnect om reconnectID finns
+    if (reconnectID) {
+        const player = room.participants.find(p => p.id === reconnectID);
+        if (player) {
+            player.socketID = socketID;  
+            return player;
+        }
+    }
+
+    // 2. Annars skapa ny spelare
+    const newPlayer = {
+      id: Math.random().toString(36).substring(2, 10), // permanent ID
+        socketID,  // socket.id
+        name,
+        //points: 0,
+        // props
+        isHost: false, 
+        //hasPickedCard: false, 
+        isActive: true // Antar att de är aktiva när de ansluter
+    };
+
+    room.participants.push(newPlayer);
+    return newPlayer;
+};
+//test2
+Data.prototype.getParticipants = function(gameID) {
+  if (this.pollExists(gameID)) {
+    return this.gameRooms[gameID].participants;
   }
   return [];
-}
+};
+
+
 
 Data.prototype.createGameRoom = function(gameId, gameSettings, participants) {
   if (gameId && gameSettings) {

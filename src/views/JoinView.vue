@@ -39,19 +39,27 @@ export default {
   methods: {
     toggleNav: function () {
         this.hideNav = ! this.hideNav;},
-
+        
+        
+        
     joinGame: function() {
-    if (!this.nickname || !this.roomCode) {
-        alert("Please enter a nickname and a room code.");
-        return;
-    }
-  
-
-    socket.emit('attemptJoinGame', {gameID: this.roomCode, name: this.nickname});
-
-    this.$router.push(`/lobby/${this.roomCode}`);
-
-  }},
+        if (!this.nickname || !this.roomCode) {
+            alert("Please enter a nickname and a room code.");
+            return;
+        }
+        
+        // Försök hämta ett befintligt permanent ID för återanslutning
+        const reconnectID = localStorage.getItem("playerID"); 
+        
+        socket.emit('attemptJoinGame', {
+            gameID: this.roomCode, 
+            name: this.nickname,
+            reconnectID: reconnectID // <--- SKICKA MED RECONNECT-ID
+        });
+        
+        this.$router.push(`/lobby/${this.roomCode}`);
+    },
+},
 
 
 
@@ -60,7 +68,6 @@ data: function () {
     hideNav: true,
     nickname: '',
     roomCode: ''
-
     }
   }
 }

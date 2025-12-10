@@ -59,7 +59,9 @@
   </div>
 
   <div class="lobby-actions">
-    <button class="back-button-aligned" @click="goBack">{{ uiLabels.createView?.back }}</button>
+    <button class="back-button-aligned" @click="goBack">
+      {{ uiLabels.createView?.back }}
+    </button>
     <button class="openLobbyButton" @click="openLobby">
       {{ uiLabels.createView?.openLobby }}
     </button>
@@ -250,7 +252,8 @@ input[type="text"] {
 .lobby-actions {
   display: flex;
   justify-content: center;
-  gap: 40px;
-  margin-top: 3rem;
+  gap: 10rem;
+  margin-left: 5;
+  margin-bottom: 5rem;
 }
 </style>
