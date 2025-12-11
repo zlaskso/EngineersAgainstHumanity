@@ -34,7 +34,6 @@
 import io from "socket.io-client";
 const socket = io("localhost:3000");
 import Player from "@/components/Player.vue";
-import Player from "../components/Player.vue";
 
 export default {
   name: "LobbyView",
