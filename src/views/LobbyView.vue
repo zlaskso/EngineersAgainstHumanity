@@ -5,7 +5,11 @@
   <section class="gridLayout">
     <div class="left-column">
       <p>Waiting for players <span class="loading"> ...</span></p>
-      {{ participants }}
+      <ul class="player-list">
+        <li v-for="p in participants" :key="p.id">
+          {{ p.name }}
+        </li>
+      </ul>
 
       <Player
         v-for="p in participants"
@@ -17,6 +21,9 @@
         :totalNumPoints="p.points"
         :isActive="p.isActive"
       />
+      <button v-if="iAmHost" @click="startGame" class="startGameButton">
+        Starta spelet
+      </button>
     </div>
 
     <div class="finalGameRules">
@@ -57,46 +64,79 @@ export default {
         answerTime: 0,
         nrOfRerolls: 0,
       },
+      hostSocketID: null,
     };
+  },
+  computed: {
+    iAmHost() {
+      console.log(
+        "[CLIENT] hostSocketID:",
+        this.hostSocketID,
+        "my socket.id:",
+        socket.id
+      );
+
+      return this.hostSocketID === socket.id;
+    },
   },
   created: function () {
     this.gameID = this.$route.params.id;
 
+    // Om vi har en sparad playerID = vi är en spelare; annars antas vi vara host
+    const localPlayerID = localStorage.getItem("playerID");
+
+    if (!localPlayerID) {
+      // Antas host: registrera hostens lobby-skärm (sätter hostSocketID på servern)
+      socket.emit("joinLobbyScreen", this.gameID);
+    } else {
+      // Är spelare: be om aktuell participants-lista och spelinställningar
+      socket.emit("getParticipantsList", this.gameID);
+      socket.emit("getGameSettings", this.gameID);
+    }
+
+    // Gemensamma socket-lyssnare (logg för debugging)
     socket.on("updateParticipants", (p) => {
+      console.log("[CLIENT] updateParticipants received:", p);
       this.participants = p;
     });
 
-    const handleLobbyNotFound = () => {
-      alert(`Lobby med kod ${this.gameID} hittades inte. Omdirigerar.`);
-      this.$router.push("/join/");
-    };
+    socket.on("gameSettings", (room) => {
+      console.log("[CLIENT] Received gameSettings:", room);
+      this.gameSettings = room.gameSettings;
+      this.hostSocketID = room.hostSocketID;
+      console.log(
+        "[CLIENT] hostSocketID:",
+        this.hostSocketID,
+        "my socket.id:",
+        socket.id
+      );
+    });
 
     socket.on("checkLobbyStatus", (data) => {
       if (!data.exists) {
-        handleLobbyNotFound();
+        alert(`Lobby med kod ${this.gameID} hittades inte. Omdirigerar.`);
+        this.$router.push("/join/");
       } else {
-        // Lobbyn finns! Fortsätt med att hämta data och ansluta.
         this.isValidLobby = true;
-        this.fetchLobbyData();
+        // fetchLobbyData anropas inte nödvändigt här eftersom vi anropar getGameSettings/getParticipantsList direkt
       }
     });
 
-    socket.emit("checkLobby", { gameID: this.gameID });
-
-    socket.on("updateParticipants", (p) => (this.participants = p));
-    socket.on("startPoll", () => this.$router.push("/poll/" + this.gameID));
-    socket.on("gameSettings", (room) => {
-      if (room && room.gameSettings) {
-        this.gameSettings = room.gameSettings;
+    socket.on("gameStarted", (data) => {
+      if (socket.id === data.hostSocketID) {
+        this.$router.push(`/black/${this.gameID}`);
       } else {
-        console.error("Kunde inte hämta spelinställningar trots giltigt ID.");
+        this.$router.push(`/cards/${this.gameID}`);
       }
     });
+
+    // Fråga att kolla om lobbyn existerar
+    socket.emit("checkLobby", { gameID: this.gameID });
   },
+
   methods: {
     fetchLobbyData: function () {
       socket.emit("getGameSettings", this.gameID);
-      socket.emit("joinLobbyScreen", this.gameID);
     },
     participateInPoll: function () {
       socket.emit("participateInPoll", { gameID: this.gameID, name: this.userName });
@@ -104,6 +144,9 @@ export default {
     },
     toggleNav: function () {
       this.hideNav = !this.hideNav;
+    },
+    startGame() {
+      socket.emit("startGame", { gameID: this.gameID });
     },
   },
   beforeDestroy() {
@@ -161,5 +204,10 @@ export default {
   to {
     clip-path: inset(0 -34% 0 0);
   }
+}
+.player-list {
+  list-style-type: none; /* tar bort prickarna */
+  padding: 0; /* tar bort indrag */
+  margin: 0;
 }
 </style>

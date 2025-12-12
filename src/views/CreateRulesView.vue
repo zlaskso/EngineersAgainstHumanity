@@ -133,6 +133,13 @@ export default {
         alert("Please enter a lobby name!");
         return;
       }
+      // Skapa permanent host playerID
+      let hostID = localStorage.getItem("playerID");
+      if (!hostID) {
+        hostID = Math.random().toString(36).substring(2, 10);
+        localStorage.setItem("HOSTplayerID", hostID);
+      }
+
       const gameSettings = {
         lobbyName: this.lobbyName,
         maxPlayerAmount: this.maxPlayerAmount,
@@ -150,6 +157,7 @@ export default {
         participants: participants,
       });
       this.$router.push(`/lobby/${this.gameID}`);
+      socket.emit("joinLobbyScreen", this.gameID);
     },
   },
 };

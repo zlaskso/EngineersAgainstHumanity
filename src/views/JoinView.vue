@@ -18,7 +18,7 @@
 
 <script>
 import ResponsiveNav from '@/components/ResponsiveNav.vue';
-import io from "socket.io-client"; 
+import io from "socket.io-client";
 const socket = io("localhost:3000");
 
 
@@ -35,33 +35,37 @@ export default {
   },
 
   
-  
   methods: {
-    toggleNav: function () {
-        this.hideNav = ! this.hideNav;},
-        
-        
-        
-    joinGame: function() {
-        if (!this.nickname || !this.roomCode) {
-            alert("Please enter a nickname and a room code.");
-            return;
-        }
-        
-        // Försök hämta ett befintligt permanent ID för återanslutning
-        const reconnectID = localStorage.getItem("playerID"); 
-        
-        socket.emit('attemptJoinGame', {
-            gameID: this.roomCode, 
-            name: this.nickname,
-            reconnectID: reconnectID // <--- SKICKA MED RECONNECT-ID
-        });
-        
-        this.$router.push(`/lobby/${this.roomCode}`);
+  toggleNav() {
+      this.hideNav = !this.hideNav;
     },
+
+    joinGame() {
+      // Hela playerID + reconnect-logiken här
+      let playerID = localStorage.getItem("playerID");
+      if (!playerID) {
+        playerID = Math.random().toString(36).substring(2, 10);
+        localStorage.setItem("playerID", playerID);
+      }
+
+      const reconnectID =
+        sessionStorage.getItem("isReconnecting") === "true"
+          ? playerID
+          : null;
+
+      socket.once("playerRegistered", (data) => {
+        localStorage.setItem("playerID", data.id);
+        sessionStorage.setItem("isReconnecting", "true");
+        this.$router.push(`/lobby/${this.roomCode}`);
+      });
+
+      socket.emit("attemptJoinGame", {
+        gameID: this.roomCode,
+        name: this.nickname,
+        reconnectID
+      });
+    }
 },
-
-
 
 data: function () {
   return {
@@ -77,8 +81,6 @@ data: function () {
 header {
     width: 100%;
     display: grid;
-    /* Uppdaterad grid: 3 kolumner. 
-       2em (hamburger) | auto (logo, tar upp all plats) | 5rem (flagga) */
     grid-template-columns: 2em auto 5rem;
     align-items: center;
     margin-bottom: 100px;
