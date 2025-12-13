@@ -7,7 +7,10 @@
       <p>Waiting for players <span class="loading"> ...</span></p>
       <ul class="player-list">
         <li v-for="p in participants" :key="p.id">
-          {{ p.name }}
+          <span v-if="p.id === localPlayerID"
+            ><b>{{ p.name }}</b></span
+          >
+          <span v-else>{{ p.name }}</span>
         </li>
       </ul>
 
@@ -21,7 +24,7 @@
         :totalNumPoints="p.points"
         :isActive="p.isActive"
       />
-      <button v-if="iAmHost" @click="startGame" class="startGameButton">
+      <button v-if="amIHost" @click="startGame" class="startGameButton">
         Starta spelet
       </button>
     </div>
@@ -52,7 +55,7 @@ export default {
   data: function () {
     return {
       userName: "",
-      gameID: "inactive poll",
+      gameID: "inactive game",
       joined: false,
       participants: [],
       isValidLobby: false,
@@ -65,34 +68,25 @@ export default {
         nrOfRerolls: 0,
       },
       hostSocketID: null,
+      localPlayerID: localStorage.getItem("playerID"), // spelaren själv
     };
   },
   computed: {
-    iAmHost() {
-      console.log(
-        "[CLIENT] hostSocketID:",
-        this.hostSocketID,
-        "my socket.id:",
-        socket.id
-      );
-
-      return this.hostSocketID === socket.id;
+    amIHost() {
+      return localStorage.getItem("hostPlayerID") != undefined;
     },
   },
+
   created: function () {
     this.gameID = this.$route.params.id;
+    console.log("Socket connection status:", socket.connected);
+    socket.emit("joinLobbyPlayer", { gameID: this.gameID });
 
     // Om vi har en sparad playerID = vi är en spelare; annars antas vi vara host
     const localPlayerID = localStorage.getItem("playerID");
 
-    if (!localPlayerID) {
-      // Antas host: registrera hostens lobby-skärm (sätter hostSocketID på servern)
-      socket.emit("joinLobbyScreen", this.gameID);
-    } else {
-      // Är spelare: be om aktuell participants-lista och spelinställningar
-      socket.emit("getParticipantsList", this.gameID);
-      socket.emit("getGameSettings", this.gameID);
-    }
+    socket.emit("getParticipantsList", this.gameID);
+    socket.emit("getGameSettings", { gameID: this.gameID });
 
     // Gemensamma socket-lyssnare (logg för debugging)
     socket.on("updateParticipants", (p) => {
@@ -100,16 +94,22 @@ export default {
       this.participants = p;
     });
 
-    socket.on("gameSettings", (room) => {
-      console.log("[CLIENT] Received gameSettings:", room);
-      this.gameSettings = room.gameSettings;
-      this.hostSocketID = room.hostSocketID;
-      console.log(
-        "[CLIENT] hostSocketID:",
-        this.hostSocketID,
-        "my socket.id:",
-        socket.id
-      );
+    socket.on("gameSettings", (data) => {
+      console.log("[CLIENT] Received gameSettings:", data);
+
+      // lägger till gameSettings från servern
+      this.gameSettings = {
+        //lobbyName: data.lobbyName,
+        //...data.gameRules,
+        lobbyName: data.gameSettings.lobbyName,
+        maxPlayerAmount: data.gameSettings.maxPlayerAmount,
+        numOfRounds: data.gameSettings.numOfRounds,
+        cardsOnHand: data.gameSettings.cardsOnHand,
+        answerTime: data.gameSettings.answerTime,
+        nrOfRerolls: data.gameSettings.nrOfRerolls,
+      };
+      this.hostID = data.hostID;
+      //this.participants = data.participants;
     });
 
     socket.on("checkLobbyStatus", (data) => {
@@ -123,24 +123,20 @@ export default {
     });
 
     socket.on("gameStarted", (data) => {
-      if (socket.id === data.hostSocketID) {
+      if (this.iAmHost) {
         this.$router.push(`/black/${this.gameID}`);
       } else {
         this.$router.push(`/cards/${this.gameID}`);
       }
     });
 
-    // Fråga att kolla om lobbyn existerar
+    // finns lobbyn?
     socket.emit("checkLobby", { gameID: this.gameID });
   },
 
   methods: {
     fetchLobbyData: function () {
       socket.emit("getGameSettings", this.gameID);
-    },
-    participateInPoll: function () {
-      socket.emit("participateInPoll", { gameID: this.gameID, name: this.userName });
-      this.joined = true;
     },
     toggleNav: function () {
       this.hideNav = !this.hideNav;
@@ -183,10 +179,9 @@ export default {
   font-size: 20pt;
 }
 .left-column {
-  /* Använd Flexbox eller en intern Grid för att stapla elementen i VÄNSTER kolumn */
   display: flex;
-  flex-direction: column; /* Stapla .playersName och alla Player-komponenter vertikalt */
-  gap: 20px; /* Lägg till lite utrymme mellan spelarna */
+  flex-direction: column;
+  gap: 20px;
   font-size: 20pt;
 }
 
@@ -206,8 +201,8 @@ export default {
   }
 }
 .player-list {
-  list-style-type: none; /* tar bort prickarna */
-  padding: 0; /* tar bort indrag */
+  list-style-type: none;
+  padding: 0;
   margin: 0;
 }
 </style>

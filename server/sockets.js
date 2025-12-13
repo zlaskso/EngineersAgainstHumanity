@@ -6,21 +6,29 @@ function sockets(io, socket, data) {
     socket.emit('uiLabels', data.getUILabels(lang));
   });
 
+
   socket.on('getaboutExplanations', function (lang) {
     socket.emit('aboutExplanations', data.getaboutExplanations(lang));
   });
+
 
   socket.on('getUICardLabels', function (lang) {
     socket.emit('uiCardLabels', data.getUICardLabels(lang));
   });
 
+
   socket.on('createGameRoom', function (d) {
-    data.createGameRoom(d.gameID, d.gameSettings);
+    console.log("Creating game room with ID:", d.gameID, d.gameSettings);
+    data.createGameRoom(d.gameID, d.gameSettings, d.hostID);
+    console.log("Game room created:", d.gameID, 'med regler:', d.gameSettings);
+
     socket.join(d.gameID);
     // console.log("gameRoomCreated -> sockets.js")
+
     io.to(d.gameID).emit('gameRoomCreated', {
       gameID: d.gameID,
-      gameSettings: d.gameSettings
+      gameSettings: d.gameSettings,
+      hostID: d.hostID
     });
   });
 
@@ -32,15 +40,6 @@ function sockets(io, socket, data) {
     socket.emit('checkLobbyStatus', { gameID, exists });
   });
 
-  socket.on("getGameSettings", (gameID) => {
-    const room = data.getGameRoom(gameID);
-    if (!room) return;
-    socket.emit("gameSettings", {
-      gameSettings: room.gameSettings,
-      hostSocketID: room.hostSocketID,
-    });
-  });
-
   socket.on('getParticipantsList', function (gameID) {
     const participants = data.getParticipants(gameID);
     socket.emit('updateParticipants', participants);
@@ -48,83 +47,107 @@ function sockets(io, socket, data) {
 
   //test1
   socket.on('attemptJoinGame', (d) => {
-    const { gameID, name, reconnectID } = d;
+    const { gameID, name, playerID } = d;
     console.log("attemptJoinGame received:", d);
-
-
     const room = data.getGameRoom(gameID);
     if (!room) {
       socket.emit("lobbyNotFound");
       return;
     }
 
-    // 1. Registrera eller reconnecta spelaren.
-    // OBS: Skickar med socket.id här!
+    // registrera spelaren i datalagret
+    // ink socket
     const player = data.participateInGame(
       gameID,
       name,
       socket.id, // SOCKET
-      reconnectID
+      playerID
     );
 
     if (!player) {
-      // Borde inte hända om getGameRoom lyckas, men bra säkerhetsåtgärd.
-      socket.emit("lobbyNotFound");
+      // om player är null = något gick fel
+      socket.emit("no player to register  found");
       return;
     }
 
-    // 2. Låt den anslutande socketen gå med i Socket.IO-rummet
+    // anslutade spelaren till rätt "room" i socket.io
     socket.join(gameID);
 
-    // 3. Spara permanent ID till klienten (viktigt för reconnect)
+    // spara players ID i klientens localStorage
     socket.emit("playerRegistered", { id: player.id });
 
-    // 4. Hämta den kompletta uppdaterade listan
+    // hämta uppdtaterad deltagarlista
     const updatedParticipants = data.getParticipants(gameID);
 
-    // 5. Uppdatera listan till ALLA i rummet (inklusive den nya/återanslutande spelaren)
+    // uppdatera listan till ALLA i rummet (inklusive den nya/återanslutande spelaren) VERKAR EJ FUNGERA
+    //socket.emit('updateParticipants', updatedParticipants); // Synkroniserar listan
+    console.log(`[SERVER] Broadcasting updateParticipants till rum ${gameID}. Antal: ${updatedParticipants.length}`);
     io.to(gameID).emit('updateParticipants', updatedParticipants);
   });
 
+  //joinLobby för host
 
-  socket.on("joinLobbyScreen", (gameID) => {
-    const room = data.getGameRoom(gameID);
-    if (!room) return;
+  socket.on("joinLobby", ({ gameID, hostID }) => {
+  const room = data.getGameRoom(gameID);
+  if (!room) {
+    socket.emit("lobbyNotFound");
+    return;
+  }
 
-    // Sätt hostens socketID om ingen host är registrerad
-    if (!room.hostSocketID)
-      room.hostSocketID = socket.id;
-    console.log(`[SERVER] Host satt:`, room.hostSocketID);
+  // sätt hostID första gången
+  if (hostID && !room.hostID) {
+    room.hostID = hostID;
+    console.log(`[SERVER] HostID satt: ${hostID}`);
+  }
+  socket.join(gameID);
+  console.log(`[SERVER] ${socket.id} joined lobby ${gameID}`);
+  console.log(`[SERVER] Participants:`, room.participants.map(p => p.name));
+  socket.emit("updateParticipants", room.participants);
+});
 
 
-    socket.join(gameID);
+  socket.on("getGameSettings", ({ gameID }) => {
+  const room = data.getGameRoom(gameID);
+  if (!room) {
+    console.log('[SERVER] Lobby not found for getGameSettings:', gameID);
+    socket.emit("lobbyNotFound");
+    return;
+  }
 
-    console.log(`[SERVER] ${socket.id} joined lobby ${gameID}`);
-    console.log(`[SERVER] Current host: ${room.hostSocketID}`);
-    console.log(`[SERVER] Participants:`, room.participants.map(p => p.name));
-
-    socket.emit("updateParticipants", room.participants);
-
+  socket.emit("gameSettings", {
+    gameSettings: room.gameSettings,
+    lobbyName: room.gameSettings.lobbyName,
+    hostID: room.hostID,
+    //participants: room.participants
   });
-  socket.on("getGameSettings", (gameID) => {
-    const room = data.getGameRoom(gameID);
-    if (!room) return;
-    console.log(`[SERVER] Sending gameSettings to socketID ${socket.id}, hostSocketID: ${room.hostSocketID}`);
+});
 
 
-    socket.emit("gameSettings", {
-      gameSettings: room.gameSettings,
-      hostSocketID: room.hostSocketID
-    });
-  });
 
   socket.on("startGame", d => {
     const room = data.getGameRoom(d.gameID);
     io.to(d.gameID).emit("gameStarted", {
-      hostSocketID: room.hostSocketID,
+      hostID: room.hostID,
       participants: room.participants
     });
   });
+
+  socket.on("joinLobbyPlayer", ({ gameID }) => {
+  const room = data.getGameRoom(gameID);
+
+  if (!room) {
+    socket.emit("lobbyNotFound");
+    return;
+  }
+  
+  // 1. Kritiskt: Anslut denna socket till rummet så den kan ta emot broadcasts
+  socket.join(gameID); 
+  
+  // 2. Skicka den aktuella deltagarlistan till ENDAST denna klient
+  socket.emit("updateParticipants", room.participants); 
+  
+  console.log(`[SERVER] Spelare ${socket.id} joined lobby-rum ${gameID}`);
+});
 }
 
 export { sockets };

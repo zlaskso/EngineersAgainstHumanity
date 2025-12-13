@@ -1,49 +1,16 @@
 <template>
   <section id="gameRules">
     <h1>{{ uiLabels.createView?.setGameRules }}</h1>
-    <div id="maxNumPlayers">
-      <label>{{ uiLabels.createView?.maxNumPlayers }}</label>
-      {{ maxPlayerAmount }}
+
+    <div v-for="rule in rulesConfig" :key="rule.key" class="gameRuleContainer">
+      <label>{{ uiLabels.createView?.[rule.label] }}</label>
+      <span class="ruleValue">{{ gameRules[rule.key] }}</span>
 
       <div class="gameRuleButtonsContainer">
-        <button class="gameRuleButton" @click="addOne('maxPlayerAmount')">↑</button>
-        <button class="gameRuleButton" @click="removeOne('maxPlayerAmount')">↓</button>
-      </div>
-    </div>
-
-    <div id="numRounds">
-      <label>{{ uiLabels.createView?.numOfRounds }}</label>
-      {{ numOfRounds }}
-      <div class="gameRuleButtonsContainer">
-        <button class="gameRuleButton" @click="addOne('numOfRounds')">↑</button>
-        <button class="gameRuleButton" @click="removeOne('numOfRounds')">↓</button>
-      </div>
-    </div>
-
-    <div id="cardsOnHand">
-      <label>{{ uiLabels.createView?.cardsOnHand }}</label>
-      {{ cardsOnHand }}
-      <div class="gameRuleButtonsContainer">
-        <button class="gameRuleButton" @click="addOne('cardsOnHand')">↑</button>
-        <button class="gameRuleButton" @click="removeOne('cardsOnHand')">↓</button>
-      </div>
-    </div>
-
-    <div id="answerTime">
-      <label>{{ uiLabels.createView?.answerTime }}</label>
-      {{ answerTime }}
-      <div class="gameRuleButtonsContainer">
-        <button class="gameRuleButton" @click="addFifteen('answerTime')">↑</button>
-        <button class="gameRuleButton" @click="removeFifteen('answerTime')">↓</button>
-      </div>
-    </div>
-
-    <div id="nrOfRerolls">
-      <label>{{ uiLabels.createView?.nrOfRerolls }}</label>
-      {{ nrOfRerolls }}
-      <div class="gameRuleButtonsContainer">
-        <button class="gameRuleButton" @click="addOne('nrOfRerolls')">↑</button>
-        <button class="gameRuleButton" @click="removeOne('nrOfRerolls')">↓</button>
+        <button class="gameRuleButton" @click="changeRule(rule.key, rule.step)">↑</button>
+        <button class="gameRuleButton" @click="changeRule(rule.key, -rule.step)">
+          ↓
+        </button>
       </div>
     </div>
   </section>
@@ -88,11 +55,20 @@ export default {
       lobbyName: "",
       hideNav: true,
       gameID: null,
-      maxPlayerAmount: 0,
-      numOfRounds: 0,
-      cardsOnHand: 0,
-      answerTime: 0,
-      nrOfRerolls: 0,
+      gameRules: {
+        maxPlayerAmount: 0,
+        numOfRounds: 0,
+        cardsOnHand: 0,
+        answerTime: 0,
+        nrOfRerolls: 0,
+      },
+      rulesConfig: [
+        { key: "maxPlayerAmount", label: "maxNumPlayers", step: 1 },
+        { key: "numOfRounds", label: "numOfRounds", step: 1 },
+        { key: "cardsOnHand", label: "cardsOnHand", step: 1 },
+        { key: "answerTime", label: "answerTime", step: 15 },
+        { key: "nrOfRerolls", label: "nrOfRerolls", step: 1 },
+      ],
     };
   },
   created: function () {
@@ -101,6 +77,11 @@ export default {
     this.gameID = this.getGameID();
   },
   methods: {
+    changeRule(key, delta) {
+      const value = this.gameRules[key] + delta;
+      this.gameRules[key] = Math.max(0, value);
+    },
+
     toggleNav: function () {
       this.hideNav = !this.hideNav;
     },
@@ -112,52 +93,39 @@ export default {
     getGameID: function () {
       return Math.floor(Math.random() * 100000);
     },
-    addOne(gameRulesField) {
-      this[gameRulesField]++;
-    },
-    removeOne(gameRulesField) {
-      if (this[gameRulesField] > 0) {
-        this[gameRulesField]--;
-      }
-    },
-    addFifteen(gameRulesField) {
-      this[gameRulesField] += 15;
-    },
-    removeFifteen(gameRulesField) {
-      if (this[gameRulesField] > 0) {
-        this[gameRulesField] -= 15;
-      }
-    },
+
     openLobby() {
       if (!this.lobbyName || this.lobbyName.trim() === "") {
         alert("Please enter a lobby name!");
         return;
       }
-      // Skapa permanent host playerID
-      let hostID = localStorage.getItem("playerID");
+      // Skapa permanent hostID
+      let hostID = localStorage.getItem("hostPlayerID");
       if (!hostID) {
         hostID = Math.random().toString(36).substring(2, 10);
-        localStorage.setItem("HOSTplayerID", hostID);
+        localStorage.setItem("hostPlayerID", hostID);
       }
 
       const gameSettings = {
         lobbyName: this.lobbyName,
-        maxPlayerAmount: this.maxPlayerAmount,
-        numOfRounds: this.numOfRounds,
-        cardsOnHand: this.cardsOnHand,
-        answerTime: this.answerTime,
-        nrOfRerolls: this.nrOfRerolls,
+        ...this.gameRules,
       };
 
-      const participants = [];
+      //const participants = [];
 
       socket.emit("createGameRoom", {
         gameID: this.gameID,
         gameSettings: gameSettings,
-        participants: participants,
+        hostID: hostID, // hostID till servern
+        //participants: participants,
       });
+
+      socket.emit("joinLobby", {
+        gameID: this.gameID,
+        hostID,
+      });
+
       this.$router.push(`/lobby/${this.gameID}`);
-      socket.emit("joinLobbyScreen", this.gameID);
     },
   },
 };

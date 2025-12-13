@@ -12,9 +12,6 @@ prototype of the Data object/class
 https://developer.mozilla.org/en-US/docs/Web/JavaScript/Closures
 ***********************************************/
 
-Data.prototype.pollExists = function (pollId) {
-  return typeof this.gameRooms[pollId] !== "undefined"
-}
 
 Data.prototype.getUILabels = function (lang) {
   //check if lang is valid before trying to load the dictionary file
@@ -41,61 +38,72 @@ Data.prototype.getaboutExplanations = function (lang) {
 }
 
 
-Data.prototype.participateInGame = function (gameID, name, socketID, reconnectID = null) {
+Data.prototype.roomExists = function (gameID) {
+  return typeof this.gameRooms[gameID] !== "undefined"
+}
+
+
+Data.prototype.participateInGame = function (
+  gameID,
+  name,
+  socketID,
+  playerID // identifier från klienten
+) {
   const room = this.getGameRoom(gameID);
   if (!room) return null;
 
-  // 1. Reconnect om reconnectID finns
-  if (reconnectID) {
-    const existingPlayer = room.participants.find(
-      (p) => p.id === reconnectID
-    );
+  // kolla om spelaren redan finns (återansluter)
+  const existingPlayer = room.participants.find(
+    (p) => p.id === playerID
+  );
 
-    if (existingPlayer) {
-      console.log("RECONNECTING PLAYER:", existingPlayer.name);
+  if (existingPlayer) {
+    console.log("RECONNECTING PLAYER:", existingPlayer.name);
 
-      // uppdatera socket-id till den nya anslutningen
-      existingPlayer.socketID = socketID;
-      existingPlayer.isActive = true;
+    existingPlayer.socketID = socketID;
+    existingPlayer.isActive = true;
+    existingPlayer.name = name; // om spelaren bytt namn vid reconnect
 
-      return existingPlayer; // ❗ AVBRYT – skapa INGEN ny spelare
-    }
+    return existingPlayer; // skapar ingen
   }
 
-  // 2. Annars skapa ny spelare
+  // 2️⃣ Skapa ny spelare
   const newPlayer = {
-    id: Math.random().toString(36).substring(2, 10), // permanent ID
-    socketID,  // socket.id
-    name,
-    //points: 0,
-    // props
+    id: playerID,       // använd det ID som klienten skickade med
+    socketID: socketID, // socket.id
+    name: name,
     isHost: false,
-    //hasPickedCard: false, 
-    isActive: true // Antar att de är aktiva när de ansluter
+    isActive: true,
   };
 
   room.participants.push(newPlayer);
+
   console.log("ADDING PLAYER:", newPlayer);
   console.log("ROOM NOW:", room.participants);
+
   return newPlayer;
 };
+
 //test2
 Data.prototype.getParticipants = function (gameID) {
-  if (this.pollExists(gameID)) {
+  if (this.roomExists(gameID)) {
+    console.log("getParticipants -> Data.js", this.gameRooms[gameID].participants);
     return this.gameRooms[gameID].participants;
   }
   return [];
 };
 
-Data.prototype.createGameRoom = function (gameId, gameSettings, participants) {
+Data.prototype.createGameRoom = function (gameId, gameSettings, hostID, participants) {
   if (gameId && gameSettings) {
     this.gameRooms[gameId] = {
       gameSettings,
+      hostID: hostID,
       participants: participants || [], //Om participants finns och inte är null/undefined → använd det.|| betyder “eller”.
-      hostSocketID: null
     }
   }
+  console.log("createGameRoom -> Data.js", this.gameRooms[gameId]);
 }
+
 Data.prototype.getGameRoom = function (gameID) {
   return this.gameRooms[gameID] || null;
 };

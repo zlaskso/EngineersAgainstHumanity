@@ -45,7 +45,7 @@ const router = createRouter({
       component: () => import('../views/cardViewTest.vue')
     },
     {
-      path: '/black/',
+      path: '/black/:id',
       name: 'BlackCardView',
       component: () => import('../views/BlackCardView.vue')
     }

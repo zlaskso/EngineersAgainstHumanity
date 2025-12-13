@@ -41,29 +41,27 @@ export default {
     },
 
     joinGame() {
-      // Hela playerID + reconnect-logiken här
+      // PlayerID hantering
       let playerID = localStorage.getItem("playerID");
       if (!playerID) {
         playerID = Math.random().toString(36).substring(2, 10);
         localStorage.setItem("playerID", playerID);
+        localStorage.setItem("playerName", this.nickname);
       }
 
-      const reconnectID =
-        sessionStorage.getItem("isReconnecting") === "true"
-          ? playerID
-          : null;
+      socket.emit("attemptJoinGame", {
+        gameID: this.roomCode,
+        name: this.nickname,
+        playerID: playerID,
+      });
+      
 
-      socket.once("playerRegistered", (data) => {
+      socket.on("playerRegistered", (data) => {
         localStorage.setItem("playerID", data.id);
         sessionStorage.setItem("isReconnecting", "true");
         this.$router.push(`/lobby/${this.roomCode}`);
       });
 
-      socket.emit("attemptJoinGame", {
-        gameID: this.roomCode,
-        name: this.nickname,
-        reconnectID
-      });
     }
 },
 
