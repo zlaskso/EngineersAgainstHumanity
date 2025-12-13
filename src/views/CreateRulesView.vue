@@ -72,10 +72,10 @@ export default {
     };
   },
   created: function () {
-    // socket = io("http://localhost:3000", { autoConnect: true });
     socket.on("connect_error", (err) => console.error("socket err", err));
     this.gameID = this.getGameID();
   },
+
   methods: {
     changeRule(key, delta) {
       const value = this.gameRules[key] + delta;
@@ -111,16 +111,13 @@ export default {
         ...this.gameRules,
       };
 
-      //const participants = [];
-
       socket.emit("createGameRoom", {
         gameID: this.gameID,
         gameSettings: gameSettings,
-        hostID: hostID, // hostID till servern
-        //participants: participants,
+        hostID: hostID, // skickar med hostID
       });
 
-      socket.emit("joinLobby", {
+      socket.emit("joinLobbyHost", {
         gameID: this.gameID,
         hostID,
       });

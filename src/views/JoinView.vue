@@ -55,7 +55,6 @@ export default {
         playerID: playerID,
       });
       
-
       socket.on("playerRegistered", (data) => {
         localStorage.setItem("playerID", data.id);
         sessionStorage.setItem("isReconnecting", "true");

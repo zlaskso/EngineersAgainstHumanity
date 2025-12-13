@@ -82,8 +82,7 @@ export default {
     console.log("Socket connection status:", socket.connected);
     socket.emit("joinLobbyPlayer", { gameID: this.gameID });
 
-    // Om vi har en sparad playerID = vi är en spelare; annars antas vi vara host
-    const localPlayerID = localStorage.getItem("playerID");
+    const localPlayerID = localStorage.getItem("playerID"); //finns endast om spelare annars är host
 
     socket.emit("getParticipantsList", this.gameID);
     socket.emit("getGameSettings", { gameID: this.gameID });
@@ -99,8 +98,6 @@ export default {
 
       // lägger till gameSettings från servern
       this.gameSettings = {
-        //lobbyName: data.lobbyName,
-        //...data.gameRules,
         lobbyName: data.gameSettings.lobbyName,
         maxPlayerAmount: data.gameSettings.maxPlayerAmount,
         numOfRounds: data.gameSettings.numOfRounds,
@@ -109,7 +106,6 @@ export default {
         nrOfRerolls: data.gameSettings.nrOfRerolls,
       };
       this.hostID = data.hostID;
-      //this.participants = data.participants;
     });
 
     socket.on("checkLobbyStatus", (data) => {
@@ -118,12 +114,11 @@ export default {
         this.$router.push("/join/");
       } else {
         this.isValidLobby = true;
-        // fetchLobbyData anropas inte nödvändigt här eftersom vi anropar getGameSettings/getParticipantsList direkt
       }
     });
 
     socket.on("gameStarted", (data) => {
-      if (this.iAmHost) {
+      if (this.amIHost) {
         this.$router.push(`/black/${this.gameID}`);
       } else {
         this.$router.push(`/cards/${this.gameID}`);

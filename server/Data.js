@@ -62,12 +62,12 @@ Data.prototype.participateInGame = function (
 
     existingPlayer.socketID = socketID;
     existingPlayer.isActive = true;
-    existingPlayer.name = name; // om spelaren bytt namn vid reconnect
+    existingPlayer.name = name; // om spelaren bytt namn
 
-    return existingPlayer; // skapar ingen
+    return existingPlayer; // skapar ingen ny spelare
   }
 
-  // 2️⃣ Skapa ny spelare
+  // skapa ny spelare
   const newPlayer = {
     id: playerID,       // använd det ID som klienten skickade med
     socketID: socketID, // socket.id
@@ -84,7 +84,6 @@ Data.prototype.participateInGame = function (
   return newPlayer;
 };
 
-//test2
 Data.prototype.getParticipants = function (gameID) {
   if (this.roomExists(gameID)) {
     console.log("getParticipants -> Data.js", this.gameRooms[gameID].participants);
