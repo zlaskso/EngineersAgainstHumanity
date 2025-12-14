@@ -28,15 +28,22 @@
 		"back": "Back"
 	},
 	"aboutView": {
+		"title1": "Create and prepare the game",
+		"title2": "Playing the game",
+		"undertitle2": "The statement is shown:",
+		"undertitle3": "Play your card:",
+		"undertitle4": "Vote for favourite:",
+		"undertitle5": "Round won:",
+		"title3": "Winning the game",
 		"explanation1": "Create a game on a screen that all players can see. You choose how many players are participating and how many rounds you play, etc.", 
 		"explanation2": "Players join the game from their own devices",
-		"explanation3": "The screen shows a card…", 
-		"explanation4": "...with a statement on it. You can fill in the blank with anything ____",
+		"explanation3": "The screen shows a black card with a blank on it that needs to be filled in.", 
+		"explanation4": "The players are given white cards with possible answers to fill in the blank ____",
 		"explanation5": "Players choose what fits.", 
 		"explanation6": "Option 1",
 		"explanation7": "The choices are shown anonymously, and you vote for which one is the funniest.",
-		"explanation8": "The player with the voted option wins the round.",
-		"explanation9": "The one with the most won rounds wins"
+		"explanation8": "The player with the most voted option wins the round.",
+		"explanation9": "The player with the most won rounds wins"
 		
 		
 	},

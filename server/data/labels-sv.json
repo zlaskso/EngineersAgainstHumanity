@@ -29,15 +29,22 @@
 		"back": "Tillbaka"
 	},
 	"aboutView": {
+		"title1": "Skapa och förbered spelet",
+		"title2": "Spela spelet",
+		"undertitle2": "Påståendet visas:",
+		"undertitle3": "Spela ditt kort:",
+		"undertitle4": "Rösta på favorit:",
+		"undertitle5": "Runda vunnen:",
+		"title3": "Vinn spelet",
 		"explanation1": "Skapa ett spel på en skärm som alla spelare kan se. Du väljer hur många spelare som deltar och hur många rundor ni kör, mm.", 
 		"explanation2": "Spelarna deltar i spelet från sina egna enheter",
-		"explanation3": "Skärmen visar ett kort…", 
-		"explanation4": "...där det står ett påstende. Du kan fylla luckan med vad som helst ____",
+		"explanation3": "Skärmen visar ett svart kort med en liten lucka som måste fyllas i.", 
+		"explanation4": "Spelarna får upp vita kort med möjliga svar att fylla i den tomma platsen ____",
 		"explanation5": "Spelarna väljer vad som passar.", 
 		"explanation6": "Alternativ 1",
 		"explanation7": "Valen visas anonymt, och man röstar vilken som är roligast.",
-		"explanation8": "Spelaren med det framröstade alternativet vinner rundan.",
-		"explanation9": "Den med flest vunna rundor vinner"
+		"explanation8": "Spelaren med det mest framröstade alternativet vinner rundan.",
+		"explanation9": "Spelaren med flest vunna rundor vinner"
 
 
 	},
