@@ -75,6 +75,7 @@ Data.prototype.participateInGame = function (
     name: name,
     isHost: false,
     isActive: true,
+    points: 0,
   };
 
   room.participants.push(newPlayer);
@@ -165,6 +166,17 @@ Data.prototype.createPlayerID = function () {
   // Borde kolla ifall ett sånt PlayerID redan finns för att undvika krockar
   // Då behöver vi veta PlayerID för alla spelare i lobbyn som spelaren ska gå med i.
   return 'player-' + Math.random().toString(36).substring(2, 10);
+};
+
+Data.prototype.registerWin = function (gameID, playerID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return;
+
+  const player = room.participants.find((p) => p.id === playerID);
+  if (player) {
+    player.points += 1;
+    console.log(`Poäng utdelad till ${player.name}. Total: ${player.points}`);
+  }
 };
 
 

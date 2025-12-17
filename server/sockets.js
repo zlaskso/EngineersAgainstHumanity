@@ -122,10 +122,31 @@ function sockets(io, socket, data) {
     });
   });
 
+socket.on("reportWinner", (d) => {
+    
+    data.registerWin(d.gameID, d.winnerID);
+
+    const room = data.getGameRoom(d.gameID);
+    
+    room.lastRoundResult = {
+        winner: d.winnerName,
+        winningCard: d.winningCardText,
+        blackCard: room.currentBlackCard,
+        allSubmittedCards: d.allSubmittedCards
+    };
+
+    io.to(d.gameID).emit("showResult");
+});
+    
+socket.on("getRoundResult", (d) => {
+    const room = data.getGameRoom(d.gameID);
+    if (room && room.lastRoundResult) {
+        socket.emit("roundResult", {
+            ...room.lastRoundResult,
+            participants: room.participants
+        });
+    }
+});
 
 }
-
-
-
-
 export { sockets };
