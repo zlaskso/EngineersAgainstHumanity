@@ -68,22 +68,16 @@ export default {
         const interval = setInterval(() => {
           this.timeLeft--;
 
-          // END OF PHASE 1: Card Selection
           if (this.timeLeft < 0 && this.isFirstRestart === true) {
             console.log("Phase 1 Over: Moving players to VoteView");
             this.isFirstRestart = false;
-            this.timeLeft = duration; // Reset timer for Phase 2 (Voting)
+            this.timeLeft = duration;
             socket.emit("startVotePhase", this.gameID);
           }
 
-          // END OF PHASE 2: Voting
-          else if (this.timeLeft < 0 && this.isFirstRestart === false) {
+          else if (this.timeLeft <= 0 && this.isFirstRestart === false) {
             console.log("Phase 2 Over: Moving everyone to Results");
             clearInterval(interval);
-            socket.emit("reportWinner", { 
-              gameID: this.gameID 
-              // Add winner logic here if BlackCardView is the one deciding
-            });
             this.goToNextPage();
           }
         }, 1000);
