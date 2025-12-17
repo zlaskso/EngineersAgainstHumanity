@@ -101,7 +101,11 @@ Data.prototype.createGameRoom = function (gameId, gameSettings, hostID, particip
       hostID: hostID,
       participants: participants || [], //Om participants finns och inte är null/undefined → använd det.|| betyder “eller”.
       whiteCardDeck: this.shuffle(allWhiteCardIndexes),
-      usedWhiteCards: []
+      usedWhiteCards: [],
+      currentRound: {
+        roundNumber: 1,
+        submissions: {} // { playerID: cardIndex }
+      }
     }
   } else {
     console.log("createGameRoom -> Data.js: Missing gameId or gameSettings");
@@ -167,6 +171,34 @@ Data.prototype.createPlayerID = function () {
   return 'player-' + Math.random().toString(36).substring(2, 10);
 };
 
+Data.prototype.saveSubmission = function (gameID, playerID, cardIndex) {
+  const room = this.getGameRoom(gameID);
+  if (room) {
+    room.currentRound.submissions[playerID] = cardIndex;
+  }
+};
+
+Data.prototype.prepareNextRound = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (room) {
+    room.currentRound.roundNumber++;
+    room.currentRound.submissions = {}; // Clear old cards!
+    console.log(`[DATA] Room ${gameID} moved to round ${room.currentRound.roundNumber}`);
+  }
+};
+
+Data.prototype.getSubmissions = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  return room ? room.currentRound.submissions : {};
+};
+
+Data.prototype.allPlayersSubmitted = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return false;
+  const totalParticipants = room.participants.length;
+  const totalSubmissions = Object.keys(room.currentRound.submissions).length;
+  return totalSubmissions >= totalParticipants;
+};
 
 export { Data };
 

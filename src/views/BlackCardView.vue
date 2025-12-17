@@ -30,6 +30,7 @@ export default {
       currentBlackIndex: null,
       gameBlackUsedIndex: [],
       timeLeft: 10,
+      isFirstRestart: true,
     };
   },
   props: {
@@ -83,17 +84,22 @@ export default {
 
       const interval = setInterval(() => {
         this.timeLeft--;
-        //this.$forceUpdate();
 
-        if (this.timeLeft <= 0) {
+        if (this.timeLeft < 0 && this.isFirstRestart === true) {
+          this.timeLeft = 10;
+          this.isFirstRestart = false;
+          socket.emit("startVotePhase", this.gameID);
+        }
+
+        if (this.timeLeft <= 0 && this.isFirstRestart === false) {
           clearInterval(interval);
-          this.goToNextPage(); // byt sida
+          this.goToNextPage();
         }
       }, 1000);
     },
 
     goToNextPage() {
-      this.$router.push("/cards/:id"); //nästa sida WHITE CARDS
+      this.$router.push(`/result/${this.gameID}`); //nästa sida WHITE CARDS
     },
   },
 };
