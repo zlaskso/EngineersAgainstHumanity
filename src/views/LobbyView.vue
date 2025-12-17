@@ -23,6 +23,7 @@
         :hasPickedCard="p.hasPickedCard"
         :totalNumPoints="p.points"
         :isActive="p.isActive"
+        :rerollsLeft="p.rerollsLeft"
       />
       <button v-if="amIHost" @click="startGame" class="startGameButton">
         Starta spelet

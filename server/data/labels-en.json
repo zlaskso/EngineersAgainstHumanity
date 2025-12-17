@@ -15,16 +15,16 @@
 	},
 	"createView": {
 		"lobbyName": "Lobby Name",
-		"maxNumPlayers": "Max player count:",
+		"maxNumPlayers": "Max player count: ",
 		"lobbyNamePlaceholder": "Enter lobby name",
 		"setGameRules":"Set game rules",
-		"numOfRounds":"Number of rounds:",
-		"cardsOnHand":"Cards on hand:",
+		"numOfRounds":"Number of rounds: ",
+		"cardsOnHand":"Cards on hand: ",
 		"openLobby": "Open lobby",
 		"gameCode": "Gamecode:",
 		"gameRules": "Gamerules",
-		"answerTime": "Answer time:",
-		"nrOfRerolls": "Number of rerolls:",
+		"answerTime": "Answer time: ",
+		"nrOfRerolls": "Number of rerolls: ",
 		"back": "Back"
 	},
 	"aboutView": {

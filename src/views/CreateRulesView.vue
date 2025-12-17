@@ -55,18 +55,18 @@ export default {
       lobbyName: "",
       hideNav: true,
       gameRules: {
-        maxPlayerAmount: 0,
-        numOfRounds: 0,
-        cardsOnHand: 0,
-        answerTime: 0,
-        nrOfRerolls: 0,
+        //maxPlayerAmount: 0,
+        numOfRounds: 5,
+        cardsOnHand: 5,
+        answerTime: 30,
+        nrOfRerolls: 2,
       },
       rulesConfig: [
-        { key: "maxPlayerAmount", label: "maxNumPlayers", step: 1 },
-        { key: "numOfRounds", label: "numOfRounds", step: 1 },
-        { key: "cardsOnHand", label: "cardsOnHand", step: 1 },
-        { key: "answerTime", label: "answerTime", step: 15 },
-        { key: "nrOfRerolls", label: "nrOfRerolls", step: 1 },
+        //{ key: "maxPlayerAmount", label: "maxNumPlayers", step: 1 },
+        { key: "numOfRounds", label: "numOfRounds", step: 1, min: 1, max: 20 },
+        { key: "cardsOnHand", label: "cardsOnHand", step: 1, min: 1, max: 20 },
+        { key: "answerTime", label: "answerTime", step: 15, min: 15, max: 300 },
+        { key: "nrOfRerolls", label: "nrOfRerolls", step: 1, min: 1, max: 20 },
       ],
     };
   },
@@ -76,8 +76,12 @@ export default {
 
   methods: {
     changeRule(key, delta) {
-      const value = this.gameRules[key] + delta;
-      this.gameRules[key] = Math.max(0, value);
+      const rule = this.rulesConfig.find((r) => r.key === key);
+      if (!rule) return;
+
+      const newValue = this.gameRules[key] + delta;
+
+      this.gameRules[key] = Math.min(rule.max, Math.max(rule.min, newValue));
     },
 
     toggleNav: function () {

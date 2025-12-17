@@ -75,6 +75,8 @@ Data.prototype.participateInGame = function (
     name: name,
     isHost: false,
     isActive: true,
+    rerollsLeft: room.gameSettings.nrOfRerolls,
+    currentHandIndexes: [],
   };
 
   room.participants.push(newPlayer);

@@ -15,13 +15,8 @@
   </div>
   {{ gameSettings.nrOfRerolls }} {{ gameSettings.cardsOnHand }}
 
-  <button
-    class="rerollButton"
-    @click="reroll"
-    :disabled="this.gameSettings.nrOfRerolls <= 0"
-  >
-    {{ uiLabels.cardView?.reroll }} ({{ this.gameSettings.nrOfRerolls }}
-    {{ uiLabels.cardView?.left }})
+  <button class="rerollButton" @click="reroll" :disabled="this.nrOfRerolls <= 0">
+    {{ uiLabels.cardView?.reroll }} ({{ this.nrOfRerolls }} {{ uiLabels.cardView?.left }})
   </button>
 </template>
 <script>
@@ -45,12 +40,12 @@ export default {
       ResponsiveNav,
       //nrOfWhiteCardsOnHand: 7,
       currentHandIndexes: [],
-      roundUsedIndexes: [],
+      //roundUsedIndexes: [],
       //nrOfRerolls: 10,
       selectedIndex: null,
       gameSettings: {
         lobbyName: "",
-        maxPlayerAmount: 0,
+        //maxPlayerAmount: 0,
         numOfRounds: 0,
         cardsOnHand: 0,
         answerTime: 0,
@@ -64,9 +59,9 @@ export default {
     uiCardLabels: Object,
   },
   mounted() {
-    if (this.uiCardLabels?.whiteCards?.length) {
+    /*     if (this.uiCardLabels?.whiteCards?.length) {
       this.requestInitialHand();
-    }
+    } */
   },
   created: function () {
     this.gameID = this.$route.params.id;
@@ -86,56 +81,29 @@ export default {
       if (data.handIndexes) {
         console.log(this.localPlayerID, "recieved initial hand", data.handIndexes);
         this.currentHandIndexes = data.handIndexes;
+        console.log("Initial hand indexes set to:", this.currentHandIndexes);
         // this.gameSettings.nrOfRerolls = data.rerollsLeft;
       } else {
         console.error("Kunde inte hämta initial hand.");
       }
     });
+
+    socket.on("rerollResult", (data) => {
+      if (data.newCardIndexes) {
+        console.log(this.localPlayerID, "recieved rerolled hand", data.newHandIndexes);
+        this.currentHandIndexes = data.newHandIndexes;
+        this.nrOfRerolls = data.rerollsLeft;
+      } else {
+        console.error("Kunde inte hämta ny hand efter reroll.");
+      }
+    });
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+      this.requestInitialHand();
+    });
   },
 
-  /*
-  watch: {
-    // Kör generateHand när whiteCards laddats
-    uiCardLabels: {
-      deep: true,
-      immediate: true,
-      handler(newVal) {
-        if (newVal?.whiteCards?.length) {
-          this.generateHand();
-        }
-      },
-    },
-  },
-*/
   methods: {
-    /*
-    generateHand() {
-      const totalCards = this.uiCardLabels?.whiteCards;
-      if (!Array.isArray(totalCards) || totalCards.length === 0) {
-        // borde inte hända med mounted?
-        console.log("OPSIE");
-      }
-      this.currentHandIndexes = [];
-
-      //const totalCards = this.uiCardLabels.whiteCards;
-      while (this.currentHandIndexes.length < this.gameSettings.cardsOnHand) {
-        const randomIndex = Math.floor(Math.random() * totalCards.length);
-        if (
-          !this.currentHandIndexes.includes(randomIndex) &&
-          !this.roundUsedIndexes.includes(randomIndex)
-        ) {
-          this.currentHandIndexes.push(randomIndex);
-          //this.roundUsedIndexes.push(randomIndex);
-        }
-        if (
-          this.roundUsedIndexes.length + this.currentHandIndexes.length - 2 >=
-          totalCards.length
-        )
-          break;
-      }
-    },
-    */
-
     requestInitialHand() {
       if (this.gameID && this.localPlayerID) {
         socket.emit("requestInitialHand", {
@@ -143,16 +111,6 @@ export default {
           playerID: this.localPlayerID,
         });
       }
-    },
-
-    getRandomWhiteCard() {
-      if (!this.uiCardLabels || !this.uiCardLabels.whiteCards) {
-        return "FUNKAR EJ";
-      }
-      const cards = this.uiCardLabels.whiteCards;
-      const randomIndex = Math.floor(Math.random() * cards.length);
-      this.whiteHand.push(cards[randomIndex]);
-      return cards[randomIndex];
     },
 
     reroll() {
@@ -166,15 +124,6 @@ export default {
       }
     },
 
-    /*
-    reroll() {
-      if (this.gameSettings.nrOfRerolls > 0) {
-        this.gameSettings.nrOfRerolls--;
-        this.generateHand();
-        this.selectedIndex = null;
-      }
-    },
-    */
     fetchLobbyData: function (gameID) {
       socket.emit("getGameSettings", gameID);
     },
