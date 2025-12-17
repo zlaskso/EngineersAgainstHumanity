@@ -54,31 +54,24 @@
     uiCardLabels: Object,
   },
   
-  created: function () { 
-    this.gameID = this.$route.params.id; 
-
-    socket.on("submitCard", (data) => {
-      if (data.selectedCard && data.playerID !== this.localPlayerID) {
-        console.log(this.localPlayerID, "recieved others chosen cards", data.selectedCard);
-        this.chosenIndexes = data.selectedCard;
-      } else {
-        console.error("Kunde inte hämta valda kort.");
-      }
+  mounted: function () {
+    socket.emit("getSubmissions", { 
+    gameID: this.gameID, 
+    playerID: this.localPlayerID 
     });
+  },
+  created: function () { 
+    this.gameID = this.$route.params.id;
+
+    socket.emit("join", this.gameID);
+
+    socket.on("returnSubmissions", (submissions) => {
+        this.chosenIndexes = Object.values(submissions);
+    })
   },
 
 
   methods: {
-
-    //requestChosenCards() { 
-      //if (this.gameID && this.localPlayerID) {
-        //socket.emit("requestChosenHand", {
-          //gameID: this.gameID,
-          //playerID: this.localPlayerID, });} },
-
-    getRandomWhiteCard() {
-      return cards[this.chosenIndexes];
-    },
 
     fetchLobbyData: function (gameID) {
       socket.emit("getGameSettings", gameID);

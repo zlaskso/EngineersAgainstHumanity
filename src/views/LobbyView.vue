@@ -32,7 +32,6 @@
 
     <div class="finalGameRules">
       <h2>{{ uiLabels.createView?.gameRules }}</h2>
-      <p>{{ uiLabels.createView?.maxNumPlayers }} {{ gameSettings.maxPlayerAmount }}</p>
       <p>{{ uiLabels.createView?.numOfRounds }} {{ gameSettings.numOfRounds }}</p>
       <p>{{ uiLabels.createView?.cardsOnHand }} {{ gameSettings.cardsOnHand }}</p>
       <p>{{ uiLabels.createView?.answerTime }} {{ gameSettings.answerTime }}</p>
@@ -100,7 +99,6 @@ export default {
       // lägger till gameSettings från servern
       this.gameSettings = {
         lobbyName: data.gameSettings.lobbyName,
-        maxPlayerAmount: data.gameSettings.maxPlayerAmount,
         numOfRounds: data.gameSettings.numOfRounds,
         cardsOnHand: data.gameSettings.cardsOnHand,
         answerTime: data.gameSettings.answerTime,
