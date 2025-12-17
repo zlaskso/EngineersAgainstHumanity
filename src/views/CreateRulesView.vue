@@ -158,6 +158,7 @@ h1 {
 .back-button-aligned {
   position: absolute;
   left: 0;
+  padding-left: 5rem;
   background: none;
   border: none;
   color: gray;
@@ -178,7 +179,7 @@ h1 {
   background: none;
   border: none;
   color: black;
-  font-size: 0.9rem;
+  font-size: 1.3rem;
   padding: 5px 10px;
   border: none;
   border-radius: 8px;

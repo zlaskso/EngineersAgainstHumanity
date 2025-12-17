@@ -50,12 +50,19 @@
 	"lobbyView": {
 		"joinInstructions": "Enter your nickname and press Join to participate in the game.",
 		"participants": "Participants",
-		"startGame": "Start game"
+		"startGame": "Start game",
+		"waitingForPlayers": "Waiting for players to join"
 	},
 	"cardView": {
 		"pickFavourite" : "Pick your favourite", 
 		"reroll" : "Reroll",
 		"left" : "left"
+	},
+	"resultView": {
+		"roundWinner": "The winner of the round is",
+		"otherCards": "Losing cards:",
+		"nextRound": "Next round",
+		"WaitingForHost": "Waiting for the host..."
 	}
 	
 }

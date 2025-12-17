@@ -45,6 +45,10 @@ function sockets(io, socket, data) {
     socket.emit('updateParticipants', participants);
   });
 
+  socket.on("join", (gameID) => {
+    socket.join(gameID)
+  });
+
   socket.on('attemptJoinGame', (d) => {
     console.log("attemptJoinGame received:", d);
 
@@ -105,38 +109,6 @@ function sockets(io, socket, data) {
     console.log(`[SERVER] Spelare ${socket.id} joined lobby-rum ${gameID}`);
   });
 
-  socket.on('requestInitialHand', ({ gameID, playerID }) => {
-    const room = data.getGameRoom(gameID);
-    if (!room) return;
-
-    const player = room.participants.find(p => p.id === playerID);
-    if (!player) return;
-    // Om spelaren redan har en hand, skicka tillbaka den
-    if (player.currentHandIndexes && player.currentHandIndexes.length > 0) {
-    socket.emit("initialHand", {
-      handIndexes: player.currentHandIndexes,
-      rerollsLeft: player.rerollsLeft
-    });
-    return;
-  }
-
-    // Server drar N nya kort
-    const nrCardsOnHand = room.gameSettings.cardsOnHand;
-
-    console.log(`Dealing initial hand of ${nrCardsOnHand} cards to player ${playerID} in game ${gameID}`);
-
-    const newCards = data.dealWhiteCards(gameID, playerID, nrCardsOnHand);
-    console.log(`Dealt cards indexes:`, newCards);
-    player.currentHandIndexes = newCards;
-
-
-    // skicka tillbaka den kompletta handen till *denna* klient
-    socket.emit('initialHand', {
-      handIndexes: newCards,
-      //rerollsLeft: room.gameSettings.nrOfRerolls
-    });
-  });
-
 socket.on('requestReroll', ({ gameID, playerID }) => {
   const room = data.getGameRoom(gameID);
   if (!room) return;
@@ -152,7 +124,7 @@ socket.on('requestReroll', ({ gameID, playerID }) => {
       playerID,
       nrCardsOnHand
     );
-
+    player.currentHandIndexes = newCardIndexes;
     player.rerollsLeft -= 1;
 
     socket.emit('rerollResult', {
@@ -170,10 +142,77 @@ socket.on('requestReroll', ({ gameID, playerID }) => {
     
 
 
+socket.on("startVotePhase", (gameID) => {
+console.log(`[SERVER] Timer expired for room ${gameID}. Requesting cards.`);
+
+// 1. Tell all players in the room to send their selected card immediately
+io.to(gameID).emit("requestFinalSelection");
+});
+
+socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
+  console.log(`[SERVER] Submitting card`);
+  data.saveSubmission(gameID, playerID, cardIndex);
+  
+  // ONLY move to vote view when everyone is done
+  if (data.allPlayersSubmitted(gameID)) {
+    console.log("[SERVER] All players submitted, going to vote view")
+    const submissions = data.getSubmissions(gameID);
+    io.to(gameID).emit("goToVoteView", submissions);
+  }
+});
+
+socket.on("startNextRound", (gameID) => {
+  data.prepareNextRound(gameID);
+  // Tell everyone to go back to the Black Card screen
+  io.to(gameID).emit("newRoundStarted");
+});socket.on("reportWinner", (d) => {
+    
+    data.registerWin(d.gameID, d.winnerID);
+
+    const room = data.getGameRoom(d.gameID);
+    
+    room.lastRoundResult = {
+        winner: d.winnerName,
+        winningCard: d.winningCardText,
+        blackCard: room.currentBlackCard,
+        allSubmittedCards: d.allSubmittedCards
+    };
+
+    io.to(d.gameID).emit("showResult");
+});
+    
+socket.on("getRoundResult", (d) => {
+    const room = data.getGameRoom(d.gameID);
+    if (room && room.lastRoundResult) {
+        socket.emit("roundResult", {
+            ...room.lastRoundResult,
+            participants: room.participants
+        });
+    }
+});
+
+socket.on("requestCurrentHand", ({ gameID, playerID }) => {
+    
+    const room = data.getGameRoom(gameID);
+    if (!room) return;
+
+    const player = room.participants.find(p => p.id === playerID);
+    if (!player) return;
+
+
+    // Om spelaren inte har någon hand, dela ut en ny
+    if (!player.currentHandIndexes || player.currentHandIndexes.length === 0) {
+    const nrCards = room.gameSettings.cardsOnHand;
+    player.currentHandIndexes = data.dealWhiteCards(gameID, playerID, nrCards);
+    player.rerollsLeft = room.gameSettings.nrOfRerolls;
+    console.log("SERVER emitting initialHand", player.currentHandIndexes, "to player", playerID, "in game", gameID);
+  }
+  socket.emit("currentHand", {
+    handIndexes: player.currentHandIndexes,
+    rerollsLeft: player.rerollsLeft
+  });
+});
+
 
 }
-
-
-
-
 export { sockets };

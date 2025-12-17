@@ -25,7 +25,7 @@
 		"gameCode": "Spelkod:",
 		"gameRules": "Spelregler",
 		"answerTime": "Svarstid: ",
-		"nrOfRerolls": "Antal omkast",
+		"nrOfRerolls": "Antal omkast: ",
 		"back": "Tillbaka"
 	},
 	"aboutView": {
@@ -51,12 +51,19 @@
 	"lobbyView": {
 		"joinInstructions": "Skriv in ditt smeknamn och tryck på Gå med för att delta i spelet.",
 		"participants": "Deltagare",
-		"startGame": "Starta spel"
+		"startGame": "Starta spel",
+		"waitingForPlayers": "Väntar på att spelare ska ansluta"
 	},
 	"cardView": {
 		"pickFavourite" : "Välj din favorit",
 		"reroll" : "Slå igen",
 		"left" : "kvar"
 
+	},
+	"resultView": {
+		"roundWinner": "Rundans vinnare är",
+		"otherCards": "Förlorande kort:",
+		"nextRound": "Nästa runda",
+		"WaitingForHost": "Väntar på spelledaren..."
 	}
 }

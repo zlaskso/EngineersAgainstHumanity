@@ -4,7 +4,7 @@
 
   <section class="gridLayout">
     <div class="left-column">
-      <p>Waiting for players <span class="loading"> ...</span></p>
+      <p>{{ uiLabels.lobbyView?.waitingForPlayers }} <span class="loading"> ...</span></p>
       <ul class="player-list">
         <li v-for="p in participants" :key="p.id">
           <span v-if="p.id === localPlayerID"
@@ -25,8 +25,13 @@
         :isActive="p.isActive"
         :rerollsLeft="p.rerollsLeft"
       />
-      <button v-if="amIHost" @click="startGame" class="startGameButton">
-        Starta spelet
+      <button
+        v-if="amIHost"
+        @click="startGame"
+        class="startGameButton"
+        :disabled="participants.length < 1"
+      >
+        {{ uiLabels.lobbyView?.startGame }}
       </button>
     </div>
 
@@ -200,5 +205,29 @@ export default {
   list-style-type: none;
   padding: 0;
   margin: 0;
+}
+.startGameButton {
+  background: gray;
+  align-self: center;
+  width: fit-content;
+  color: white;
+  font-weight: bold;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  font-size: 1rem;
+}
+.startGameButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+.startGameButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #ccc;
+  box-shadow: none;
 }
 </style>

@@ -11,17 +11,13 @@
       :selected="selectedIndex === idx"
       @select="setSelected"
     />
-    <!--<BlackCard :prompt="uiCardLabels.blackCards[0]" />-->
   </div>
-  {{ gameSettings.nrOfRerolls }} {{ gameSettings.cardsOnHand }}
-
-  <button class="rerollButton" @click="reroll" :disabled="this.nrOfRerolls <= 0">
-    {{ uiLabels.cardView?.reroll }} ({{ this.nrOfRerolls }} {{ uiLabels.cardView?.left }})
+  <button class="rerollButton" @click="reroll" :disabled="this.rerollsLeft <= 0">
+    {{ uiLabels.cardView?.reroll }} ({{ rerollsLeft }} {{ uiLabels.cardView?.left }})
   </button>
 </template>
 <script>
 import WhiteCard from "@/components/WhiteCard.vue";
-import BlackCard from "@/components/blackCard.vue";
 import ResponsiveNav from "@/components/ResponsiveNav.vue";
 import io from "socket.io-client";
 const socket = io("localhost:3000");
@@ -31,21 +27,17 @@ export default {
   components: {
     ResponsiveNav,
     WhiteCard,
-    BlackCard,
   },
   data: function () {
     return {
       gameID: "inactive poll",
       localPlayerID: sessionStorage.getItem("playerID"),
       ResponsiveNav,
-      //nrOfWhiteCardsOnHand: 7,
+      rerollsLeft: 0,
       currentHandIndexes: [],
-      //roundUsedIndexes: [],
-      //nrOfRerolls: 10,
       selectedIndex: null,
       gameSettings: {
         lobbyName: "",
-        //maxPlayerAmount: 0,
         numOfRounds: 0,
         cardsOnHand: 0,
         answerTime: 0,
@@ -55,67 +47,61 @@ export default {
   },
   props: {
     uiLabels: Object,
-    //  prompt: Object,
     uiCardLabels: Object,
   },
-  mounted() {
-    /*     if (this.uiCardLabels?.whiteCards?.length) {
-      this.requestInitialHand();
-    } */
-  },
+  mounted() {},
   created: function () {
     this.gameID = this.$route.params.id;
-    // this.fetchLobbyData(this.gameID);
 
-    /* 
-    socket.on("gameSettings", (room) => {
-      if (room && room.gameSettings) {
-        this.gameSettings = room.gameSettings;
-        this.requestInitialHand();
-      } else {
-        console.error("Kunde inte hämta spelinställningar trots giltigt ID.");
-      }
-    }); 
-    */
-    socket.on("initialHand", (data) => {
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+      socket.emit("join", this.gameID); // obligatoriskt för att ansluta till spelet
+      socket.emit("requestCurrentHand", {
+        gameID: this.gameID,
+        playerID: this.localPlayerID,
+      });
+    });
+
+    socket.on("currentHand", (data) => {
       if (data.handIndexes) {
-        console.log(this.localPlayerID, "recieved initial hand", data.handIndexes);
         this.currentHandIndexes = data.handIndexes;
-        console.log("Initial hand indexes set to:", this.currentHandIndexes);
-        // this.gameSettings.nrOfRerolls = data.rerollsLeft;
-      } else {
-        console.error("Kunde inte hämta initial hand.");
+        this.rerollsLeft = data.rerollsLeft;
       }
     });
 
     socket.on("rerollResult", (data) => {
       if (data.newCardIndexes) {
-        console.log(this.localPlayerID, "recieved rerolled hand", data.newHandIndexes);
-        this.currentHandIndexes = data.newHandIndexes;
-        this.nrOfRerolls = data.rerollsLeft;
+        console.log(this.localPlayerID, "recieved rerolled hand", data.newCardIndexes);
+        this.currentHandIndexes = data.newCardIndexes;
+        this.rerollsLeft -= 1;
       } else {
         console.error("Kunde inte hämta ny hand efter reroll.");
       }
     });
-    socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
-      this.requestInitialHand();
+
+    socket.on("requestFinalSelection", () => {
+      // If no card is selected, default to the first card (index 0) or handle as null
+      const indexToSubmit = this.selectedIndex !== null ? this.selectedIndex : 0;
+      const selectedCard = this.currentHandIndexes[indexToSubmit];
+
+      socket.emit("submitCard", {
+        gameID: this.gameID,
+        playerID: this.localPlayerID,
+        cardIndex: selectedCard,
+      });
+    });
+
+    // The server says "Everyone is ready, move to the vote screen."
+    socket.on("goToVoteView", () => {
+      this.$router.push(`/vote/${this.gameID}`);
     });
   },
 
   methods: {
-    requestInitialHand() {
-      if (this.gameID && this.localPlayerID) {
-        socket.emit("requestInitialHand", {
-          gameID: this.gameID,
-          playerID: this.localPlayerID,
-        });
-      }
-    },
-
     reroll() {
       // Ändra logiken till att begära reroll från servern
-      if (this.gameSettings.nrOfRerolls > 0) {
+      console.log("Requesting reroll from server...", this.localPlayerID);
+      if (this.rerollsLeft > 0) {
         socket.emit("requestReroll", {
           gameID: this.gameID,
           playerID: this.localPlayerID,
