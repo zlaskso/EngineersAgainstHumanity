@@ -104,7 +104,7 @@ export default {
       });
 
       socket.on("gameRoomCreated", (d) => {
-        localStorage.setItem("hostPlayerID", d.hostID);
+        sessionStorage.setItem("hostPlayerID", d.hostID);
         this.$router.push(`/lobby/${d.gameID}`);
       });
     },

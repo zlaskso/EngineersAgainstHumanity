@@ -68,12 +68,12 @@ export default {
         nrOfRerolls: 0,
       },
       hostSocketID: null,
-      localPlayerID: localStorage.getItem("playerID"), // spelaren själv
+      localPlayerID: sessionStorage.getItem("playerID"), // spelaren själv
     };
   },
   computed: {
     amIHost() {
-      return localStorage.getItem("hostPlayerID") != undefined;
+      return sessionStorage.getItem("hostPlayerID") != undefined;
     },
   },
 
@@ -82,7 +82,7 @@ export default {
     console.log("Socket connection status:", socket.connected);
     socket.emit("joinLobbyPlayer", { gameID: this.gameID });
 
-    const localPlayerID = localStorage.getItem("playerID"); //finns endast om spelare annars är host
+    const localPlayerID = sessionStorage.getItem("playerID"); //finns endast om spelare annars är host
 
     socket.emit("getParticipantsList", this.gameID);
     socket.emit("getGameSettings", { gameID: this.gameID });

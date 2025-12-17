@@ -41,7 +41,7 @@ export default {
   data: function () {
     return {
       gameID: "inactive poll",
-      localPlayerID: localStorage.getItem("playerID"),
+      localPlayerID: sessionStorage.getItem("playerID"),
       ResponsiveNav,
       //nrOfWhiteCardsOnHand: 7,
       currentHandIndexes: [],

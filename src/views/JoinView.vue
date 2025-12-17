@@ -54,8 +54,8 @@ export default {
       });
       
       socket.on("playerJoinedGame", (d) => {
-        localStorage.setItem("playerID", d.playerID);
-        localStorage.setItem("playerName", d.nickname);
+        sessionStorage.setItem("playerID", d.playerID);
+        sessionStorage.setItem("playerName", d.nickname);
         this.$router.push(`/lobby/${d.gameID}`);
       });
 
