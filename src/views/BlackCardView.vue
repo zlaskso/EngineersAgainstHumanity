@@ -57,6 +57,38 @@ export default {
   },
 
   methods: {
+    async startTimer() {
+      // 1. Fetch settings once to get the duration
+      socket.emit("getGameSettings", { gameID: this.gameID });
+      
+      socket.once("gameSettings", (d) => {
+        const duration = d.gameSettings.answerTime || 20; // fallback to 20s
+        this.timeLeft = duration;
+
+        const interval = setInterval(() => {
+          this.timeLeft--;
+
+          // END OF PHASE 1: Card Selection
+          if (this.timeLeft < 0 && this.isFirstRestart === true) {
+            console.log("Phase 1 Over: Moving players to VoteView");
+            this.isFirstRestart = false;
+            this.timeLeft = duration; // Reset timer for Phase 2 (Voting)
+            socket.emit("startVotePhase", this.gameID);
+          }
+
+          // END OF PHASE 2: Voting
+          else if (this.timeLeft < 0 && this.isFirstRestart === false) {
+            console.log("Phase 2 Over: Moving everyone to Results");
+            clearInterval(interval);
+            socket.emit("reportWinner", { 
+              gameID: this.gameID 
+              // Add winner logic here if BlackCardView is the one deciding
+            });
+            this.goToNextPage();
+          }
+        }, 1000);
+      });
+    },
     getRandomBlackCard() {
       const cards = this.uiCardLabels?.blackCards;
       if (!Array.isArray(cards) || cards.length === 0) {
@@ -77,25 +109,6 @@ export default {
 
     toggleNav: function () {
       this.hideNav = !this.hideNav;
-    },
-
-    startTimer() {
-      this.timeLeft = 10;
-
-      const interval = setInterval(() => {
-        this.timeLeft--;
-
-        if (this.timeLeft < 0 && this.isFirstRestart === true) {
-          this.timeLeft = 10;
-          this.isFirstRestart = false;
-          socket.emit("startVotePhase", this.gameID);
-        }
-
-        if (this.timeLeft <= 0 && this.isFirstRestart === false) {
-          clearInterval(interval);
-          this.goToNextPage();
-        }
-      }, 1000);
     },
 
     goToNextPage() {
