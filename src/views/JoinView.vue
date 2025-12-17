@@ -34,44 +34,36 @@ export default {
     uiLabels: Object
   },
 
-  
+  data: function () {
+  return {
+    hideNav: true,
+    nickname: '',
+    roomCode: ''
+    }
+  },
+
   methods: {
   toggleNav() {
       this.hideNav = !this.hideNav;
     },
 
     joinGame() {
-      // PlayerID hantering
-      let playerID = localStorage.getItem("playerID");
-      if (!playerID) {
-        playerID = Math.random().toString(36).substring(2, 10);
-        localStorage.setItem("playerID", playerID);
-        localStorage.setItem("playerName", this.nickname);
-      }
-
       socket.emit("attemptJoinGame", {
         gameID: this.roomCode,
-        name: this.nickname,
-        playerID: playerID,
+        nickname: this.nickname,
       });
       
-      socket.on("playerRegistered", (data) => {
-        localStorage.setItem("playerID", data.id);
-        sessionStorage.setItem("isReconnecting", "true");
-        this.$router.push(`/lobby/${this.roomCode}`);
+      socket.on("playerJoinedGame", (d) => {
+        localStorage.setItem("playerID", d.playerID);
+        localStorage.setItem("playerName", d.nickname);
+        this.$router.push(`/lobby/${d.gameID}`);
       });
 
     }
 },
 
-data: function () {
-  return {
-    hideNav: true,
-    nickname: '',
-    roomCode: ''
-    }
-  }
 }
+
 </script>
 
 <style scoped>

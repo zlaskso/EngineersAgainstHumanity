@@ -48,6 +48,11 @@ const router = createRouter({
       path: '/black/:id',
       name: 'BlackCardView',
       component: () => import('../views/BlackCardView.vue')
+    },
+      {
+      path: '/vote/:id',
+      name: 'VoteView',
+      component: () => import('../views/VoteView.vue')
     }
   ]
 })

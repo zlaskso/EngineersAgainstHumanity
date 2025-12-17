@@ -54,7 +54,6 @@ export default {
     return {
       lobbyName: "",
       hideNav: true,
-      gameID: null,
       gameRules: {
         maxPlayerAmount: 0,
         numOfRounds: 0,
@@ -73,7 +72,6 @@ export default {
   },
   created: function () {
     socket.on("connect_error", (err) => console.error("socket err", err));
-    this.gameID = this.getGameID();
   },
 
   methods: {
@@ -90,20 +88,10 @@ export default {
       this.$router.go(-1);
     },
 
-    getGameID: function () {
-      return Math.floor(Math.random() * 100000);
-    },
-
     openLobby() {
       if (!this.lobbyName || this.lobbyName.trim() === "") {
         alert("Please enter a lobby name!");
         return;
-      }
-      // Skapa permanent hostID
-      let hostID = localStorage.getItem("hostPlayerID");
-      if (!hostID) {
-        hostID = Math.random().toString(36).substring(2, 10);
-        localStorage.setItem("hostPlayerID", hostID);
       }
 
       const gameSettings = {
@@ -112,17 +100,13 @@ export default {
       };
 
       socket.emit("createGameRoom", {
-        gameID: this.gameID,
         gameSettings: gameSettings,
-        hostID: hostID, // skickar med hostID
       });
 
-      socket.emit("joinLobbyHost", {
-        gameID: this.gameID,
-        hostID,
+      socket.on("gameRoomCreated", (d) => {
+        localStorage.setItem("hostPlayerID", d.hostID);
+        this.$router.push(`/lobby/${d.gameID}`);
       });
-
-      this.$router.push(`/lobby/${this.gameID}`);
     },
   },
 };

@@ -41,6 +41,7 @@ export default {
   data: function () {
     return {
       gameID: "inactive poll",
+      localPlayerID: localStorage.getItem("playerID"),
       ResponsiveNav,
       //nrOfWhiteCardsOnHand: 7,
       currentHandIndexes: [],
@@ -64,21 +65,34 @@ export default {
   },
   mounted() {
     if (this.uiCardLabels?.whiteCards?.length) {
-      this.generateHand();
+      this.requestInitialHand();
     }
   },
   created: function () {
     this.gameID = this.$route.params.id;
-    this.fetchLobbyData();
+    // this.fetchLobbyData(this.gameID);
 
+    /* 
     socket.on("gameSettings", (room) => {
       if (room && room.gameSettings) {
         this.gameSettings = room.gameSettings;
+        this.requestInitialHand();
       } else {
         console.error("Kunde inte hämta spelinställningar trots giltigt ID.");
       }
+    }); 
+    */
+    socket.on("initialHand", (data) => {
+      if (data.handIndexes) {
+        console.log(this.localPlayerID, "recieved initial hand", data.handIndexes);
+        this.currentHandIndexes = data.handIndexes;
+        // this.gameSettings.nrOfRerolls = data.rerollsLeft;
+      } else {
+        console.error("Kunde inte hämta initial hand.");
+      }
     });
   },
+
   /*
   watch: {
     // Kör generateHand när whiteCards laddats
@@ -94,6 +108,7 @@ export default {
   },
 */
   methods: {
+    /*
     generateHand() {
       const totalCards = this.uiCardLabels?.whiteCards;
       if (!Array.isArray(totalCards) || totalCards.length === 0) {
@@ -119,6 +134,17 @@ export default {
           break;
       }
     },
+    */
+
+    requestInitialHand() {
+      if (this.gameID && this.localPlayerID) {
+        socket.emit("requestInitialHand", {
+          gameID: this.gameID,
+          playerID: this.localPlayerID,
+        });
+      }
+    },
+
     getRandomWhiteCard() {
       if (!this.uiCardLabels || !this.uiCardLabels.whiteCards) {
         return "FUNKAR EJ";
@@ -130,14 +156,27 @@ export default {
     },
 
     reroll() {
+      // Ändra logiken till att begära reroll från servern
+      if (this.gameSettings.nrOfRerolls > 0) {
+        socket.emit("requestReroll", {
+          gameID: this.gameID,
+          playerID: this.localPlayerID,
+        });
+        this.selectedIndex = null;
+      }
+    },
+
+    /*
+    reroll() {
       if (this.gameSettings.nrOfRerolls > 0) {
         this.gameSettings.nrOfRerolls--;
         this.generateHand();
         this.selectedIndex = null;
       }
     },
-    fetchLobbyData: function () {
-      socket.emit("getGameSettings", this.gameID);
+    */
+    fetchLobbyData: function (gameID) {
+      socket.emit("getGameSettings", gameID);
     },
 
     toggleNav: function () {

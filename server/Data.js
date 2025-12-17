@@ -4,6 +4,7 @@ import { readFileSync } from "fs";
 // Store data in an object to keep the global namespace clean. In an actual implementation this would be interfacing a database...
 function Data() {
   this.gameRooms = {};
+  this.whiteCards = this.getUICardLabels().whiteCards;
 }
 
 /***********************************************
@@ -94,18 +95,78 @@ Data.prototype.getParticipants = function (gameID) {
 
 Data.prototype.createGameRoom = function (gameId, gameSettings, hostID, participants) {
   if (gameId && gameSettings) {
+    const allWhiteCardIndexes = [...Array(this.whiteCards.length).keys()];
     this.gameRooms[gameId] = {
       gameSettings,
       hostID: hostID,
       participants: participants || [], //Om participants finns och inte är null/undefined → använd det.|| betyder “eller”.
+      whiteCardDeck: this.shuffle(allWhiteCardIndexes),
+      usedWhiteCards: []
     }
+  } else {
+    console.log("createGameRoom -> Data.js: Missing gameId or gameSettings");
   }
   console.log("createGameRoom -> Data.js", this.gameRooms[gameId]);
-}
+};
 
 Data.prototype.getGameRoom = function (gameID) {
   return this.gameRooms[gameID] || null;
 };
+
+Data.prototype.shuffle = function (array) {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+  return array;
+};
+
+Data.prototype.dealWhiteCards = function (gameID, playerID, nrCardsOnHand) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return null;
+
+  const player = room.participants.find(p => p.id === playerID);
+  if (!player) return null;
+
+  /* if (!player.hand) {
+    player.hand = [];
+  } */
+
+  const cardsToDealIndexes = [];
+  for (let i = 0; i < nrCardsOnHand; i++) {
+    if (room.whiteCardDeck.length === 0) {
+      // Om leken är tom, blanda om använda kort
+      room.whiteCardDeck = this.shuffle(room.usedWhiteCards);
+      room.usedWhiteCards = [];
+    }
+    const cardIndex = room.whiteCardDeck.pop();
+    room.usedWhiteCards.push(cardIndex);
+    const cardText = this.whiteCards[cardIndex];
+    //player.hand.push(cardIndex);
+    cardsToDealIndexes.push(cardIndex);
+  }
+  return cardsToDealIndexes;
+};
+
+Data.prototype.createGameID = function () {
+  // Borde kolla ifall ett sånt GameID redan finns för att undvika krockar
+  return Math.floor(Math.random() * 100000);
+};
+
+Data.prototype.createHostID = function () {
+  // Eftersom det bara finns en host per lobby, finns ingen risk för krockar
+  return 'host-' + Math.random().toString(36).substring(2, 10);
+};
+
+Data.prototype.createPlayerID = function () {
+  // Borde kolla ifall ett sånt PlayerID redan finns för att undvika krockar
+  // Då behöver vi veta PlayerID för alla spelare i lobbyn som spelaren ska gå med i.
+  return 'player-' + Math.random().toString(36).substring(2, 10);
+};
+
 
 export { Data };
 
