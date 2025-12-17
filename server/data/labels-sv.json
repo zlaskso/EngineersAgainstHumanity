@@ -58,5 +58,11 @@
 		"reroll" : "Slå igen",
 		"left" : "kvar"
 
+	},
+	"resultView": {
+		"roundWinner": "Rundans vinnare är",
+		"otherCards": "Förlorande kort:",
+		"nextRound": "Nästa runda",
+		"WaitingForHost": "Väntar på spelledaren..."
 	}
 }

@@ -56,6 +56,12 @@
 		"pickFavourite" : "Pick your favourite", 
 		"reroll" : "Reroll",
 		"left" : "left"
+	},
+	"resultView": {
+		"roundWinner": "The winner of the round is",
+		"otherCards": "Losing cards:",
+		"nextRound": "Next round",
+		"WaitingForHost": "Waiting for the host..."
 	}
 	
 }

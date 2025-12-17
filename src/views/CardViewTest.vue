@@ -65,9 +65,11 @@ export default {
   },
   created: function () {
     this.gameID = this.$route.params.id;
+
+    socket.emit("join", this.gameID);
     // this.fetchLobbyData(this.gameID);
 
-    /* 
+    /*
     socket.on("gameSettings", (room) => {
       if (room && room.gameSettings) {
         this.gameSettings = room.gameSettings;
@@ -75,7 +77,7 @@ export default {
       } else {
         console.error("Kunde inte hämta spelinställningar trots giltigt ID.");
       }
-    }); 
+    });
     */
     socket.on("initialHand", (data) => {
       if (data.handIndexes) {
@@ -100,6 +102,22 @@ export default {
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
       this.requestInitialHand();
+    });
+    socket.on("requestFinalSelection", () => {
+      // If no card is selected, default to the first card (index 0) or handle as null
+      const indexToSubmit = this.selectedIndex !== null ? this.selectedIndex : 0;
+      const selectedCard = this.currentHandIndexes[indexToSubmit];
+
+      socket.emit("submitCard", {
+        gameID: this.gameID,
+        playerID: this.localPlayerID,
+        cardIndex: selectedCard,
+      });
+    });
+
+    // The server says "Everyone is ready, move to the vote screen."
+    socket.on("goToVoteView", () => {
+      this.$router.push(`/vote/${this.gameID}`);
     });
   },
 

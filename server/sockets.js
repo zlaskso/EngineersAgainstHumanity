@@ -45,6 +45,10 @@ function sockets(io, socket, data) {
     socket.emit('updateParticipants', participants);
   });
 
+  socket.on("join", (gameID) => {
+    socket.join(gameID)
+  });
+
   socket.on('attemptJoinGame', (d) => {
     console.log("attemptJoinGame received:", d);
 
@@ -170,10 +174,54 @@ socket.on('requestReroll', ({ gameID, playerID }) => {
     
 
 
+  socket.on("startVotePhase", (gameID) => {
+  console.log(`[SERVER] Timer expired for room ${gameID}. Requesting cards.`);
+  
+  // 1. Tell all players in the room to send their selected card immediately
+  io.to(gameID).emit("requestFinalSelection");
+});
+
+socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
+  console.log(`[SERVER] Submitting card`);
+  data.saveSubmission(gameID, playerID, cardIndex);
+  
+  // ONLY move to vote view when everyone is done
+  if (data.allPlayersSubmitted(gameID)) {
+    console.log("[SERVER] All players submitted, going to vote view")
+    const submissions = data.getSubmissions(gameID);
+    io.to(gameID).emit("goToVoteView", submissions);
+  }
+});
+
+socket.on("startNextRound", (gameID) => {
+  data.prepareNextRound(gameID);
+  // Tell everyone to go back to the Black Card screen
+  io.to(gameID).emit("newRoundStarted");
+});socket.on("reportWinner", (d) => {
+    
+    data.registerWin(d.gameID, d.winnerID);
+
+    const room = data.getGameRoom(d.gameID);
+    
+    room.lastRoundResult = {
+        winner: d.winnerName,
+        winningCard: d.winningCardText,
+        blackCard: room.currentBlackCard,
+        allSubmittedCards: d.allSubmittedCards
+    };
+
+    io.to(d.gameID).emit("showResult");
+});
+    
+socket.on("getRoundResult", (d) => {
+    const room = data.getGameRoom(d.gameID);
+    if (room && room.lastRoundResult) {
+        socket.emit("roundResult", {
+            ...room.lastRoundResult,
+            participants: room.participants
+        });
+    }
+});
 
 }
-
-
-
-
 export { sockets };
