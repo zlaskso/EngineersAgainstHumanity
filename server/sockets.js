@@ -109,90 +109,91 @@ function sockets(io, socket, data) {
     console.log(`[SERVER] Spelare ${socket.id} joined lobby-rum ${gameID}`);
   });
 
-socket.on('requestReroll', ({ gameID, playerID }) => {
-  const room = data.getGameRoom(gameID);
-  if (!room) return;
+  socket.on('requestReroll', ({ gameID, playerID }) => {
+    const room = data.getGameRoom(gameID);
+    if (!room) return;
 
-  const nrCardsOnHand = room.gameSettings.cardsOnHand;
+    const nrCardsOnHand = room.gameSettings.cardsOnHand;
 
-  const player = room.participants.find(p => p.id === playerID);
-  if (!player) return;
+    const player = room.participants.find(p => p.id === playerID);
+    if (!player) return;
 
-  if (player.rerollsLeft > 0) {
-    const newCardIndexes = data.dealWhiteCards(
-      gameID,
-      playerID,
-      nrCardsOnHand
-    );
-    player.currentHandIndexes = newCardIndexes;
-    player.rerollsLeft -= 1;
+    if (player.rerollsLeft > 0) {
+      const newCardIndexes = data.dealWhiteCards(
+        gameID,
+        playerID,
+        nrCardsOnHand
+      );
+      player.currentHandIndexes = newCardIndexes;
+      player.rerollsLeft -= 1;
 
-    socket.emit('rerollResult', {
-      newCardIndexes,
-      rerollsLeft: player.rerollsLeft
-    });
-  } else {
-    socket.emit('rerollResult', {
-      newCardIndexes: [],
-      rerollsLeft: 0
-    });
-  }
-});
-
-    
+      socket.emit('rerollResult', {
+        newCardIndexes,
+        rerollsLeft: player.rerollsLeft
+      });
+    } else {
+      socket.emit('rerollResult', {
+        newCardIndexes: [],
+        rerollsLeft: 0
+      });
+    }
+  });
 
 
-socket.on("startVotePhase", (gameID) => {
-console.log(`[SERVER] Timer expired for room ${gameID}. Requesting cards.`);
 
-// 1. Tell all players in the room to send their selected card immediately
-io.to(gameID).emit("requestFinalSelection");
-});
 
-socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
-  console.log(`[SERVER] Submitting card`);
-  data.saveSubmission(gameID, playerID, cardIndex);
-  
-  // ONLY move to vote view when everyone is done
-  if (data.allPlayersSubmitted(gameID)) {
-    console.log("[SERVER] All players submitted, going to vote view")
-    const submissions = data.getSubmissions(gameID);
-    io.to(gameID).emit("goToVoteView", submissions);
-  }
-});
+  socket.on("startVotePhase", (gameID) => {
+    console.log(`[SERVER] Timer expired for room ${gameID}. Requesting cards.`);
 
-socket.on("startNextRound", (gameID) => {
-  data.prepareNextRound(gameID);
-  // Tell everyone to go back to the Black Card screen
-  io.to(gameID).emit("newRoundStarted");
-});socket.on("reportWinner", (d) => {
-    
+    // 1. Tell all players in the room to send their selected card immediately
+    io.to(gameID).emit("requestFinalSelection");
+  });
+
+  socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
+    console.log(`[SERVER] Submitting card ${cardIndex}`);
+    data.saveSubmission(gameID, playerID, cardIndex);
+
+    // ONLY move to vote view when everyone is done
+    if (data.allPlayersSubmitted(gameID)) {
+      console.log("[SERVER] All players submitted, going to vote view")
+      io.to(gameID).emit("goToVoteView");
+    }
+  });
+
+  socket.on("startNextRound", (gameID) => {
+    data.prepareNextRound(gameID);
+    // Tell everyone to go back to the Black Card screen
+    io.to(gameID).emit("newRoundStarted");
+  });
+
+  socket.on("reportWinner", (d) => {
+
     data.registerWin(d.gameID, d.winnerID);
 
     const room = data.getGameRoom(d.gameID);
-    
+
     room.lastRoundResult = {
-        winner: d.winnerName,
-        winningCard: d.winningCardText,
-        blackCard: room.currentBlackCard,
-        allSubmittedCards: d.allSubmittedCards
+      winner: d.winnerName,
+      winningCard: d.winningCardText,
+      blackCard: room.currentBlackCard,
+      allSubmittedCards: d.allSubmittedCards
     };
 
     io.to(d.gameID).emit("showResult");
-});
-    
-socket.on("getRoundResult", (d) => {
+  });
+
+  socket.on("getRoundResult", (d) => {
     const room = data.getGameRoom(d.gameID);
     if (room && room.lastRoundResult) {
-        socket.emit("roundResult", {
-            ...room.lastRoundResult,
-            participants: room.participants
-        });
+      socket.emit("roundResult", {
+        ...room.lastRoundResult,
+        participants: room.participants
+      });
     }
-});
+  });
 
-socket.on("requestCurrentHand", ({ gameID, playerID }) => {
-    
+  socket.on("requestCurrentHand", ({ gameID, playerID }) => {
+
     const room = data.getGameRoom(gameID);
     if (!room) return;
 
@@ -202,17 +203,55 @@ socket.on("requestCurrentHand", ({ gameID, playerID }) => {
 
     // Om spelaren inte har någon hand, dela ut en ny
     if (!player.currentHandIndexes || player.currentHandIndexes.length === 0) {
-    const nrCards = room.gameSettings.cardsOnHand;
-    player.currentHandIndexes = data.dealWhiteCards(gameID, playerID, nrCards);
-    player.rerollsLeft = room.gameSettings.nrOfRerolls;
-    console.log("SERVER emitting initialHand", player.currentHandIndexes, "to player", playerID, "in game", gameID);
-  }
-  socket.emit("currentHand", {
-    handIndexes: player.currentHandIndexes,
-    rerollsLeft: player.rerollsLeft
+      const nrCards = room.gameSettings.cardsOnHand;
+      player.currentHandIndexes = data.dealWhiteCards(gameID, playerID, nrCards);
+      player.rerollsLeft = room.gameSettings.nrOfRerolls;
+      console.log("SERVER emitting initialHand", player.currentHandIndexes, "to player", playerID, "in game", gameID);
+    }
+     // skickar aktuell hand och antal rerolls kvar
+    socket.emit("currentHand", {
+      handIndexes: player.currentHandIndexes,
+      rerollsLeft: player.rerollsLeft
+    });
   });
-});
 
+  socket.on("getPlayerSubmissions", (d) => {
+    const room = data.getGameRoom(d.gameID)
+    if (room) {
+      submissions = data.getSubmissions(d.gameID)
+      socket.emit("displaySubmissions", submissions)
+    }
+    socket.emit("currentHand", {
+      handIndexes: player.currentHandIndexes,
+      rerollsLeft: player.rerollsLeft
+    });
+  });
 
-}
+  socket.on("getSubmissions", (d) => {
+    const room = data.getGameRoom(d.gameID);
+    if (room) {
+      const submissionsObj = data.getSubmissions(d.gameID);
+      const cardIndexes = Object.values(submissionsObj);
+      // Shuffle using your existing data.shuffle method
+      const shuffled = data.shuffle([...cardIndexes]);
+      socket.emit("returnSubmissions", shuffled);
+    }
+  });
+
+  socket.on("requestCurrentBlackCard", ({ gameID }) => {
+    const room = data.getGameRoom(gameID);
+    if (!room) return;
+
+    // Om spelaren inte har någon hand, dela ut en ny
+    if (!room.currentRound.blackCardIndex) {
+      room.currentRound.blackCardIndex = data.dealBlackCard(gameID);
+    }
+    
+    socket.emit("currentBlackCard", {
+      blackCard: room.currentRound.blackCardIndex
+    });
+    });
+
+};
+
 export { sockets };

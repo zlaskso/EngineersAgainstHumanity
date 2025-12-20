@@ -95,6 +95,22 @@ export default {
     socket.on("goToVoteView", () => {
       this.$router.push(`/vote/${this.gameID}`);
     });
+    socket.on("requestFinalSelection", () => {
+      // If no card is selected, default to the first card (index 0) or handle as null
+      const indexToSubmit = this.selectedIndex !== null ? this.selectedIndex : 0;
+      const selectedCard = this.currentHandIndexes[indexToSubmit];
+
+      socket.emit("submitCard", {
+        gameID: this.gameID,
+        playerID: this.localPlayerID,
+        cardIndex: selectedCard,
+      });
+    });
+
+    // The server says "Everyone is ready, move to the vote screen."
+    socket.on("goToVoteView", () => {
+      this.$router.push(`/vote/${this.gameID}`);
+    });
   },
 
   methods: {

@@ -5,6 +5,7 @@ import { readFileSync } from "fs";
 function Data() {
   this.gameRooms = {};
   this.whiteCards = this.getUICardLabels().whiteCards;
+  this.blackCards = this.getUICardLabels().blackCards;
 }
 
 /***********************************************
@@ -99,15 +100,19 @@ Data.prototype.getParticipants = function (gameID) {
 Data.prototype.createGameRoom = function (gameId, gameSettings, hostID, participants) {
   if (gameId && gameSettings) {
     const allWhiteCardIndexes = [...Array(this.whiteCards.length).keys()];
+    const allBlackCardIndexes = [...Array(this.blackCards.length).keys()];
     this.gameRooms[gameId] = {
       gameSettings,
       hostID: hostID,
       participants: participants || [], //Om participants finns och inte är null/undefined → använd det.|| betyder “eller”.
       whiteCardDeck: this.shuffle(allWhiteCardIndexes),
       usedWhiteCards: [],
+      blackCardDeck: this.shuffle(allBlackCardIndexes),
+      usedBlackCards: [],
       currentRound: {
         roundNumber: 1,
-        submissions: {} // { playerID: cardIndex }
+        submissions: {}, // { playerID: cardIndex }
+        blackCardIndex: null
       }
     }
   } else {
@@ -156,6 +161,20 @@ Data.prototype.dealWhiteCards = function (gameID, playerID, nrCardsOnHand) {
     cardsToDealIndexes.push(cardIndex);
   }
   return cardsToDealIndexes;
+};
+
+Data.prototype.dealBlackCard = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return null;
+
+  if (room.blackCardDeck.length === 0) {
+    // Om leken är tom, blanda om använda kort
+    room.blackCardDeck = this.shuffle(room.usedBlackCards);
+    room.usedBlackCards = [];
+  }
+  const cardIndex = room.blackCardDeck.pop();
+  room.usedBlackCards.push(cardIndex);
+  return cardIndex;
 };
 
 Data.prototype.createGameID = function () {

@@ -28,7 +28,6 @@ export default {
   data: function () {
     return {
       currentBlackIndex: null,
-      gameBlackUsedIndex: [],
       timeLeft: 10,
       isFirstRestart: true,
     };
@@ -41,11 +40,6 @@ export default {
     uiCardLabels: {
       deep: true,
       immediate: true,
-      handler(newVal) {
-        if (newVal?.blackCards?.length && this.currentBlackIndex === null) {
-          this.currentBlackIndex = this.getRandomBlackCard();
-        }
-      },
     },
   },
   mounted() {
@@ -54,52 +48,52 @@ export default {
   },
   created: function () {
     this.gameID = this.$route.params.id;
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+      socket.emit("join", this.gameID); // obligatoriskt för att ansluta till spelet
+      socket.emit("requestCurrentBlackCard", {
+        gameID: this.gameID,
+      });
+    });
+
+    socket.on("currentBlackCard", (data) => {
+      if (data.blackCard !== undefined) {
+        this.currentBlackIndex = data.blackCard;
+      }
+    });
   },
 
   methods: {
-    getRandomBlackCard() {
-      const cards = this.uiCardLabels?.blackCards;
-      if (!Array.isArray(cards) || cards.length === 0) {
-        console.warn("Black cards not loaded yet");
-        return null;
-      }
+    async startTimer() {
+      // 1. Fetch settings once to get the duration
+      socket.emit("getGameSettings", { gameID: this.gameID });
 
-      let randomIndex = Math.floor(Math.random() * cards.length);
+      socket.once("gameSettings", (d) => {
+        const duration = d.gameSettings.answerTime || 20; // fallback to 20s
+        this.timeLeft = duration;
 
-      // försäkra att vi inte får samma kort
-      if (this.gameBlackUsedIndex.includes(randomIndex)) {
-        randomIndex = Math.floor(Math.random() * cards.length);
-      }
+        const interval = setInterval(() => {
+          this.timeLeft--;
 
-      this.gameBlackUsedIndex.push(randomIndex);
-      return randomIndex;
+          if (this.timeLeft < 0 && this.isFirstRestart === true) {
+            console.log("Phase 1 Over: Moving players to VoteView");
+            this.isFirstRestart = false;
+            this.timeLeft = duration;
+            socket.emit("startVotePhase", this.gameID);
+          } else if (this.timeLeft <= 0 && this.isFirstRestart === false) {
+            console.log("Phase 2 Over: Moving everyone to Results");
+            clearInterval(interval);
+            this.goToNextPage();
+          }
+        }, 1000);
+      });
     },
-
     toggleNav: function () {
       this.hideNav = !this.hideNav;
     },
 
-    startTimer() {
-      this.timeLeft = 10;
-
-      const interval = setInterval(() => {
-        this.timeLeft--;
-
-        if (this.timeLeft < 0 && this.isFirstRestart === true) {
-          this.timeLeft = 10;
-          this.isFirstRestart = false;
-          socket.emit("startVotePhase", this.gameID);
-        }
-
-        if (this.timeLeft <= 0 && this.isFirstRestart === false) {
-          clearInterval(interval);
-          this.goToNextPage();
-        }
-      }, 1000);
-    },
-
     goToNextPage() {
-      this.$router.push(`/result/${this.gameID}`); //nästa sida WHITE CARDS
+      this.$router.push(`/result/${this.gameID}`);
     },
   },
 };
@@ -117,7 +111,9 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  size: 2rem;
+  width: 25rem; /* kortets faktiska bredd */
+  max-width: 80%; /* responsiv max-bredd */
+  margin: 2rem auto; /* centrera */
 }
 .timer {
   font-size: 2rem;
