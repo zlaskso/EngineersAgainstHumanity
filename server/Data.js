@@ -111,7 +111,9 @@ Data.prototype.createGameRoom = function (gameId, gameSettings, hostID, particip
       usedBlackCards: [],
       currentRound: {
         roundNumber: 1,
-        submissions: {}, // { playerID: cardIndex }
+        submissions: {},   
+        votes: {}, 
+        voteCount: 0,   
         blackCardIndex: null
       }
     }
@@ -198,6 +200,44 @@ Data.prototype.saveSubmission = function (gameID, playerID, cardIndex) {
   if (room) {
     room.currentRound.submissions[playerID] = cardIndex;
   }
+};
+
+Data.prototype.saveVote = function (gameID, cardIndex) {
+  const room = this.getGameRoom(gameID);
+  if (room) {
+    // Om detta kort inte fått röster än, sätt till 0
+    if (!room.currentRound.votes[cardIndex]) {
+      room.currentRound.votes[cardIndex] = 0;
+    }
+    room.currentRound.votes[cardIndex] += 1;
+    room.currentRound.voteCount += 1;
+  }
+};
+
+Data.prototype.allPlayersVoted = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return false;
+  
+  // Kollar om antalet lagda röster är lika med antalet deltagare
+  return room.currentRound.voteCount >= room.participants.length;
+};
+
+Data.prototype.getRoundResults = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return [];
+
+  // Omvandla submissions-objektet till en lista som är lättare för frontend att läsa
+  const results = Object.entries(room.currentRound.submissions).map(([playerID, cardIndex]) => {
+    const player = room.participants.find(p => p.id === playerID);
+    return {
+      playerID: playerID,
+      name: player ? player.name : "Okänd",
+      cardIndex: cardIndex,
+      votes: room.currentRound.votes[cardIndex] || 0
+    };
+  });
+
+  return results;
 };
 
 Data.prototype.prepareNextRound = function (gameID) {

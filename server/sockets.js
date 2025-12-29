@@ -2,6 +2,45 @@
 
 function sockets(io, socket, data) {
 
+
+  const startVotingPhase = (gameID) => {
+    const room = data.getGameRoom(gameID);
+    if (!room) return;
+
+    const submissionsMap = data.getSubmissions(gameID);
+    // Gör om map till en lista: [{playerID: "x", cardIndex: 5}, ...]
+    let submissionsList = Object.entries(submissionsMap).map(([pid, cIdx]) => ({
+      playerID: pid,
+      cardIndex: cIdx
+    }));
+    
+    // Blanda listan för anonymitet
+    submissionsList = data.shuffle(submissionsList);
+
+ 
+    io.to(gameID).emit("votingPhaseStarted", {
+      submissions: submissionsList
+    });
+  };
+
+  socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
+    console.log(`[SERVER] Submitting card ${cardIndex}`);
+  data.saveSubmission(gameID, playerID, cardIndex);
+  
+
+  if (data.allPlayersSubmitted(gameID)) {
+    console.log("[SERVER] All players submitted, starting voting phase");
+    io.to(gameID).emit("goToVoteView");
+  }
+});
+
+// Om timern på stora skärmen tar slut
+socket.on("startVotePhase", (gameID) => {
+console.log("[SERVER] All players submitted, starting voting phase");
+  startVotingPhase(gameID);
+});
+
+
   socket.on('getUILabels', function (lang) {
     socket.emit('uiLabels', data.getUILabels(lang));
   });
@@ -149,14 +188,27 @@ function sockets(io, socket, data) {
     io.to(gameID).emit("requestFinalSelection");
   });
 
-  socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
+socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
     console.log(`[SERVER] Submitting card ${cardIndex}`);
     data.saveSubmission(gameID, playerID, cardIndex);
 
-    // ONLY move to vote view when everyone is done
+    // Om alla spelare har lämnat svar...
     if (data.allPlayersSubmitted(gameID)) {
-      console.log("[SERVER] All players submitted, going to vote view")
-      io.to(gameID).emit("goToVoteView");
+      console.log("[SERVER] All players submitted, starting voting phase");
+      // Anropa hjälpfunktionen vi skapade ovan
+      startVotingPhase(gameID);
+    }
+  });
+
+  socket.on("submitVote", ({ gameID, voteCardIndex }) => {
+    console.log(`[SERVER] Vote received for card ${voteCardIndex}`);
+    data.saveVote(gameID, voteCardIndex);
+
+    if (data.allPlayersVoted(gameID)) {
+      // Hämta resultatet för rundan
+      const results = data.getRoundResults(gameID);
+      // Skicka alla till resultatsidan
+      io.to(gameID).emit("roundFinished", results);
     }
   });
 
@@ -230,11 +282,19 @@ function sockets(io, socket, data) {
   socket.on("getSubmissions", (d) => {
     const room = data.getGameRoom(d.gameID);
     if (room) {
-      const submissionsObj = data.getSubmissions(d.gameID);
-      const cardIndexes = Object.values(submissionsObj);
-      // Shuffle using your existing data.shuffle method
-      const shuffled = data.shuffle([...cardIndexes]);
-      socket.emit("returnSubmissions", shuffled);
+      // 1. Hämta och formatera data PRECIS som i startVotingPhase
+      const submissionsMap = data.getSubmissions(d.gameID);
+      let submissionsList = Object.entries(submissionsMap).map(([pid, cIdx]) => ({
+        playerID: pid,
+        cardIndex: cIdx
+      }));
+      
+      // 2. Blanda (viktigt att blanda varje gång eller spara blandningen i Data.js om ordningen ska vara konstant)
+      submissionsList = data.shuffle(submissionsList);
+
+      // 3. Skicka 'votingPhaseStarted' direkt till den som frågade
+      // VoteView lyssnar redan på detta event!
+      socket.emit("votingPhaseStarted", { submissions: submissionsList });
     }
   });
 

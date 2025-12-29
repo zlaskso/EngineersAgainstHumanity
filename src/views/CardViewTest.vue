@@ -12,6 +12,21 @@
       @select="setSelected"
     />
   </div>
+
+<div class="action-area">
+  <button 
+    class="submit-btn" 
+    v-if="!hasSubmitted" 
+    @click="submitSelection" 
+    :disabled="selectedIndex === null">
+    {{ uiLabels.cardView?.submitAnswer || "Välj detta kort" }}
+  </button>
+  <div v-else class="waiting-msg">
+    <h3>Väntar på andra spelare...</h3>
+  </div>
+</div>
+
+
   <button class="rerollButton" @click="reroll" :disabled="this.rerollsLeft <= 0">
     {{ uiLabels.cardView?.reroll }} ({{ rerollsLeft }} {{ uiLabels.cardView?.left }})
   </button>
@@ -35,6 +50,7 @@ export default {
       ResponsiveNav,
       rerollsLeft: 0,
       currentHandIndexes: [],
+      hasSubmitted: false,
       selectedIndex: null,
       gameSettings: {
         lobbyName: "",
@@ -123,22 +139,48 @@ export default {
           playerID: this.localPlayerID,
         });
         this.selectedIndex = null;
+
+      
       }
+      
     },
+
+    submitSelection() {
+    if (this.selectedIndex !== null) {
+      const selectedCard = this.currentHandIndexes[this.selectedIndex];
+      
+      socket.emit("submitCard", {
+        gameID: this.gameID,
+        playerID: this.localPlayerID,
+        cardIndex: selectedCard
+      });
+      
+      this.hasSubmitted = true;
+    }
+  },
 
     fetchLobbyData: function (gameID) {
       socket.emit("getGameSettings", gameID);
     },
 
-    toggleNav: function () {
-      this.hideNav = !this.hideNav;
+    requestInitialHand() {
+      if (this.gameID && this.localPlayerID) {
+        socket.emit("requestInitialHand", {
+          gameID: this.gameID,
+          playerID: this.localPlayerID,
+        });
+      }
     },
+
+
+
     setSelected(index) {
       this.selectedIndex = index;
     },
   },
 };
 </script>
+
 <style scoped>
 .card-view {
   padding: 2rem;
@@ -170,4 +212,35 @@ export default {
   background: #ccc;
   box-shadow: none;
 }
+
+
+.footer-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.vote-btn {
+  background-color: black;
+  color: white;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.vote-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.card-view {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
 </style>

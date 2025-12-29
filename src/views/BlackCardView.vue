@@ -1,15 +1,21 @@
 <template>
   <div class="shared-view">
-    <h1>testing testing, men sen helt utan rubrik</h1>
+    <h1>{{ statusText }}</h1>
+    
     <div class="blackcard-wrap">
       <BlackCard
         v-if="uiCardLabels?.blackCards && currentBlackIndex !== null"
         :prompt="uiCardLabels.blackCards[currentBlackIndex]"
-      ></BlackCard>
+      />
+    </div>
+
+    <div class="timer">
+      {{ timeLeft }} sekunder kvar
+      <span v-if="gamePhase === 'SELECTION'"> att välja svar</span>
+      <span v-if="gamePhase === 'VOTING'"> att rösta</span>
     </div>
   </div>
-  <div class="timer">{{ timeLeft }} sek kvar</div>
-  {{ gameBlackUsedIndex }}
+  
 </template>
 
 <script>
@@ -21,80 +27,98 @@ const socket = io("localhost:3000");
 export default {
   name: "BlackCardView",
   components: {
-    gameID: "inactive poll",
     ResponsiveNav,
     BlackCard,
-  },
-  data: function () {
-    return {
-      currentBlackIndex: null,
-      timeLeft: 10,
-      isFirstRestart: true,
-    };
   },
   props: {
     uiLabels: Object,
     uiCardLabels: Object,
   },
-  watch: {
-    uiCardLabels: {
-      deep: true,
-      immediate: true,
-    },
+  data: function () {
+    return {
+      currentBlackIndex: null,
+      timeLeft: 10,
+      gamePhase: "SELECTION", // "SELECTION" eller "VOTING"
+      statusText: "Välj era kort!",
+      gameID: "",
+      answerTime: 20, // Sparar tiden från inställningarna
+    };
   },
-  mounted() {
-    console.log("Mounted blackcard körs!");
-    this.startTimer();
-  },
-  created: function () {
+
+  // VIKTIGT: Allt ligger nu i EN enda created-funktion
+  created() {
     this.gameID = this.$route.params.id;
+    
     socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
-      socket.emit("join", this.gameID); // obligatoriskt för att ansluta till spelet
-      socket.emit("requestCurrentBlackCard", {
-        gameID: this.gameID,
-      });
+      socket.emit("join", this.gameID);
+      // Hämta aktuellt svart kort om man laddar om sidan
+      socket.emit("requestCurrentBlackCard", { gameID: this.gameID });
     });
 
+    // Lyssnare för svart kort
     socket.on("currentBlackCard", (data) => {
       if (data.blackCard !== undefined) {
         this.currentBlackIndex = data.blackCard;
       }
     });
+
+    // Lyssnare för FAS-BYTE (När servern säger att vi ska rösta)
+    socket.on("votingPhaseStarted", () => {
+      console.log("Server says: Voting phase started!");
+      this.gamePhase = "VOTING";
+      this.statusText = "Dags att rösta!";
+      this.timeLeft = 30; // Ge spelarna 30 sekunder att rösta
+    });
+
+    // Lyssnare för RESULTAT
+    socket.on("roundFinished", () => {
+       this.$router.push(`/result/${this.gameID}`);
+    });
+  },
+
+  mounted() {
+    this.startTimer();
   },
 
   methods: {
-    async startTimer() {
-      // 1. Fetch settings once to get the duration
+    startTimer() {
+      // 1. Hämta inställningar först för att få rätt tid
       socket.emit("getGameSettings", { gameID: this.gameID });
 
       socket.once("gameSettings", (d) => {
-        const duration = d.gameSettings.answerTime || 20; // fallback to 20s
-        this.timeLeft = duration;
+        this.answerTime = d.gameSettings.answerTime || 20;
+        this.timeLeft = this.answerTime;
 
+        // Starta intervallet
         const interval = setInterval(() => {
           this.timeLeft--;
 
-          if (this.timeLeft < 0 && this.isFirstRestart === true) {
-            console.log("Phase 1 Over: Moving players to VoteView");
-            this.isFirstRestart = false;
-            this.timeLeft = duration;
-            socket.emit("startVotePhase", this.gameID);
-          } else if (this.timeLeft <= 0 && this.isFirstRestart === false) {
-            console.log("Phase 2 Over: Moving everyone to Results");
-            clearInterval(interval);
-            this.goToNextPage();
+          if (this.timeLeft < 0) {
+            
+            if (this.gamePhase === "SELECTION") {
+              // Tiden ute för att VÄLJA -> Be servern starta röstning
+              // Vi nollställer inte tiden här, vi väntar på "votingPhaseStarted"
+              // för att vara säkra på att servern är med.
+              if (this.timeLeft === -1) { // Kör bara en gång precis när den går under 0
+                 console.log("Time up! Requesting vote phase...");
+                 socket.emit("startVotePhase", this.gameID);
+              }
+            } 
+            else if (this.gamePhase === "VOTING") {
+              // Tiden ute för att RÖSTA -> Gå till resultat
+              console.log("Voting time up!");
+              clearInterval(interval);
+              // Tvinga fram resultat om servern inte redan skickat oss vidare
+              // (Servern borde sköta detta via allPlayersVoted, men detta är en säkerhet)
+            }
           }
         }, 1000);
       });
     },
-    toggleNav: function () {
-      this.hideNav = !this.hideNav;
-    },
 
-    goToNextPage() {
-      this.$router.push(`/result/${this.gameID}`);
-    },
+    toggleNav() {
+      this.hideNav = !this.hideNav;
+    }
   },
 };
 </script>
