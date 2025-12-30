@@ -10,9 +10,9 @@
     </div>
 
     <div class="timer">
-      {{ timeLeft }} sekunder kvar
-      <span v-if="gamePhase === 'SELECTION'"> att välja svar</span>
-      <span v-if="gamePhase === 'VOTING'"> att rösta</span>
+      {{ timeLeft }} {{ uiLabels.common?.secondsLeft}}
+    <span v-if="gamePhase === 'SELECTION'"> {{ uiLabels.blackCardView?.toSelect }}</span>
+      <span v-if="gamePhase === 'VOTING'"> {{ uiLabels.blackCardView?.toVote }}</span>
     </div>
   </div>
   
@@ -38,13 +38,20 @@ export default {
     return {
       currentBlackIndex: null,
       timeLeft: 10,
-      gamePhase: "SELECTION", // "SELECTION" eller "VOTING"
-      statusText: "Välj era kort!",
+      gamePhase: "SELECTION", 
       gameID: "",
       answerTime: 20, // Sparar tiden från inställningarna
     };
   },
 
+  computed: {
+    statusText() {
+      if (this.gamePhase === "VOTING") {
+        return this.uiLabels.blackCardView?.votingPhase;
+      }
+      return this.uiLabels.blackCardView?.selectionPhase;
+    },
+  },
   // VIKTIGT: Allt ligger nu i EN enda created-funktion
   created() {
     this.gameID = this.$route.params.id;
@@ -66,7 +73,6 @@ export default {
     socket.on("votingPhaseStarted", () => {
       console.log("Server says: Voting phase started!");
       this.gamePhase = "VOTING";
-      this.statusText = "Dags att rösta!";
       this.timeLeft = 30; // Ge spelarna 30 sekunder att rösta
     });
 
@@ -119,8 +125,9 @@ export default {
     toggleNav() {
       this.hideNav = !this.hideNav;
     }
-  },
-};
+  }
+}
+
 </script>
 
 <style scoped>

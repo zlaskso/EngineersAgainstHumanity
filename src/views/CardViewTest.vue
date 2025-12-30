@@ -19,10 +19,10 @@
     v-if="!hasSubmitted" 
     @click="submitSelection" 
     :disabled="selectedIndex === null">
-    {{ uiLabels.cardView?.submitAnswer || "Välj detta kort" }}
+    {{ uiLabels.cardView?.submitAnswer}}
   </button>
   <div v-else class="waiting-msg">
-    <h3>Väntar på andra spelare...</h3>
+    <h3>{{ uiLabels.cardView?.waitingForOthers}}</h3>
   </div>
 </div>
 

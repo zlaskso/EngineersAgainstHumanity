@@ -1,7 +1,8 @@
 {
 	"common": {
 		"back": "Back",
-		"home": "Home"
+		"home": "Home",
+		"secondsLeft": "seconds left"
 	},
 	"startView": {
 		"createGame": "Create game",
@@ -54,15 +55,31 @@
 		"waitingForPlayers": "Waiting for players to join"
 	},
 	"cardView": {
-		"pickFavourite" : "Pick your favourite", 
+		"submitAnswer": "Pick this card",
+    	"waitingForOthers": "Waiting for other players...",
+		"pickFavourite" : "Vote for the funniest card!", 
 		"reroll" : "Reroll",
 		"left" : "left"
+
 	},
 	"resultView": {
 		"roundWinner": "The winner of the round is",
 		"otherCards": "Losing cards:",
 		"nextRound": "Next round",
 		"WaitingForHost": "Waiting for the host..."
+	},
+	"blackCardView": {
+    "selectionPhase": "Choose your cards!",
+    "votingPhase": "Time to vote!",
+    "toSelect": "to choose",
+    "toVote": "to vote"
+	},
+
+	"voteView": {
+    "header": "Vote for the funniest card!",
+    "vote": "Vote",
+    "voteReceived": "Vote received, waiting for other players..."
+    
 	}
 	
 }

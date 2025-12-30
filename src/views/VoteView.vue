@@ -1,7 +1,7 @@
 <template>
   <div class="vote-container">
     <div class="header-section">
-      <h1>Rösta på det roligaste kortet!</h1>
+      <h1>{{ uiLabels.voteView?.header}}</h1>
     </div>
     
     <div class="card-view"> <div 
@@ -25,12 +25,11 @@
         class="vote-btn" 
         @click="submitVote" 
         :disabled="selectedVoteIndex === null">
-        {{ uiLabels.voteView?.vote || "Rösta" }}
+        {{ uiLabels.voteView?.vote }}
       </button>
       
       <div v-else class="waiting-message">
-        <h3>Röst mottagen!</h3>
-        <p>Väntar på resultatet...</p>
+        <h3>{{ uiLabels.voteView?.voteReceived}}</h3>
       </div>
     </div>
   </div>
@@ -144,7 +143,81 @@
 </script>
 
 
-<style scoped>
+
+
+  <style scoped>
+.vote-container {
+  padding: 20px;
+  text-align: center;
+}
+.card-view {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 80px; /* Plats för footer */
+}
+.vote-card-wrapper {
+  transition: transform 0.2s;
+}
+.selected-vote {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0,0,0,0.3);
+  border-radius: 8px; /* Matcha kortets hörn */
+}
+.footer-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: white; /* Eller genomskinlig/gradient */
+  padding: 20px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+.vote-btn {
+  background-color: black;
+  color: white;
+  padding: 18px 50px;
+  font-size: 1.3rem;
+  border-radius: 50px;
+  border: 2px solid #000;
+  font-weight: bold;
+  cursor: pointer;
+
+  /* Gör animeringen mjuk och "studsig" */
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  
+  /* En subtil skugga för djup */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+  /* Se till att texten inte markeras när man klickar snabbt */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.vote-btn:hover:not(:disabled) {
+  transform: translateY(-3px); /* Knappen lyfter */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); 
+  background-color: #222; 
+}
+
+/* När man klickar (Active) */
+.vote-btn:active:not(:disabled) {
+  transform: translateY(1px); /* Knappen trycks ner */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Skuggan krymper */
+  background-color: #000;
+}
+
+/* När knappen är inaktiverad (inget kort valt) */
+.vote-btn:disabled {
+  background-color: #e0e0e0; 
+  border-color: #e0e0e0;
+  color: #a0a0a0; 
+  cursor: not-allowed;
+  transform: none; 
+  box-shadow: none; 
+}
+
 .card-view {
   padding: 2rem;
   display: flex;

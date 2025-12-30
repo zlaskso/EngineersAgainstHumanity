@@ -1,5 +1,6 @@
 {
 	"common": {
+		"secondsLeft": "sekunder kvar",
 		"back": "Tillbaka",
 		"home": "Hem"
 	},
@@ -55,9 +56,11 @@
 		"waitingForPlayers": "Väntar på att spelare ska ansluta"
 	},
 	"cardView": {
-		"pickFavourite" : "Välj din favorit",
+		"pickFavourite" : "Välj det roligaste kortet!",
 		"reroll" : "Slå igen",
-		"left" : "kvar"
+		"left" : "kvar",
+		"submitAnswer": "Skicka svar",
+		"waitingForOthers": "Väntar på andra spelare..."
 
 	},
 	"resultView": {
@@ -65,5 +68,18 @@
 		"otherCards": "Förlorande kort:",
 		"nextRound": "Nästa runda",
 		"WaitingForHost": "Väntar på spelledaren..."
+	},
+
+	"voteView": {
+		"header": "Rösta på det roligaste kortet!",
+		"vote": "Lägg röst",
+		"voteReceived": "Röst mottagen, vänta på andra spelare..."
+		
+	},
+	"blackCardView": {
+		"selectionPhase": "Välj era kort!",
+    	"votingPhase": "Dags att rösta!",
+    	"toSelect": "att välja svar",
+    	"toVote": "att rösta"
 	}
 }
