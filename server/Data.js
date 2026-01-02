@@ -268,6 +268,23 @@ Data.prototype.pointToWinner = function (gameID){
   }
 }
 
+Data.prototype.getWinningCardIndex = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return null;
+
+  let maxVotes = -1;
+  let winningCardIndex = null;
+
+  for (const [playerID, cardIndex] of Object.entries(room.currentRound.submissions)) {
+    const votes = room.currentRound.votes[cardIndex] || 0;
+    if (votes > maxVotes) {
+      maxVotes = votes;
+      winningCardIndex = cardIndex;
+    }
+  }
+  return winningCardIndex;
+};
+
 // Resetta röster för nästa omgång
 Data.prototype.resetVotes = function(gameID) {
   const room = this.getGameRoom(gameID);

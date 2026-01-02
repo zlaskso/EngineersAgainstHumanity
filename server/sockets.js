@@ -1,5 +1,3 @@
-
-
 function sockets(io, socket, data) {
 
 
@@ -17,27 +15,17 @@ function sockets(io, socket, data) {
     // Blanda listan för anonymitet
     submissionsList = data.shuffle(submissionsList);
 
- 
+    io.to(gameID).emit("goToVoteView");
     io.to(gameID).emit("votingPhaseStarted", {
       submissions: submissionsList
     });
   };
 
-  socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
-    console.log(`[SERVER] Submitting card ${cardIndex}`);
-  data.saveSubmission(gameID, playerID, cardIndex);
-  
-
-  if (data.allPlayersSubmitted(gameID)) {
-    console.log("[SERVER] All players submitted, starting voting phase");
-    io.to(gameID).emit("goToVoteView");
-  }
-});
 
 // Om timern på stora skärmen tar slut
 socket.on("startVotePhase", (gameID) => {
 console.log("[SERVER] All players submitted, starting voting phase");
-  startVotingPhase(gameID);
+  io.to(gameID).emit("requestFinalSelection");
 });
 
 
@@ -178,16 +166,6 @@ console.log("[SERVER] All players submitted, starting voting phase");
     }
   });
 
-
-
-
-  socket.on("startVotePhase", (gameID) => {
-    console.log(`[SERVER] Timer expired for room ${gameID}. Requesting cards.`);
-
-    // 1. Tell all players in the room to send their selected card immediately
-    io.to(gameID).emit("requestFinalSelection");
-  });
-
 socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
     console.log(`[SERVER] Submitting card ${cardIndex}`);
     data.saveSubmission(gameID, playerID, cardIndex);
@@ -207,13 +185,22 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
     if (data.allPlayersVoted(gameID)){
       const room = data.getGameRoom(gameID);
  // Hämta resultatet för rundan
-      const winnerPlayer = data.pointToWinner(gameID);
+      const winnerPlayer= data.pointToWinner(gameID);
+      const winningCardIndex = data.getWinningCardIndex(gameID);
+      const winningCardText = (winningCardIndex !== null) ? data.whiteCards[winningCardIndex]: "";
       const results = data.getRoundResults(gameID);
+      const allSubmittedCards = results.map(r => ({
+        ...r, 
+        cardText: data.whiteCards[r.cardIndex]
+      }));
+
       // Skicka alla till resultatsidan
       room.lastRoundResult = {
-        winner: winnerPlayer ? winnerPlayer.name : null,
-        winnerPlayerID: winnerPlayer ? winnerPlayer.id : null,
-        results: results,
+        winnerName: winnerPlayer ? winnerPlayer.name : "Okänd", 
+        blackCardIndex: room.currentRound.blackCardIndex,
+        winningCardIndex, 
+        winningCardText,
+        allSubmittedCards, 
         participants: room.participants
       };
       io.to(gameID).emit("roundFinished", room.lastRoundResult);
@@ -222,35 +209,17 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
   );
 
   socket.on("startNextRound", ({gameID}) => {
+    data.resetVotes(gameID);
     data.prepareNextRound(gameID);
     // Tell everyone to go back to the Black Card screen
     io.to(gameID).emit("newRoundStarted");
   });
 
-  socket.on("reportWinner", (d) => {
-
-    data.registerWin(d.gameID, d.winnerID);
-
-    const room = data.getGameRoom(d.gameID);
-
-    room.lastRoundResult = {
-      winner: d.winnerName,
-      winningCard: d.winningCardText,
-      blackCard: room.currentBlackCard,
-      allSubmittedCards: d.allSubmittedCards
-    };
-
-    io.to(d.gameID).emit("showResult");
-  });
-
   socket.on("getRoundResult", (d) => {
     const room = data.getGameRoom(d.gameID);
-    if (room && room.lastRoundResult) {
-      socket.emit("roundResult", {
-        ...room.lastRoundResult,
-        participants: room.participants
-      });
-    }
+    if (!room) return;
+  
+    socket.emit("roundResult", room.lastRoundResult);
   });
 
   socket.on("requestCurrentHand", ({ gameID, playerID }) => {

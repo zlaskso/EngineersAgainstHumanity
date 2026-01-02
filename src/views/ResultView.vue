@@ -7,9 +7,11 @@
         <h1>{{ uiLabels.resultView?.roundWinner}}</h1>
         <h2 class="winner-name">{{ winnerName }}</h2>
         
-        <div class="winning-combo">
-          <BlackCard :cardText="blackCardText" />
-          <WhiteCard :cardText="winningCardText" :selected="true" />
+      <div class="winning-combo">
+        <div class="result-black-card">
+        <BlackCard :prompt="uiCardLabels?.blackCards?.[blackCardIndex]" /></div>
+         <WhiteCard :prompt="uiCardLabels?.whiteCards?.[winningCardIndex]"
+        :selected="true" />
         </div>
       </div>
 
@@ -20,7 +22,7 @@
         
         <div class="cards-grid">
           <div v-for="(card, index) in losingCards" :key="index" class="small-card-wrapper">
-            <WhiteCard :cardText="card.cardText" />
+            <WhiteCard :prompt="uiCardLabels?.whiteCards?.[card.cardIndex]" />
           </div>
         </div>
       </div>
@@ -59,20 +61,24 @@ export default {
     BlackCard,
     WhiteCard
   },
+
   props: {
-    uiLabels: Object
+    uiLabels: Object,
+    uiCardLabels: Object
   },
+
   data() {
     return {
       gameID: "",
       localPlayerID: sessionStorage.getItem("playerID"),
       winnerName: "Laddar...",
-      blackCardText: "",
-      winningCardText: "",
+      blackCardIndex: null,
+      winningCardIndex: null,
       allSubmittedCards: [], 
       participants: []
     };
   },
+
   computed: {
     amIHost() {
       return sessionStorage.getItem("hostPlayerID") !== null;
@@ -82,13 +88,18 @@ export default {
     },
     losingCards() {
       return this.allSubmittedCards.filter(
-        c => c.cardText !== this.winningCardText
+        c => c.cardIndex !== this.winningCardIndex
       );
     },
     // NY COMPUTED: Hämtar spelarens egna poäng
     myScore() {
       const me = this.participants.find(p => p.id === this.localPlayerID);
       return me ? me.points : 0;
+    },
+
+    winningCardText() {
+      if (this.winningCardIndex === null || this.winningCardIndex === undefined) return "";
+      return this.uiCardLabels?.whiteCards?.[this.winningCardIndex] || " ";
     }
   },
   created() {
@@ -97,12 +108,20 @@ export default {
     socket.emit("getRoundResult", { gameID: this.gameID });
 
     socket.on("roundResult", (data) => {
-      this.winnerName = data.winner;
-      this.blackCardText = data.blackCard;
-      this.winningCardText = data.winningCard;
+      this.winnerName = data.winnerName;
+      this.blackCardIndex = Number(data.blackCardIndex);
+      this.winningCardIndex = data.winningCardIndex;
       this.allSubmittedCards = data.allSubmittedCards || []; 
       this.participants = data.participants;
     });
+
+    socket.on("roundFinished", (data) => {
+  this.winnerName = data.winnerName;
+  this.blackCardIndex = Number(data.blackCardIndex);
+  this.winningCardIndex = data.winningCardIndex;
+  this.allSubmittedCards = data.allSubmittedCards || [];
+  this.participants = data.participants || [];
+});
 
     socket.on("newRoundStarted", () => {
       if (this.amIHost) {
@@ -147,16 +166,19 @@ export default {
 .winner-name {
   font-size: 2.5rem;
   color: #d35400;
-  margin: 10px 0 30px 0;
+  margin: 10px 0 10px 0;
 }
 
+.result-black-card {
+  transform: scale(0.7);
+}
 .winning-combo {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 40px;
-  transform: scale(0.9);
-}
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  }
+
 
 .divider {
   width: 100%;
