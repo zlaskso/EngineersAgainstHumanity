@@ -188,6 +188,19 @@ export default {
   flex-wrap: wrap;
   gap: 20px;
 }
+
+.submit-btn {
+  margin: 1.5rem;
+  color:  black;
+  font-weight: bold;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  font-size: 1rem;
+}
 .rerollButton {
   background: gray;
   color: white;
