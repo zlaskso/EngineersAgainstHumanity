@@ -204,15 +204,24 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
     console.log(`[SERVER] Vote received for card ${voteCardIndex}`);
     data.saveVote(gameID, voteCardIndex);
 
-    if (data.allPlayersVoted(gameID)) {
-      // Hämta resultatet för rundan
+    if (data.allPlayersVoted(gameID)){
+      const room = data.getGameRoom(gameID);
+ // Hämta resultatet för rundan
+      const winnerPlayer = data.pointToWinner(gameID);
       const results = data.getRoundResults(gameID);
       // Skicka alla till resultatsidan
-      io.to(gameID).emit("roundFinished", results);
+      room.lastRoundResult = {
+        winner: winnerPlayer ? winnerPlayer.name : null,
+        winnerPlayerID: winnerPlayer ? winnerPlayer.id : null,
+        results: results,
+        participants: room.participants
+      };
+      io.to(gameID).emit("roundFinished", room.lastRoundResult);
     }
-  });
+  }
+  );
 
-  socket.on("startNextRound", (gameID) => {
+  socket.on("startNextRound", ({gameID}) => {
     data.prepareNextRound(gameID);
     // Tell everyone to go back to the Black Card screen
     io.to(gameID).emit("newRoundStarted");

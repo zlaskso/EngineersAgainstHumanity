@@ -18,6 +18,9 @@
     {{uiLabels.startView?.joinGame}}
   </button>
   </router-link>
+  <div>
+  <p v-if="false"class="tagline">{{uiLabels.startView?.info}}</p>
+  </div>
   <footer>
     <router-link to="/about/">
     <button id="htp">{{uiLabels.startView?.htp}}</button>
@@ -62,7 +65,7 @@ export default {
     letter-spacing: 0.08em;
     font-size: 3rem;
     font-weight: bold;
-    padding-top:0.2em;
+    padding-top:0.5em;
     border: 0;
     background: transparent;
   }
@@ -77,7 +80,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: left;
-    padding:0.5rem;
+    padding:2rem;
     top:0;
     left:0;
     height: 2rem;
@@ -99,7 +102,7 @@ export default {
     border-radius: 15px;
     width: 300px;
     height: 422px;
-    margin-top: 100px;
+    margin-top: 200px;
     padding: 40px;
     padding-bottom: 300px;
     font-size: 26pt;
@@ -129,6 +132,7 @@ export default {
     animation-fill-mode: forwards;
   }
 
+
   #htp:hover {
     animation-name: grayToBlack;
     animation-duration: 0.5s;
@@ -138,8 +142,8 @@ export default {
   #htp {
     background: transparent;
     border: 0px;
-    margin-top: 140px;
-    font-size: 14pt;
+    margin-top: 75px;
+    font-size: 17pt;
     color: gray;
     cursor: pointer;
   }

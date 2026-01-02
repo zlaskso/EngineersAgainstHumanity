@@ -93,7 +93,7 @@ export default {
   },
   created() {
     this.gameID = this.$route.params.id;
-    socket.emit("joinLobbyPlayer", { gameID: this.gameID });
+    socket.emit("join", this.gameID);
     socket.emit("getRoundResult", { gameID: this.gameID });
 
     socket.on("roundResult", (data) => {
@@ -111,7 +111,9 @@ export default {
         this.$router.push(`/cards/${this.gameID}`);
       }
     });
+
   },
+
   methods: {
     nextRound() {
       socket.emit("startNextRound", { gameID: this.gameID });

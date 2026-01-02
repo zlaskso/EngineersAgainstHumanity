@@ -33,7 +33,6 @@
       </div>
     </div>
   </div>
-
 </template>
 
 
@@ -94,7 +93,7 @@
     gameID: this.gameID, 
     playerID: this.localPlayerID 
     });
-  },
+    },
   created: function () { 
     this.gameID = this.$route.params.id;
     socket.emit("join", this.gameID);
@@ -108,7 +107,10 @@
       this.$router.push("/result/" + this.gameID);
     })
 
-
+    socket.on("roundFinished", (data) => {
+    console.log("VOTEVIEW, WINNER DATA:", data);
+    this.$router.push("/result/" + this.gameID);
+  }); 
   },
 
 

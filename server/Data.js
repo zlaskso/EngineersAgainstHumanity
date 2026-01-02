@@ -204,6 +204,7 @@ Data.prototype.saveSubmission = function (gameID, playerID, cardIndex) {
 
 Data.prototype.saveVote = function (gameID, cardIndex) {
   const room = this.getGameRoom(gameID);
+  console.log("[SERVER] voteCount:", room.currentRound.voteCount, "participants:", room.participants.length);
   if (room) {
     // Om detta kort inte fått röster än, sätt till 0
     if (!room.currentRound.votes[cardIndex]) {
@@ -219,8 +220,8 @@ Data.prototype.allPlayersVoted = function (gameID) {
   if (!room) return false;
   
   // Kollar om antalet lagda röster är lika med antalet deltagare
-  return room.currentRound.voteCount >= room.participants.length;
-};
+  const activeVoters = room.participants.filter(p => p.isActive);
+  return room.currentRound.voteCount >= activeVoters.length;};
 
 Data.prototype.getRoundResults = function (gameID) {
   const room = this.getGameRoom(gameID);
@@ -238,6 +239,41 @@ Data.prototype.getRoundResults = function (gameID) {
   });
 
   return results;
+};
+
+Data.prototype.pointToWinner = function (gameID){
+  const room = this.getGameRoom(gameID);
+  if (!room) return null; 
+
+  let maxVotes = -1;
+  let winnerPlayerID=null;
+
+    //Hitta kortet med flest röster
+  for (const [PlayerID, cardIndex] of Object.entries (room.currentRound.submissions)){
+    const votes = room.currentRound.votes[cardIndex] || 0;
+    if (votes > maxVotes){
+      maxVotes = votes;
+      winnerPlayerID = PlayerID;
+    }
+  }
+
+  // Om ingen vinnare (alla fick 0 röster)
+  if (!winnerPlayerID) return null;
+
+  // Ge poäng till spelaren som äger kortet
+  const winnerPlayer = room.participants.find (p => p.id === winnerPlayerID);
+  if (winnerPlayer){
+    winnerPlayer.points +=1;
+    return winnerPlayer;
+  }
+}
+
+// Resetta röster för nästa omgång
+Data.prototype.resetVotes = function(gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return;
+  room.currentRound.votes = {};
+  room.currentRound.voteCount = 0;
 };
 
 Data.prototype.prepareNextRound = function (gameID) {

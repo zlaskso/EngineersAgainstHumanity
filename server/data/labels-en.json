@@ -7,6 +7,7 @@
 	"startView": {
 		"createGame": "Create game",
 		"joinGame": "Join game",
+		"info": "A card game. Unfortunately for engineers.",
 		"htp": "How to play"
 	},
 	"joinView": {

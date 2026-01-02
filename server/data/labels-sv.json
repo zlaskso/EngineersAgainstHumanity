@@ -8,6 +8,7 @@
 	"startView": {
 		"createGame": "Skapa spel",
 		"joinGame": "Delta",
+		"info": "Ett kortspel. Dessvärre för ingenjörer.",
 		"htp": "Hur man spelar"
 	},
 	"joinView": {
