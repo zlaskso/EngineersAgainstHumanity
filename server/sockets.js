@@ -210,6 +210,7 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
 
   socket.on("startNextRound", ({gameID}) => {
     data.resetVotes(gameID);
+    data.resetForNewRound(gameID);
     data.prepareNextRound(gameID);
     // Tell everyone to go back to the Black Card screen
     io.to(gameID).emit("newRoundStarted");

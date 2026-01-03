@@ -315,6 +315,20 @@ Data.prototype.allPlayersSubmitted = function (gameID) {
   return totalSubmissions >= totalParticipants;
 };
 
+Data.prototype.resetForNewRound = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return;
+
+  // nytt svartkort nästa runda
+  room.currentRound.blackCardIndex = null;
+
+  // ny hand för alla (så requestCurrentHand delar ut nytt)
+  for (const p of room.participants) {
+    p.currentHandIndexes = [];
+    p.rerollsLeft = room.gameSettings.nrOfRerolls;
+  }
+};
+
 export { Data };
 
 

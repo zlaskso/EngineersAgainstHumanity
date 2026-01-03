@@ -85,6 +85,14 @@ export default {
       }
     });
 
+    socket.on("newRoundStarted", () => {
+      this.hasSubmitted = false;
+      this.selectedIndex = null;
+      socket.emit("requestCurrentHand", { 
+        gameID: this.gameID, 
+        playerID: this.localPlayerID });
+  });
+
     socket.on("rerollResult", (data) => {
       if (data.newCardIndexes) {
         console.log(this.localPlayerID, "recieved rerolled hand", data.newCardIndexes);
@@ -111,6 +119,7 @@ export default {
     socket.on("goToVoteView", () => {
       this.$router.push(`/vote/${this.gameID}`);
     });
+
     socket.on("requestFinalSelection", () => {
       // If no card is selected, default to the first card (index 0) or handle as null
       const indexToSubmit = this.selectedIndex !== null ? this.selectedIndex : 0;

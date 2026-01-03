@@ -41,6 +41,7 @@ export default {
       gamePhase: "SELECTION", 
       gameID: "",
       answerTime: 20, // Sparar tiden från inställningarna
+      timerId: null,
     };
   },
 
@@ -80,6 +81,11 @@ export default {
     socket.on("roundFinished", () => {
        this.$router.push(`/result/${this.gameID}`);
     });
+
+    socket.on("newRoundStarted", () => {
+      this.currentBlackIndex = null;
+      socket.emit("requestCurrentBlackCard", { gameID: this.gameID });
+});
   },
 
   mounted() {
