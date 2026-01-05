@@ -5,7 +5,7 @@
       
       <div class="winner-section">
         <h1>{{ uiLabels.resultView?.roundWinner}}</h1>
-        <h2 class="winner-name">{{ winnerName }}</h2>
+        <h2 class="winner-name">{{ formattedWinnerNames }}</h2>
         
       <div class="winning-combo">
         <div class="result-black-card">
@@ -13,8 +13,10 @@
         </div>
 
         <div class="white-cards-column">
-          <div class="winner-white-card">
-            <WhiteCard :prompt="uiCardLabels?.whiteCards?.[winningCardIndex]"/>
+          <div class="winners-grid">
+            <div v-for="(cardIndex, idx) in winningCardIndexes" :key="idx" class="winner-white-card">
+              <WhiteCard :prompt="uiCardLabels?.whiteCards?.[cardIndex]"/>
+            </div>
           </div>
 
           <div class="others-section">
@@ -70,9 +72,9 @@ export default {
     return {
       gameID: "",
       localPlayerID: sessionStorage.getItem("playerID"),
-      winnerName: "Laddar...",
+      winnerNames: [],
       blackCardIndex: null,
-      winningCardIndex: null,
+      winningCardIndexes: [],
       allSubmittedCards: [], 
       participants: [],
       timeLeft: 10,
@@ -87,22 +89,23 @@ export default {
     sortedParticipants() {
       return [...this.participants].sort((a, b) => b.points - a.points);
     },
+    // Slår ihop alla namn med "&" emellan
+    formattedWinnerNames() {
+      if (!this.winnerNames || this.winnerNames.length === 0) return "Laddar...";
+      return this.winnerNames.join(" & ");
+    },
+    // Filtrerar bort alla vinnarkort
     losingCards() {
       return this.allSubmittedCards.filter(
-        c => c.cardIndex !== this.winningCardIndex
+        c => !this.winningCardIndexes.includes(c.cardIndex)
       );
     },
-    // NY COMPUTED: Hämtar spelarens egna poäng
     myScore() {
       const me = this.participants.find(p => p.id === this.localPlayerID);
       return me ? me.points : 0;
-    },
-
-    winningCardText() {
-      if (this.winningCardIndex === null || this.winningCardIndex === undefined) return "";
-      return this.uiCardLabels?.whiteCards?.[this.winningCardIndex] || " ";
     }
   },
+
   created() {
     this.gameID = this.$route.params.id;
     socket.emit("join", this.gameID);
@@ -113,17 +116,17 @@ export default {
       }
 
     socket.on("roundResult", (data) => {
-      this.winnerName = data.winnerName;
+      this.winnerNames = data.winnerNames || [];
       this.blackCardIndex = Number(data.blackCardIndex);
-      this.winningCardIndex = data.winningCardIndex;
+      this.winningCardIndexes = data.winningCardIndexes || [];
       this.allSubmittedCards = data.allSubmittedCards || []; 
       this.participants = data.participants;
     });
 
     socket.on("roundFinished", (data) => {
-  this.winnerName = data.winnerName;
+  this.winnerNames = data.winnerNames || [];
   this.blackCardIndex = Number(data.blackCardIndex);
-  this.winningCardIndex = data.winningCardIndex;
+  this.winningCardIndexes = data.winningCardIndexes || [];
   this.allSubmittedCards = data.allSubmittedCards || [];
   this.participants = data.participants || [];
 
@@ -222,6 +225,12 @@ export default {
   transform: scale(0.9);
   border: black solid 2px;
   border-radius: 10px;
+}
+
+.winners-grid {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
 }
 
 .winning-combo {

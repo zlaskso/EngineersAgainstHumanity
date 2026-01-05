@@ -184,29 +184,35 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
 
     if (data.allPlayersVoted(gameID)){
       const room = data.getGameRoom(gameID);
- // Hämta resultatet för rundan
-      const winnerPlayer= data.pointToWinner(gameID);
-      const winningCardIndex = data.getWinningCardIndex(gameID);
-      const winningCardText = (winningCardIndex !== null) ? data.whiteCards[winningCardIndex]: "";
+
+      // 1. Hämta alla vinnare och vinnande kort (som listor)
+      const winners = data.pointToWinners(gameID);
+      const winningCardIndexes = data.getWinningCardIndexes(gameID);
+
+      // 2. Extrahera namnen och texterna till listor
+      const winnerNames = winners.map(w => w.name);
+      const winningCardTexts = winningCardIndexes.map(idx => data.whiteCards[idx]);
+
       const results = data.getRoundResults(gameID);
       const allSubmittedCards = results.map(r => ({
         ...r, 
         cardText: data.whiteCards[r.cardIndex]
       }));
 
-      // Skicka alla till resultatsidan
+      // 3. Spara resultatet med de nya list-fälten
       room.lastRoundResult = {
-        winnerName: winnerPlayer ? winnerPlayer.name : "Okänd", 
+        winnerNames: winnerNames,               // NYTT: Array av namn ["Kalle", "Lisa"]
+        winningCardIndexes: winningCardIndexes, // NYTT: Array av index [5, 12]
+        winningCardTexts: winningCardTexts,     // NYTT: Array av texter
+        
         blackCardIndex: room.currentRound.blackCardIndex,
-        winningCardIndex, 
-        winningCardText,
         allSubmittedCards, 
         participants: room.participants
       };
+
       io.to(gameID).emit("roundFinished", room.lastRoundResult);
     }
-  }
-  );
+  });
 
   socket.on("startNextRound", ({gameID}) => {
     data.resetVotes(gameID);

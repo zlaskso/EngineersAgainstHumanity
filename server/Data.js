@@ -241,48 +241,72 @@ Data.prototype.getRoundResults = function (gameID) {
   return results;
 };
 
-Data.prototype.pointToWinner = function (gameID){
+Data.prototype.pointToWinners = function (gameID) {
   const room = this.getGameRoom(gameID);
-  if (!room) return null; 
+  if (!room) return [];
 
-  let maxVotes = -1;
-  let winnerPlayerID=null;
+  let maxVotes = 0;
 
-    //Hitta kortet med flest röster
-  for (const [PlayerID, cardIndex] of Object.entries (room.currentRound.submissions)){
-    const votes = room.currentRound.votes[cardIndex] || 0;
-    if (votes > maxVotes){
-      maxVotes = votes;
-      winnerPlayerID = PlayerID;
-    }
-  }
-
-  // Om ingen vinnare (alla fick 0 röster)
-  if (!winnerPlayerID) return null;
-
-  // Ge poäng till spelaren som äger kortet
-  const winnerPlayer = room.participants.find (p => p.id === winnerPlayerID);
-  if (winnerPlayer){
-    winnerPlayer.points +=1;
-    return winnerPlayer;
-  }
-}
-
-Data.prototype.getWinningCardIndex = function (gameID) {
-  const room = this.getGameRoom(gameID);
-  if (!room) return null;
-
-  let maxVotes = -1;
-  let winningCardIndex = null;
-
-  for (const [playerID, cardIndex] of Object.entries(room.currentRound.submissions)) {
+  // 1. Ta reda på vad högsta antalet röster är i denna runda
+  for (const cardIndex of Object.values(room.currentRound.submissions)) {
     const votes = room.currentRound.votes[cardIndex] || 0;
     if (votes > maxVotes) {
       maxVotes = votes;
-      winningCardIndex = cardIndex;
     }
   }
-  return winningCardIndex;
+
+  // Om ingen röst lagd (maxVotes = 0), ingen vinner
+  if (maxVotes === 0) return [];
+
+  const winners = [];
+
+  // 2. Hitta alla spelare som fick 'maxVotes' och ge dem poäng
+  for (const [playerID, cardIndex] of Object.entries(room.currentRound.submissions)) {
+    const votes = room.currentRound.votes[cardIndex] || 0;
+
+    if (votes === maxVotes) {
+      const player = room.participants.find(p => p.id === playerID);
+      if (player) {
+        player.points += 1; // Ge poäng till spelaren
+        winners.push(player); // Lägg till i vinnarlistan
+      }
+    }
+  }
+
+  return winners; // Returnerar en array med vinnar-objekt (kan vara en eller flera)
+};
+
+Data.prototype.getWinningCardIndexes = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return [];
+
+  let maxVotes = 0;
+
+  // 1. Hitta max röster
+  for (const cardIndex of Object.values(room.currentRound.submissions)) {
+    const votes = room.currentRound.votes[cardIndex] || 0;
+    if (votes > maxVotes) {
+      maxVotes = votes;
+    }
+  }
+
+  if (maxVotes === 0) return [];
+
+  const winningCardIndexes = [];
+
+  // 2. Samla alla kort-index som har maxVotes
+  for (const cardIndex of Object.values(room.currentRound.submissions)) {
+    const votes = room.currentRound.votes[cardIndex] || 0;
+    if (votes === maxVotes) {
+      // Vi lägger till kortet i listan. 
+      // (Vi gör en kontroll så vi inte lägger till exakt samma index två gånger, utifall att)
+      if (!winningCardIndexes.includes(cardIndex)) {
+        winningCardIndexes.push(cardIndex);
+      }
+    }
+  }
+
+  return winningCardIndexes; // Returnerar en array av kort-index
 };
 
 // Resetta röster för nästa omgång
