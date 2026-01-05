@@ -9,31 +9,30 @@
         
       <div class="winning-combo">
         <div class="result-black-card">
-        <BlackCard :prompt="uiCardLabels?.blackCards?.[blackCardIndex]" /></div>
-         <WhiteCard :prompt="uiCardLabels?.whiteCards?.[winningCardIndex]"
-        :selected="true" />
+          <BlackCard :prompt="uiCardLabels?.blackCards?.[blackCardIndex]" />
         </div>
-      </div>
 
-      <hr class="divider">
-
-      <div class="others-section">
-        <h3>{{ uiLabels.resultView?.otherCards }}</h3>
-        
-        <div class="cards-grid">
-          <div v-for="(card, index) in losingCards" :key="index" class="small-card-wrapper">
-            <WhiteCard :prompt="uiCardLabels?.whiteCards?.[card.cardIndex]" />
+        <div class="white-cards-column">
+          <div class="winner-white-card">
+            <WhiteCard :prompt="uiCardLabels?.whiteCards?.[winningCardIndex]"/>
           </div>
+
+          <div class="others-section">
+            <div class="cards-grid">
+              <div v-for="(card, index) in losingCards" :key="index" class="small-card-wrapper">
+                <WhiteCard :prompt="uiCardLabels?.whiteCards?.[card.cardIndex]" />
+              </div>
+            </div>
+          </div>
+        </div>
         </div>
       </div>
 
       <div class="footer-actions">
-
         <button @click="nextRound" class="next-round-btn">
-          {{ uiLabels.resultView?.nextRound}}
+          Time left: {{ this.timeLeft }}
         </button>
       </div>
-
     </div>
 
     <div v-else class="player-waiting-view">
@@ -75,7 +74,9 @@ export default {
       blackCardIndex: null,
       winningCardIndex: null,
       allSubmittedCards: [], 
-      participants: []
+      participants: [],
+      timeLeft: 10,
+      timerID: null
     };
   },
 
@@ -107,6 +108,10 @@ export default {
     socket.emit("join", this.gameID);
     socket.emit("getRoundResult", { gameID: this.gameID });
 
+    if (this.amIHost) {
+        this.startTimer();
+      }
+
     socket.on("roundResult", (data) => {
       this.winnerName = data.winnerName;
       this.blackCardIndex = Number(data.blackCardIndex);
@@ -121,9 +126,16 @@ export default {
   this.winningCardIndex = data.winningCardIndex;
   this.allSubmittedCards = data.allSubmittedCards || [];
   this.participants = data.participants || [];
+
+  if (this.amIHost && !this.timerID) {
+        this.startTimer();
+      }
 });
 
     socket.on("newRoundStarted", () => {
+      if (this.timerID) {
+        clearInterval(this.timerID);
+      }
       if (this.amIHost) {
         this.$router.push(`/black/${this.gameID}`);
       } else {
@@ -133,8 +145,39 @@ export default {
 
   },
 
+  beforeUnmount() {
+    if (this.timerID) {
+      clearInterval(this.timerID);
+    }
+  },
+
   methods: {
+    startTimer() {
+      if (!this.amIHost) return;
+      
+      if (this.timerID) {
+        clearInterval(this.timerID);
+      };
+      
+      this.timeLeft = 10;
+
+      this.timerID = setInterval(() => {
+        this.timeLeft--; //Om ni vill stoppa timern så ni kan ändra koden utan att den går vidare automatiskt kan ni kommentera hela denna rad
+
+          if (this.timeLeft <= 0) {
+          clearInterval(this.timerID);
+            this.timeID = null;
+            this.timeLeft = 0;
+            this.nextRound();
+      }
+      }, 1000);
+    },
     nextRound() {
+      if (this.timerID) {
+        clearInterval(this.timerID);
+        this.timerID = null;
+      }
+
       socket.emit("startNextRound", { gameID: this.gameID });
     }
   }
@@ -156,7 +199,7 @@ export default {
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: left;
 }
 
 .winner-section {
@@ -170,49 +213,70 @@ export default {
 }
 
 .result-black-card {
-  transform: scale(0.7);
+  height: 500px;
+  transform-origin: top;
 }
+
+.winner-white-card {
+  transform-origin: top left;
+  transform: scale(0.9);
+  border: black solid 2px;
+  border-radius: 10px;
+}
+
 .winning-combo {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 10px;
+  padding-top: 40px;
   }
 
-
-.divider {
-  width: 100%;
-  border: 1px solid #ddd;
-  margin: 40px 0;
+  .white-cards-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 10px;
 }
 
 .others-section {
   width: 100%;
   text-align: center;
+  margin-left: -28px;
+  margin-top: -80px;
+  width: 650px;
 }
 
 .cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  margin-top: 0px;
-  justify-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  overflow-x: hidden;
+  gap: 0px;
 }
 
 .small-card-wrapper {
-  transform: scale(0.8); 
-  opacity: 0.8;
+  margin-bottom: 0px;
+  transform: scale(0.65); 
+  opacity: 0.6;
+  width: 160px; 
+  height: 300px;
 }
-
-
 
 .is-me {
   font-weight: bold;
 }
 
+.footer-actions {
+  display: flex;
+  justify-content: center;
+}
+
 .next-round-btn {
-  background-color: black;
-  color: white;
+  background-color: white;
+  color: black;
   padding: 20px 40px;
   font-size: 1.5rem;
   border-radius: 50px;
