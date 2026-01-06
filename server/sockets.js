@@ -215,11 +215,22 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
   });
 
   socket.on("startNextRound", ({gameID}) => {
+    const room = data.getGameRoom(gameID);
+    if (!room) return;
+
+    if (room.currentRound.roundNumber >= room.gameSettings.numOfRounds) {
+      io.to(gameID).emit("gameSeshOver");
+      console.log("[SERVER] Game session over, emitting gameSeshOver");
+      return;
+    }
+    else {
+
     data.resetVotes(gameID);
     data.resetForNewRound(gameID);
     data.prepareNextRound(gameID);
     // Tell everyone to go back to the Black Card screen
     io.to(gameID).emit("newRoundStarted");
+    }
   });
 
   socket.on("getRoundResult", (d) => {

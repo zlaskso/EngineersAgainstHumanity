@@ -53,6 +53,16 @@ const router = createRouter({
       path: '/vote/:id',
       name: 'VoteView',
       component: () => import('../views/VoteView.vue')
+    },
+    {
+      path: '/final/:id',
+      name: 'FinalView',
+      component: () => import('../views/FinalView.vue')
+    },
+    {
+     path: '/end/:id',
+      name: 'EndView',
+      component: () => import('../views/EndView.vue')
     }
   ]
 })
