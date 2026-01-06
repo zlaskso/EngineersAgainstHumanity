@@ -68,7 +68,8 @@
 		"roundWinner": "Rundans vinnare är",
 		"otherCards": "Förlorande kort:",
 		"nextRound": "Nästa runda",
-		"WaitingForHost": "Väntar på spelledaren..."
+		"WaitingForHost": "Väntar på spelledaren...",
+		"yourScore": "Din poäng"
 	},
 
 	"voteView": {

@@ -41,7 +41,7 @@
       <h1>{{ uiLabels.resultView?.WaitingForHost }}</h1>
       
       <div class="my-score-box">
-        <h2>{{ uiLabels.resultView?.yourScore }}</h2>
+        <h1>{{ uiLabels.resultView?.yourScore }}</h1>
         <span class="score-number">{{ myScore }}</span>
       </div>
     </div>
