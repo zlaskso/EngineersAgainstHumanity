@@ -102,7 +102,7 @@ export default {
     border-radius: 15px;
     width: 300px;
     height: 422px;
-    margin-top: 200px;
+    margin-top: 100px;
     padding: 40px;
     padding-bottom: 300px;
     font-size: 26pt;

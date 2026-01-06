@@ -162,7 +162,6 @@ export default {
         this.startTimer();
       }
 });
-
     socket.on("newRoundStarted", () => {
       if (this.timerID) {
         clearInterval(this.timerID);
@@ -171,6 +170,18 @@ export default {
         this.$router.push(`/black/${this.gameID}`);
       } else {
         this.$router.push(`/cards/${this.gameID}`);
+      }
+    });
+
+    socket.on("gameSeshOver", () => {
+      console.log("Game session over received");
+
+      if (this.amIHost) {
+        console.log("Navigating to FinalView as host");
+        this.$router.push(`/final/${this.gameID}`);
+      } else {
+        console.log("Navigating to EndView as player");
+        this.$router.push(`/end/${this.gameID}`);
       }
     });
 
