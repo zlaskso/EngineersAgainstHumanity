@@ -66,8 +66,8 @@
 	"resultView": {
 		"roundWinner": "The winner of the round is",
 		"otherCards": "Losing cards:",
-		"nextRound": "Next round",
-		"WaitingForHost": "Waiting for the host...",
+		"nextRound": "Next round in ",
+		"WaitingForHost": "Waiting for next round...",
 		"yourScore": "Your score"
 	},
 	"blackCardView": {

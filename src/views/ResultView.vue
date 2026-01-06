@@ -14,15 +14,23 @@
 
         <div class="white-cards-column">
           <div class="winners-grid">
-            <div v-for="(cardIndex, idx) in winningCardIndexes" :key="idx" class="winner-white-card">
-              <WhiteCard :prompt="uiCardLabels?.whiteCards?.[cardIndex]"/>
+            <div v-for="(cardIndex, idx) in winningCardIndexes" :key="idx" class="winner-white-card" :style="dynamicWinnerStyle">
+              <WhiteCard 
+                  :prompt="uiCardLabels?.whiteCards?.[cardIndex]" 
+                  :playerName="winnerNames[idx]"
+                  :showName="true"
+                />
             </div>
           </div>
 
           <div class="others-section">
             <div class="cards-grid">
               <div v-for="(card, index) in losingCards" :key="index" class="small-card-wrapper">
-                <WhiteCard :prompt="uiCardLabels?.whiteCards?.[card.cardIndex]" />
+                <WhiteCard 
+                    :prompt="uiCardLabels?.whiteCards?.[card.cardIndex]" 
+                    :playerName="card.playerName"
+                    :showName="true"
+                  />
               </div>
             </div>
           </div>
@@ -32,7 +40,7 @@
 
       <div class="footer-actions">
         <button @click="nextRound" class="next-round-btn">
-          Time left: {{ this.timeLeft }}
+          {{uiLabels.resultView?.nextRound}}{{ this.timeLeft }}
         </button>
       </div>
     </div>
@@ -78,7 +86,9 @@ export default {
       allSubmittedCards: [], 
       participants: [],
       timeLeft: 10,
-      timerID: null
+      timerID: null,
+      columnWidth: 600, // Available width for winning cards
+      baseCardWidth: 200 // Original width from WhiteCard.vue
     };
   },
 
@@ -96,13 +106,31 @@ export default {
     },
     // Filtrerar bort alla vinnarkort
     losingCards() {
-      return this.allSubmittedCards.filter(
-        c => !this.winningCardIndexes.includes(c.cardIndex)
-      );
+      const winningIds = this.winningCardIndexes.map(id => Number(id));
+      return this.allSubmittedCards.filter(submission => {
+        return !winningIds.includes(Number(submission.cardIndex));
+      });
     },
     myScore() {
       const me = this.participants.find(p => p.id === this.localPlayerID);
       return me ? me.points : 0;
+    },
+    dynamicWinnerStyle() {
+      const count = this.winningCardIndexes.length || 1;
+      const totalGap = 10 * (count - 1);
+      const availableSpace = this.columnWidth - totalGap;
+      
+      // Calculate max width allowed per card to stay within 650px
+      const allowedWidthPerCard = availableSpace / count;
+      let calculatedScale = allowedWidthPerCard / this.baseCardWidth;
+      
+      // Cap scale at 0.9 so single winners aren't too massive
+      const finalScale = Math.min(0.9, calculatedScale);
+
+      return {
+        transform: `scale(${finalScale})`,
+        transformOrigin: 'top left',
+      };
     }
   },
 
@@ -221,10 +249,10 @@ export default {
 }
 
 .winner-white-card {
-  transform-origin: top left;
-  transform: scale(0.9);
   border: black solid 2px;
-  border-radius: 10px;
+  border-radius: 12px;
+  background: white;
+  overflow-x: auto;
 }
 
 .winners-grid {
@@ -247,6 +275,7 @@ export default {
   flex-direction: column;
   align-items: flex-start;
   margin-left: 10px;
+  width: 600px;
 }
 
 .others-section {
