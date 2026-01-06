@@ -260,20 +260,19 @@ Data.prototype.pointToWinners = function (gameID) {
 
   const winners = [];
 
-  // 2. Hitta alla spelare som fick 'maxVotes' och ge dem poäng
   for (const [playerID, cardIndex] of Object.entries(room.currentRound.submissions)) {
     const votes = room.currentRound.votes[cardIndex] || 0;
 
     if (votes === maxVotes) {
       const player = room.participants.find(p => p.id === playerID);
       if (player) {
-        player.points += 1; // Ge poäng till spelaren
-        winners.push(player); // Lägg till i vinnarlistan
+        player.points += 1;
+        winners.push(player);
       }
     }
   }
 
-  return winners; // Returnerar en array med vinnar-objekt (kan vara en eller flera)
+  return winners; // Returnerar en array av vinnare
 };
 
 Data.prototype.getWinningCardIndexes = function (gameID) {
@@ -294,12 +293,9 @@ Data.prototype.getWinningCardIndexes = function (gameID) {
 
   const winningCardIndexes = [];
 
-  // 2. Samla alla kort-index som har maxVotes
   for (const cardIndex of Object.values(room.currentRound.submissions)) {
     const votes = room.currentRound.votes[cardIndex] || 0;
     if (votes === maxVotes) {
-      // Vi lägger till kortet i listan. 
-      // (Vi gör en kontroll så vi inte lägger till exakt samma index två gånger, utifall att)
       if (!winningCardIndexes.includes(cardIndex)) {
         winningCardIndexes.push(cardIndex);
       }
