@@ -62,7 +62,7 @@ import io from "socket.io-client";
 import BlackCard from "@/components/BlackCard.vue";
 import WhiteCard from "@/components/WhiteCard.vue";
 
-const socket = io("localhost:3000");
+const socket = io();
 
 export default {
   name: "ResultView",

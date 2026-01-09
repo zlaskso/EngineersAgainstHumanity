@@ -3,7 +3,7 @@ import { RouterView } from "vue-router";
 import LanguageComponent from "./components/LanguageComponent.vue";
 import io from "socket.io-client";
 import router from "./router";
-const socket = io("localhost:3000");
+const socket = io();
 
 export default {
   name: "App",

@@ -42,7 +42,7 @@ const router = createRouter({
     {
       path: '/cards/:id',
       name: 'CardView',
-      component: () => import('../views/cardViewTest.vue')
+      component: () => import('../views/WhiteCardView.vue')
     },
     {
       path: '/black/:id',
@@ -57,12 +57,12 @@ const router = createRouter({
     {
       path: '/final/:id',
       name: 'FinalView',
-      component: () => import('../views/FinalView.vue')
+      component: () => import('../views/HostFinalView.vue')
     },
     {
      path: '/end/:id',
       name: 'EndView',
-      component: () => import('../views/EndView.vue')
+      component: () => import('../views/PlayerEndView.vue')
     }
   ]
 })
