@@ -82,4 +82,11 @@ export default {
   margin-bottom: -10px;
   font-size: 1.1rem;
 }
+
+.card-view .card {
+  font-size: 30px;
+  @media (min-width: 900px) {
+    font-size: 1.2rem;
+  }
+}
 </style>

@@ -135,7 +135,7 @@ export default {
 
         // Starta intervallet
         const interval = setInterval(() => {
-          this.timeLeft--;
+          this.timeLeft;
 
           if (this.timeLeft < 0) {
             if (this.gamePhase === "SELECTION") {

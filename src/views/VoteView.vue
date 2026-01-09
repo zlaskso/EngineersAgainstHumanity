@@ -148,6 +148,8 @@
 
 
   <style scoped>
+
+
 .vote-container {
   padding: 20px;
   text-align: center;
@@ -173,7 +175,8 @@
   left: 0;
   width: 100%;
   background: white; /* Eller genomskinlig/gradient */
-  padding: 20px;
+  padding-top: 20px;
+  padding-bottom: 20px;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
 }
 .vote-btn {
@@ -226,5 +229,22 @@
   flex-wrap: wrap;
   gap: 20px;
 }
+
+@media (max-width: 900px) {
+    h1 {
+  text-align: center;
+  margin-top: 50px;
+  margin-bottom: 1.5rem;
+    }
+
+    .card-view {
+ display: grid;
+ transform: scale(0.7);
+ margin-top: -100px;
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 10px;
+  justify-content: center;
+}
+  }
 </style>
 
