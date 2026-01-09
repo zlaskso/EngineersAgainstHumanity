@@ -6,17 +6,17 @@
 
     <div class="price"> 
       <div class= "col second">
-      <div class="winner-name">{{ secondPlace()?.name }}</div>
+      <div class="winner-name" id="winner2">{{ secondPlace()?.name }}</div>
        <div class="podium"> 2 </div>
       </div>
 
       <div class="col first">
-        <div class="winner-name">{{ firstPlace()?.name }}</div>
+        <div class="winner-name" id="winner1">{{ firstPlace()?.name }}</div>
         <div class="podium"> 1 </div>
       </div>
 
       <div class="col third">
-        <div class="winner-name">{{ thirdPlace()?.name }}</div>
+        <div class="winner-name" id="winner3">{{ thirdPlace()?.name }}</div>
         <div class="podium"> 3 </div>
       </div>
     </div>
@@ -96,12 +96,14 @@ export default {
 
 <style scoped>
 .price {
+  margin-top: 100px;
   height: 400px;
   display: grid;
   font-size: 2rem;
   grid-template-columns: repeat(3, 15rem);
   grid-template-rows: auto 1fr;
   justify-content: center;
+  gap: 1rem;
 }
 
 .col{
@@ -115,27 +117,53 @@ export default {
 .second, .first, .third {
   width: 15rem;
   font-size: 8rem;
-  background: white;
   border-radius: 20px 20px 0 0;
   align-self: end;
 }
 
 .second {
   grid-column: 1;
-  grid-row: 1;
-  height: 70%;
+  grid-row: 2;
 }
 
 .first {
   grid-column: 2;
-  grid-row: 1;
-  height: 100%;
+  grid-row: 2;
+}
+
+#winner1 {
+  font-weight: bold;
+  opacity: 0;
+  animation: reavealAnimation;
+  animation-duration: 800s;
+  animation-delay: 4s;
+}
+
+#winner2 {
+  opacity: 0;
+  animation: reavealAnimation;
+  animation-duration: 800s;
+  animation-delay: 2s;
+}
+
+#winner3 {
+  opacity: 0;
+  animation: reavealAnimation;
+  animation-duration: 800s;
+  animation-delay: 1s;
+}
+
+@keyframes reavealAnimation {
+  0% { transform: scaleY(0); opacity: 1; }
+  0.5% { transform: scaleY(1.5); opacity: 1; }
+  0.7% { transform: scaleY(0.9); opacity: 1;}
+  1% { transform: scaleY(1.1); opacity: 1;}
+  2% { transform: scaleY(1); opacity: 1;}
 }
 
 .third {
   grid-column: 3;
-  grid-row: 1;
-  height: 50%; 
+  grid-row: 2; 
 }
 
 .winner-name {
@@ -149,11 +177,11 @@ export default {
   width:100%;
   background: white;
   border-radius: 20px 20px 0 0;
-  border: 1px solid black;
-  font-size: 8rem;
+  border: 3px solid black;
+  font-size: 10rem;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: top;
   }
 
 .first .podium { height: 100%; }
