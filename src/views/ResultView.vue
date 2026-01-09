@@ -211,7 +211,7 @@ export default {
       this.timeLeft = 10;
 
       this.timerID = setInterval(() => {
-        this.timeLeft; //Om ni vill stoppa timern så ni kan ändra koden utan att den går vidare automatiskt kan ni kommentera hela denna rad
+        this.timeLeft--; //Om ni vill stoppa timern så ni kan ändra koden utan att den går vidare automatiskt kan ni kommentera hela denna rad
 
           if (this.timeLeft <= 0) {
           clearInterval(this.timerID);
