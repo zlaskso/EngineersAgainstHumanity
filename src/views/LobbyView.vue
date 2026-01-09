@@ -155,37 +155,107 @@ export default {
 </script>
 
 <style scoped>
+/*
+   DEL 1: MOBIL
+
+/* Rubriker */
 #lobbyName {
-  margin-top: 40px;
-  font-size: 32pt;
+  margin-top: 100px;
+  font-size: clamp(2rem, 5vw, 3rem);
+  text-align: center;
+  line-height: 1.1;
+  word-break: break-word; 
 }
 
 #gameCode {
   color: gray;
   font-weight: normal;
-  font-size: 20pt;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  text-align: center;
+  margin-bottom: 10px;
 }
+
 
 .gridLayout {
-  margin-top: 60px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 40px;
+  margin-top: 20px;
+  display: flex;     
+  flex-direction: column;
+  gap: 30px;
+  padding: 0 10px;   
 }
 
-.playersName,
-.finalGameRules {
-  font-size: 20pt;
-}
+
 .left-column {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  font-size: 20pt;
+  gap: 15px;
+  font-size: 1.2rem;
+  width: 100%;
+}
+
+
+.finalGameRules {
+  font-size: 1rem;
+  background: #f9f9f9; 
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #eee;
+  text-align: center;
+}
+
+.finalGameRules h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
 }
 
 .finalGameRules p {
-  color: gray;
+  color: #666;
+  margin: 5px 0;
+  font-size: 1.1rem;
+}
+
+
+.player-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.player-list li {
+  background: white;
+  padding: 10px;
+  margin-bottom: 5px;
+}
+
+
+.startGameButton {
+  background: black;
+  color: white;
+  font-weight: bold;
+  
+  width: 100%;
+  max-width: 400px; 
+  align-self: center;
+
+  padding: 18px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  
+  font-size: 1.2rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+  
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.startGameButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #ccc;
+  box-shadow: none;
 }
 
 .loading {
@@ -199,33 +269,61 @@ export default {
     clip-path: inset(0 -34% 0 0);
   }
 }
-.player-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-}
-.startGameButton {
-  background: gray;
-  align-self: center;
-  width: fit-content;
-  color: white;
-  font-weight: bold;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  font-size: 1rem;
-}
-.startGameButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
-.startGameButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: #ccc;
-  box-shadow: none;
+
+
+/* 
+   DEL 2: DESKTOP (STORA SKÄRMAR)
+ */
+@media (min-width: 900px) {
+  
+  #lobbyName {
+    margin-top: 40px;
+  }
+
+  .gridLayout {
+    margin-top: 60px;
+    display: grid;   
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    max-width: 1000px; 
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .left-column {
+    font-size: 1.5rem;
+  }
+
+  .startGameButton {
+    width: auto;
+    padding: 15px 40px;
+    font-size: 1.3rem;
+  }
+
+  .startGameButton:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    background-color: #333;
+  }
+
+  .finalGameRules {
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  
+  .player-list {
+    text-align: left;
+  }
+  
+  .player-list li {
+    background: none;
+    border: none;
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
+    margin-bottom: 0;
+    border-radius: 0;
+  }
 }
 </style>

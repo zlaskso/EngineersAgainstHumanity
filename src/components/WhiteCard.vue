@@ -91,4 +91,10 @@ export default {
   transform: none !important;
   box-shadow: none !important;
 }
+.card-view .card {
+  font-size: 30px;
+  @media (min-width: 900px) {
+    font-size: 1.2rem;
+  }
+}
 </style>

@@ -1,4 +1,13 @@
 <template>
+  <header>
+      <div v-bind:class="['hamburger', {'close': !hideNav}]" 
+         v-on:click="toggleNav">
+    </div>
+  <button class="logo" @click="homePage">
+      <img src="/img/logo.png">
+      Engineers Against Humanity
+    </button>
+    </header>
   <section id="gameRules">
     <h1>{{ uiLabels.createView?.setGameRules }}</h1>
 
@@ -26,10 +35,7 @@
   </div>
 
   <div class="lobby-actions">
-    <button class="back-button-aligned" @click="goBack">
-      {{ uiLabels.createView?.back }}
-    </button>
-    <button class="openLobbyButton" @click="openLobby">
+    <button class="default-btn" @click="openLobby">
       {{ uiLabels.createView?.openLobby }}
     </button>
   </div>
@@ -57,9 +63,9 @@ export default {
       gameRules: {
         //maxPlayerAmount: 0,
         numOfRounds: 5,
-        cardsOnHand: 5,
+        cardsOnHand: 4,
         answerTime: 30,
-        nrOfRerolls: 2,
+        nrOfRerolls: 1,
       },
       rulesConfig: [
         //{ key: "maxPlayerAmount", label: "maxNumPlayers", step: 1 },
@@ -112,15 +118,14 @@ export default {
         this.$router.push(`/lobby/${d.gameID}`);
       });
     },
+    homePage: function() {
+    this.$router.push(`/`);
+  }
   },
 };
 </script>
 
 <style scoped>
-body {
-  font-family: "Helvetica Neue", Arial, sans-serif;
-  font-size: large;
-}
 h1 {
   font-family: "Helvetica Neue";
   font-size: 2rem;
@@ -138,38 +143,6 @@ h1 {
   font-size: 4rem;
   gap: 1rem;
   margin: 2rem 0;
-}
-
-.openLobbyButton {
-  position: absolute;
-  right: 40;
-  background: none;
-  border: none;
-  color: gray;
-  cursor: pointer;
-  font-size: 2rem;
-  transition-duration: 1.4s;
-}
-.openLobbyButton:hover {
-  color: black;
-  transform: scale(1.4);
-}
-
-.back-button-aligned {
-  position: absolute;
-  left: 0;
-  padding-left: 5rem;
-  background: none;
-  border: none;
-  color: gray;
-  cursor: pointer;
-  font-size: 2rem;
-  transition-duration: 1.4s;
-}
-
-.back-button-aligned:hover {
-  color: black;
-  transform: scale(1.15);
 }
 
 .gameRuleButton {
@@ -209,13 +182,5 @@ input[type="text"] {
   border-color: black;
   border-radius: 10px;
   outline: none;
-}
-
-.lobby-actions {
-  display: flex;
-  justify-content: center;
-  gap: 10rem;
-  margin-left: 5;
-  margin-bottom: 5rem;
 }
 </style>

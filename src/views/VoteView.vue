@@ -22,7 +22,7 @@
     <div class="footer-actions">
       <button 
         v-if="!hasVoted" 
-        class="vote-btn" 
+        class="default-btn" 
         @click="submitVote" 
         :disabled="selectedVoteIndex === null">
         {{ uiLabels.voteView?.vote }}
@@ -101,6 +101,27 @@
       this.submittedAnswers = data.submissions;
     });
 
+    socket.on("requestFinalVote", () => {
+
+      if (this.hasVoted) return;
+
+      console.log("Time is up! Auto-voting...");
+
+      // Kolla att det finns kort att rösta på
+      if (this.cardsToVoteOn && this.cardsToVoteOn.length > 0) {
+        
+
+        const randomIndex = Math.floor(Math.random() * this.cardsToVoteOn.length);
+        const randomCardObj = this.cardsToVoteOn[randomIndex];
+
+
+        this.selectedVoteIndex = randomCardObj.cardIndex;
+
+     
+        this.submitVote();
+      }
+    });
+
 
     socket.on("roundFinished", () => {
       this.$router.push("/result/" + this.gameID);
@@ -143,10 +164,9 @@
 };
 </script>
 
+<style scoped>
 
 
-
-  <style scoped>
 .vote-container {
   padding: 20px;
   text-align: center;
@@ -172,51 +192,9 @@
   left: 0;
   width: 100%;
   background: white; /* Eller genomskinlig/gradient */
-  padding: 20px;
+  padding-top: 20px;
+  padding-bottom: 20px;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-}
-.vote-btn {
-  background-color: black;
-  color: white;
-  padding: 18px 50px;
-  font-size: 1.3rem;
-  border-radius: 50px;
-  border: 2px solid #000;
-  font-weight: bold;
-  cursor: pointer;
-
-  /* Gör animeringen mjuk och "studsig" */
-  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-  
-  /* En subtil skugga för djup */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  
-  /* Se till att texten inte markeras när man klickar snabbt */
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.vote-btn:hover:not(:disabled) {
-  transform: translateY(-3px); /* Knappen lyfter */
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); 
-  background-color: #222; 
-}
-
-/* När man klickar (Active) */
-.vote-btn:active:not(:disabled) {
-  transform: translateY(1px); /* Knappen trycks ner */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Skuggan krymper */
-  background-color: #000;
-}
-
-/* När knappen är inaktiverad (inget kort valt) */
-.vote-btn:disabled {
-  background-color: #e0e0e0; 
-  border-color: #e0e0e0;
-  color: #a0a0a0; 
-  cursor: not-allowed;
-  transform: none; 
-  box-shadow: none; 
 }
 
 .card-view {
@@ -225,5 +203,22 @@
   flex-wrap: wrap;
   gap: 20px;
 }
+
+@media (max-width: 900px) {
+    h1 {
+  text-align: center;
+  margin-top: 50px;
+  margin-bottom: 1.5rem;
+    }
+
+    .card-view {
+  display: grid;
+  transform: scale(0.7);
+  margin-top: -100px;
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 10px;
+  justify-content: center;
+}
+  }
 </style>
 

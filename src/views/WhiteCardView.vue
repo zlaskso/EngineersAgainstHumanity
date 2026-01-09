@@ -1,6 +1,6 @@
 <template>
   <h1>
-    {{ uiLabels.cardView?.pickFavourite }} {{ currentHandIndexes }}{{ roundUsedIndexes }}
+    {{ uiLabels.cardView?.pickFavourite }}
   </h1>
   <div class="card-view">
     <WhiteCard
@@ -178,25 +178,21 @@ export default {
 </script>
 
 <style scoped>
+h1 {
+  text-align: center;
+  margin-top: 100px;
+  margin-bottom: 0px;
+}
 .card-view {
-  padding: 2rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  transform: scale(0.7);
+  margin-top: -100px;
+  margin-bottom: -100px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  justify-content: center;
 }
 
-.submit-btn {
-  margin: 1.5rem;
-  color: black;
-  font-weight: bold;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  font-size: 1rem;
-}
 .rerollButton {
   background: gray;
   color: white;
@@ -208,6 +204,8 @@ export default {
   transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   font-size: 1rem;
+  margin-bottom: 50px;
+  margin-top: 10px;
 }
 
 .rerollButton:hover:not(:disabled) {
@@ -229,25 +227,21 @@ export default {
   padding-bottom: 2rem;
 }
 
-.vote-btn {
-  background-color: black;
-  color: white;
-  padding: 15px 30px;
-  font-size: 1.2rem;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
+@media (min-width: 900px) {
+  .card-view {
+    padding: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    transform: scale(1);
+    margin-top: 0px;
+    margin-bottom: 0px;
+  }
 
-.vote-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.card-view {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
+  h1 {
+    text-align: center;
+    margin-top: 50px;
+    margin-bottom: 1.5rem;
+  }
 }
 </style>
