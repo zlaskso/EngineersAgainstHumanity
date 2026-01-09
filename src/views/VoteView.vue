@@ -102,6 +102,27 @@
       this.submittedAnswers = data.submissions;
     });
 
+    socket.on("requestFinalVote", () => {
+
+      if (this.hasVoted) return;
+
+      console.log("Time is up! Auto-voting...");
+
+      // Kolla att det finns kort att rösta på
+      if (this.cardsToVoteOn && this.cardsToVoteOn.length > 0) {
+        
+
+        const randomIndex = Math.floor(Math.random() * this.cardsToVoteOn.length);
+        const randomCardObj = this.cardsToVoteOn[randomIndex];
+
+
+        this.selectedVoteIndex = randomCardObj.cardIndex;
+
+     
+        this.submitVote();
+      }
+    });
+
 
     socket.on("roundFinished", () => {
       this.$router.push("/result/" + this.gameID);

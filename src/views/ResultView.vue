@@ -257,7 +257,7 @@ export default {
 
 .winner-name {
   font-size: 2.5rem;
-  color: #d35400;
+  color: black;
   margin: 10px 0 10px 0;
 }
 
