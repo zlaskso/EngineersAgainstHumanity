@@ -307,7 +307,7 @@ export default {
   }
 
   .finalGameRules {
-    text-align: left; 
+    text-align: left;
     background: none;
     border: none;
     padding: 0;

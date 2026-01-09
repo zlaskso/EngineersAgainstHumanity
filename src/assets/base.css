@@ -6,3 +6,82 @@ body {
   margin: 0;
   padding: 0;
 }
+
+.logo {
+    letter-spacing: 0.08em;
+    font-size: 3rem;
+    font-weight: bold;
+    padding-top:0.5em;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+  .logo img {
+    height:2.5rem;
+    vertical-align: bottom;
+    margin-right: 0.5rem; 
+  }
+
+  header {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 2em auto 5rem;
+    align-items: center;
+  }
+
+  .default-btn {
+  background-color: black;
+  color: white;
+  padding: 18px 50px;
+  font-size: 1.3rem;
+  border-radius: 50px;
+  border: 2px solid #000;
+  font-weight: bold;
+  cursor: pointer;
+
+  /* Gör animeringen mjuk och "studsig" */
+  transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  
+  /* En subtil skugga för djup */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  
+  /* Se till att texten inte markeras när man klickar snabbt */
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.default-btn:hover:not(:disabled) {
+  transform: translateY(-3px); /* Knappen lyfter */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); 
+  background-color: #222; 
+}
+
+/* När man klickar (Active) */
+.default-btn:active:not(:disabled) {
+  transform: translateY(1px); /* Knappen trycks ner */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Skuggan krymper */
+  background-color: #000;
+}
+
+/* När knappen är inaktiverad (inget kort valt) */
+.default-btn:disabled {
+  background-color: #e0e0e0; 
+  border-color: #e0e0e0;
+  color: #a0a0a0; 
+  cursor: not-allowed;
+  transform: none; 
+  box-shadow: none; 
+}
+
+  @media (max-width: 900px) {
+    .logo {
+    margin-top: 90px;
+    color :black;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    justify-content: center;
+    transform: scale(1.3);
+    }
+  }

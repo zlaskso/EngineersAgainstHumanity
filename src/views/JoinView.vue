@@ -3,16 +3,14 @@
     <div v-bind:class="['hamburger', {'close': !hideNav}]" 
          v-on:click="toggleNav">
     </div>
-    <router-link to="/">
-    <button class="logo">
+    <button class="logo" @click="homePage">
       <img src="/img/logo.png">
       Engineers Against Humanity
     </button>
-    </router-link>
   </header>
   <input id="nameInput" type="text" v-model="nickname" v-bind:placeholder= "uiLabels.joinView?.namePlaceholder">
   <input id="roomInput" type="text" v-model="roomCode" v-bind:placeholder= "uiLabels.joinView?.codePlaceholder"></input><br>
-  <button id="join" @click="joinGame">{{uiLabels.joinView?.join}}</button>
+  <button class="default-btn" @click="joinGame">{{uiLabels.joinView?.join}}</button>
 </template>
 
 
@@ -28,6 +26,11 @@ export default {
     ResponsiveNav,
     nickname: "",
     roomCode: ""
+  },
+
+  created: function() {
+
+    sessionStorage.removeItem("hostPlayerID");
   },
 
   props: {
@@ -48,6 +51,11 @@ export default {
     },
 
     joinGame() {
+      if(!this.roomCode || !this.nickname) {
+        alert("Fill both fields to join a game!");
+        return;
+      }
+
       socket.emit("attemptJoinGame", {
         gameID: this.roomCode,
         nickname: this.nickname,
@@ -59,64 +67,25 @@ export default {
         this.$router.push(`/lobby/${d.gameID}`);
       });
 
-    }
-},
+    },
+    homePage: function() {
+    this.$router.push(`/`);
+  }
+  },
+  
 
 }
 
 </script>
 
 <style scoped>
-header {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 2em auto 5rem;
-    align-items: center;
-    margin-bottom: 100px;
-  }
-  .logo {
-    letter-spacing: 0.08em;
-    font-size: 3rem;
-    font-weight: bold;
-    padding-top:0.2em;
-    border: 0;
-    background: transparent;
-  }
-  .logo img {
-    height:2.5rem;
-    vertical-align: bottom;
-    margin-right: 0.5rem; 
-  }
-  .hamburger {
-    color:white;
-    width:1em;
-    display: flex;
-    align-items: center;
-    justify-content: left;
-    padding:0.5rem;
-    top:0;
-    left:0;
-    height: 2rem;
-    cursor: pointer;
-    font-size: 1.5rem;
-  }
-  .lang-switch {
-    font-size: 3rem;   /* Gör flaggan stor */
-    cursor: pointer;   /* Visar hand-ikon vid hover */
-    display: flex;
-    justify-content: center;
-    user-select: none; /* Förhindrar att man markerar texten vid snabba klick */
-    user-select: none; /* <-- Denna rad stoppar markering/highlighting */
-  -webkit-user-select: none;
-  }
-  .lang-switch:active {
-    transform: scale(0.9); /* Liten animation när man klickar */
-  }
+
   button {
     cursor: pointer;
   }
   input[type=text] {
     margin: 20px;
+    margin-top: 100px;
     padding: 10px;
     height: 50px;
     width: 350px;
@@ -154,8 +123,5 @@ header {
     from {scale: 1;}
     to {scale: 1.05;}
   }
-
-  button {
-    cursor: pointer;
-  }
+  
 </style>
