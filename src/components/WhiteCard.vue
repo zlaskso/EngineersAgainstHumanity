@@ -71,9 +71,15 @@ export default {
   position: absolute;
   bottom: 10px;
   right: 10px;
-  font-size: 0.8rem;
+  font-size: 1.2rem;
   font-weight: bold;
   color: gray;
   padding: 2px 8px;
+}
+
+.small-card-wrapper .player-name-tag {
+  margin-right: -70px;
+  margin-bottom: -10px;
+  font-size: 1.1rem;
 }
 </style>

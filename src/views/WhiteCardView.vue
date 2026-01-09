@@ -27,15 +27,17 @@
 </div>
 
 
-  <button class="rerollButton" @click="reroll" :disabled="this.rerollsLeft <= 0">
+  <button class="rerollButton" @click="reroll" :disabled="this.rerollsLeft <= 0"
+  v-if="!hasSubmitted">
     {{ uiLabels.cardView?.reroll }} ({{ rerollsLeft }} {{ uiLabels.cardView?.left }})
+
   </button>
 </template>
 <script>
 import WhiteCard from "@/components/WhiteCard.vue";
 import ResponsiveNav from "@/components/ResponsiveNav.vue";
 import io from "socket.io-client";
-const socket = io("localhost:3000");
+const socket = io();
 
 export default {
   name: "CardView",
