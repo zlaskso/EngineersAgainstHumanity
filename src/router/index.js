@@ -42,7 +42,7 @@ const router = createRouter({
     {
       path: '/cards/:id',
       name: 'CardView',
-      component: () => import('../views/cardViewTest.vue')
+      component: () => import('../views/WhiteCardView.vue')
     },
     {
       path: '/black/:id',
