@@ -63,9 +63,9 @@ export default {
       gameRules: {
         //maxPlayerAmount: 0,
         numOfRounds: 5,
-        cardsOnHand: 5,
+        cardsOnHand: 4,
         answerTime: 30,
-        nrOfRerolls: 2,
+        nrOfRerolls: 1,
       },
       rulesConfig: [
         //{ key: "maxPlayerAmount", label: "maxNumPlayers", step: 1 },
