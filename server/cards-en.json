@@ -1,6 +1,6 @@
 {
   "blackCards": [
-    "When the tent was at it's wors, ____ saved my day.",
+    "When the tenta was at it's worse, ____ saved my day.",
     "On first day as a engineeringstudent you will learn that ____ is the most important.",
     "When going to the bibbla but it is full of people, I tell them to ____ .",
     "Engineering students solve every problem with ____.",
@@ -100,7 +100,12 @@
     "The revolutionary technology is ironically based on ____.",
     "We spent the entire budget buying ____.",
     "On the last line of the report it simply said ____.",
-    "The advisor's official solution was ____."
+    "The advisor's official solution was ____.",
+    "I didn't think Vera was capable of ____.",
+    "Zanton had a tendency to always suggest ____.",
+    "Lucas surprised everyone by implementing ____.",
+    "Liana's idea of ____ saved the project.",
+    "Shahin hacked the firewall using ____."
   ],
 
   "whiteCards": [
@@ -308,6 +313,11 @@
   "a system without monitoring",
   "a repo full of binary files",
   "a fix that creates three new bugs",
-  "a project that only works in theory"
+  "a project that only works in theory",
+  "Shahin",
+  "Vera",
+  "Zanton",
+  "Lucas",
+  "Liana"
 ]
 }

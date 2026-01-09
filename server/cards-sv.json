@@ -100,7 +100,12 @@
     "Den revolutionerande tekniken bygger ironiskt nog på ____.",
     "Vi använde hela budgeten för att köpa ____.",
     "På sista raden i rapporten stod det bara ____.",
-    "Den officiella lösningen enligt handledaren var ____."
+    "Den officiella lösningen enligt handledaren var ____.",
+    "Jag trodde inte Vera var kapabel till ____.",
+    "Zanton hade en tendens att alltid föreslå ____.",
+    "Lucas överraskade alla genom att implementera ____.",
+    "Lianas idé om ____ räddade projektet.",
+    "Shahin hackade brandväggen med hjälp av ____."
   ],
 
   "whiteCards": [
@@ -308,6 +313,11 @@
     "ett system utan övervakning",
     "ett repo fullt av binärfiler",
     "en fix som skapar tre nya buggar",
-    "ett projekt som bara fungerar i teorin"
+    "ett projekt som bara fungerar i teorin",
+    "Shahin",
+    "Vera",
+    "Zanton",
+    "Lucas",
+    "Liana"
 ]
 }
