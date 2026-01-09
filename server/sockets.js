@@ -276,8 +276,6 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
         indexToNameMap[cardIndex] = player.name;
       }
     });
-
-    console.log("[SERVER] Sending name map:", indexToNameMap);
     socket.emit("returnSubmissions", indexToNameMap);
   }
 });
@@ -314,14 +312,7 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
       blackCard: room.currentRound.blackCardIndex
     });
     });
-  socket.on("getRoundCounter", ({ gameID }) => {
-    const room = data.getGameRoom(gameID);
-    if (!room) return;
 
-    socket.emit("roundCounter", {
-      roundCounter: room.currentRound.roundNumber
-    });
-  });
 };
 
 export { sockets };
