@@ -28,6 +28,13 @@ console.log("[SERVER] All players submitted, starting voting phase");
   io.to(gameID).emit("requestFinalSelection");
 });
 
+// När tiden för röstning tar slut (från BlackCardView)
+  socket.on("timeUpVoting", (gameID) => {
+    console.log(`[SERVER] Voting time up for room ${gameID}. Requesting forced votes.`);
+    // Ropa till alla klienter att de måste skicka in en röst NU
+    io.to(gameID).emit("requestFinalVote");
+  });
+
 
   socket.on('getUILabels', function (lang) {
     socket.emit('uiLabels', data.getUILabels(lang));
