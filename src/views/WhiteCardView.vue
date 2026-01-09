@@ -27,8 +27,10 @@
 </div>
 
 
-  <button class="rerollButton" @click="reroll" :disabled="this.rerollsLeft <= 0">
+  <button class="rerollButton" @click="reroll" :disabled="this.rerollsLeft <= 0"
+  v-if="!hasSubmitted">
     {{ uiLabels.cardView?.reroll }} ({{ rerollsLeft }} {{ uiLabels.cardView?.left }})
+
   </button>
 </template>
 <script>
