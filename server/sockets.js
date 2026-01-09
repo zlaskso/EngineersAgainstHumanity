@@ -1,10 +1,36 @@
+const activeTimers = {}; // Aktiva timers per gameID {gameid: timerObject}
+const timerValues = {};  // Lagrar de faktiska sekunderna som är kvar { gameID: 15 }
+
 function sockets(io, socket, data) {
 
+  const startServerTimer = (gameID, duration, onComplete) => {
+    // Ta bort eventuell tidigare timer för detta gameID
+    if (activeTimers[gameID]) clearInterval(activeTimers[gameID]);
+
+    // Spara startvärdet
+    timerValues[gameID] = duration;
+    
+    // Skicka direkt ut tiden 
+    io.to(gameID).emit("timerUpdate", { timeLeft: timerValues[gameID] });
+
+    activeTimers[gameID] = setInterval(() => {
+      timerValues[gameID]--;
+      
+      // Skicka uppdatering varje sekund
+      io.to(gameID).emit("timerUpdate", { timeLeft: timerValues[gameID] });
+
+      if (timerValues[gameID] <= 0) {
+        clearInterval(activeTimers[gameID]);
+        delete activeTimers[gameID];
+        delete timerValues[gameID]; // Rensa bort värdet när det är klart
+        if (onComplete) onComplete();
+      }
+    }, 1000);
+};
 
   const startVotingPhase = (gameID) => {
     const room = data.getGameRoom(gameID);
     if (!room) return;
-
     const submissionsMap = data.getSubmissions(gameID);
     // Gör om map till en lista: [{playerID: "x", cardIndex: 5}, ...]
     let submissionsList = Object.entries(submissionsMap).map(([pid, cIdx]) => ({
@@ -14,19 +40,18 @@ function sockets(io, socket, data) {
     
     // Blanda listan för anonymitet
     submissionsList = data.shuffle(submissionsList);
+    
+    //io.to(gameID).emit("goToVoteView");
+    io.to(gameID).emit("votingPhaseStarted", { submissions: submissionsList });
 
-    io.to(gameID).emit("goToVoteView");
-    io.to(gameID).emit("votingPhaseStarted", {
-      submissions: submissionsList
+    // förinställd tid för röstning
+    startServerTimer(gameID, 20, () => {
+       console.log("Voting time up!");
+       // Här kan du trigga resultatskärmen om alla inte röstat
+        //io.to(gameID).emit("forceEndVoting");
+        io.to(gameID).emit("roundFinished", room.lastRoundResult);
     });
   };
-
-
-// Om timern på stora skärmen tar slut
-socket.on("startVotePhase", (gameID) => {
-console.log("[SERVER] All players submitted, starting voting phase");
-  io.to(gameID).emit("requestFinalSelection");
-});
 
 
   socket.on('getUILabels', function (lang) {
@@ -56,7 +81,6 @@ console.log("[SERVER] All players submitted, starting voting phase");
       gameID: gameID,
       hostID: hostID
     });
-
   });
 
 
@@ -109,6 +133,27 @@ console.log("[SERVER] All players submitted, starting voting phase");
     });
   });
 
+  const runSelectionPhase = (gameID) => {
+  const room = data.getGameRoom(gameID);
+  if (!room) return;
+  room.currentRound.blackCardIndex = data.dealBlackCard(gameID);
+
+  // Skicka ut att en ny runda har startat
+io.to(gameID).emit("newRoundStarted", {
+    roundCounter: room.currentRound.roundNumber,
+    blackCard: room.currentRound.blackCardIndex
+  });
+
+  //Starta selection phase timer
+  startServerTimer(gameID, room.gameSettings.answerTime, () => {
+    console.log("Selection time up on server!");
+    io.to(gameID).emit("forceFinalSelection"); 
+    
+    // timeout innan röstningsfasen startar för att ge klienterna tid att hantera "forceFinalSelection"
+    setTimeout(() => startVotingPhase(gameID), 2000);
+  });
+};
+
 
   socket.on("startGame", d => {
     const room = data.getGameRoom(d.gameID);
@@ -120,6 +165,7 @@ console.log("[SERVER] All players submitted, starting voting phase");
       hostID: room.hostID,
       participants: room.participants
     });
+    runSelectionPhase(d.gameID); // Startar första rundan
   });
 
 
@@ -169,11 +215,14 @@ console.log("[SERVER] All players submitted, starting voting phase");
 socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
     console.log(`[SERVER] Submitting card ${cardIndex}`);
     data.saveSubmission(gameID, playerID, cardIndex);
+    const submissionsMap = data.getSubmissions(gameID);
+    const count = Object.keys(submissionsMap).length;
+    io.to(gameID).emit("numOfSubmissions", { numOfSubmissions: count });
 
-    // Om alla spelare har lämnat svar...
+    // Om alla spelare har svartat, starta röstningsfasen direkt
     if (data.allPlayersSubmitted(gameID)) {
       console.log("[SERVER] All players submitted, starting voting phase");
-      // Anropa hjälpfunktionen vi skapade ovan
+      // starta röstningsfasen
       startVotingPhase(gameID);
     }
   });
@@ -211,27 +260,35 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
       };
 
       io.to(gameID).emit("roundFinished", room.lastRoundResult);
-    }
-  });
 
-  socket.on("startNextRound", ({gameID}) => {
-    const room = data.getGameRoom(gameID);
-    if (!room) return;
-
-    if (room.currentRound.roundNumber >= room.gameSettings.numOfRounds) {
+startServerTimer(gameID, 10, () => {
+    const roomToUpdate = data.getGameRoom(gameID);
+    
+    // Är spelet över eller nästa runda
+    if (roomToUpdate.currentRound.roundNumber >= roomToUpdate.gameSettings.numOfRounds) {
       io.to(gameID).emit("gameSeshOver");
-      console.log("[SERVER] Game session over, emitting gameSeshOver");
-      return;
-    }
-    else {
-
-    data.resetVotes(gameID);
-    data.resetForNewRound(gameID);
-    data.prepareNextRound(gameID);
-    // Tell everyone to go back to the Black Card screen
-    io.to(gameID).emit("newRoundStarted");
+    } else {
+      // Förbered dataför nästa runda ökar roundNumber, rensar submissions osv
+      data.resetForNewRound(gameID); 
+      
+      // Återanvänd runSelectionPhase för att starta nästa runda
+      runSelectionPhase(gameID); 
     }
   });
+    }
+  });
+
+socket.on("startNextRound", ({gameID}) => {
+  const room = data.getGameRoom(gameID);
+  if (!room) return;
+
+  if (room.currentRound.roundNumber >= room.gameSettings.numOfRounds) {
+    io.to(gameID).emit("gameSeshOver");
+  } else {
+    data.resetForNewRound(gameID);
+    runSelectionPhase(gameID); // mål:använd samma kod
+  }
+});
 
   socket.on("getRoundResult", (d) => {
     const room = data.getGameRoom(d.gameID);
@@ -312,6 +369,35 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
       blackCard: room.currentRound.blackCardIndex
     });
     });
+
+    socket.on("getRoundCounter", ({ gameID }) => {
+    const room = data.getGameRoom(gameID);
+    if (!room) return;
+
+    socket.emit("roundCounter", {
+      roundCounter: room.currentRound.roundNumber
+    });
+    });
+
+    socket.on("getNumOfPlayers", ({ gameID }) => {
+    const room = data.getGameRoom(gameID);
+    if (!room) return;
+
+    const numOfPlayers = room.participants.length;
+
+    socket.emit("numOfPlayers", {
+      numOfPlayers: numOfPlayers
+    });
+    });
+
+    socket.on("requestCurrentTime", ({ gameID }) => {
+    // om det finns en aktiv timer för detta gameID, skicka dess tid
+    if (timerValues[gameID] !== undefined) {
+        socket.emit("timerUpdate", { timeLeft: timerValues[gameID] });
+    }
+});
+
+
 
 };
 

@@ -9,28 +9,32 @@
       :index="idx"
       :prompt="uiCardLabels.whiteCards[i]"
       :selected="selectedIndex === idx"
+      :disabled="hasSubmitted"
       @select="setSelected"
     />
   </div>
 
-<div class="action-area">
-  <button 
-    class="submit-btn" 
-    v-if="!hasSubmitted" 
-    @click="submitSelection" 
-    :disabled="selectedIndex === null">
-    {{ uiLabels.cardView?.submitAnswer}}
-  </button>
-  <div v-else class="waiting-msg">
-    <h3>{{ uiLabels.cardView?.waitingForOthers}}</h3>
+  <div class="action-area">
+    <button
+      class="submit-btn"
+      v-if="!hasSubmitted"
+      @click="submitSelection"
+      :disabled="selectedIndex === null"
+    >
+      {{ uiLabels.cardView?.submitAnswer }}
+    </button>
+    <div v-else class="waiting-msg">
+      <h3>{{ uiLabels.cardView?.waitingForOthers }}</h3>
+    </div>
   </div>
-</div>
 
-
-  <button class="rerollButton" @click="reroll" :disabled="this.rerollsLeft <= 0"
-  v-if="!hasSubmitted">
+  <button
+    class="rerollButton"
+    @click="reroll"
+    :disabled="this.rerollsLeft <= 0"
+    v-if="!hasSubmitted"
+  >
     {{ uiLabels.cardView?.reroll }} ({{ rerollsLeft }} {{ uiLabels.cardView?.left }})
-
   </button>
 </template>
 <script>
@@ -90,10 +94,11 @@ export default {
     socket.on("newRoundStarted", () => {
       this.hasSubmitted = false;
       this.selectedIndex = null;
-      socket.emit("requestCurrentHand", { 
-        gameID: this.gameID, 
-        playerID: this.localPlayerID });
-  });
+      socket.emit("requestCurrentHand", {
+        gameID: this.gameID,
+        playerID: this.localPlayerID,
+      });
+    });
 
     socket.on("rerollResult", (data) => {
       if (data.newCardIndexes) {
@@ -105,8 +110,12 @@ export default {
       }
     });
 
-    socket.on("requestFinalSelection", () => {
-      // If no card is selected, default to the first card (index 0) or handle as null
+    socket.on("forceFinalSelection", () => {
+      if (this.hasSubmitted) {
+        console.log("Card already submitted, ignoring timer force.");
+        return; // Avbryt, vi behöver inte skicka igen
+      }
+      // If no card is selected, default to marked card or the first card (index 0)
       const indexToSubmit = this.selectedIndex !== null ? this.selectedIndex : 0;
       const selectedCard = this.currentHandIndexes[indexToSubmit];
 
@@ -115,27 +124,11 @@ export default {
         playerID: this.localPlayerID,
         cardIndex: selectedCard,
       });
+      this.hasSubmitted = true;
     });
 
-    // The server says "Everyone is ready, move to the vote screen."
-    socket.on("goToVoteView", () => {
-      this.$router.push(`/vote/${this.gameID}`);
-    });
-
-    socket.on("requestFinalSelection", () => {
-      // If no card is selected, default to the first card (index 0) or handle as null
-      const indexToSubmit = this.selectedIndex !== null ? this.selectedIndex : 0;
-      const selectedCard = this.currentHandIndexes[indexToSubmit];
-
-      socket.emit("submitCard", {
-        gameID: this.gameID,
-        playerID: this.localPlayerID,
-        cardIndex: selectedCard,
-      });
-    });
-
-    // The server says "Everyone is ready, move to the vote screen."
-    socket.on("goToVoteView", () => {
+    // ready move to vote view
+    socket.on("votingPhaseStarted", () => {
       this.$router.push(`/vote/${this.gameID}`);
     });
   },
@@ -150,28 +143,21 @@ export default {
           playerID: this.localPlayerID,
         });
         this.selectedIndex = null;
-
-      
       }
-      
     },
 
     submitSelection() {
-    if (this.selectedIndex !== null) {
-      const selectedCard = this.currentHandIndexes[this.selectedIndex];
-      
-      socket.emit("submitCard", {
-        gameID: this.gameID,
-        playerID: this.localPlayerID,
-        cardIndex: selectedCard
-      });
-      
-      this.hasSubmitted = true;
-    }
-  },
+      if (this.selectedIndex !== null) {
+        const selectedCard = this.currentHandIndexes[this.selectedIndex];
 
-    fetchLobbyData: function (gameID) {
-      socket.emit("getGameSettings", gameID);
+        socket.emit("submitCard", {
+          gameID: this.gameID,
+          playerID: this.localPlayerID,
+          cardIndex: selectedCard,
+        });
+
+        this.hasSubmitted = true;
+      }
     },
 
     requestInitialHand() {
@@ -183,9 +169,8 @@ export default {
       }
     },
 
-
-
     setSelected(index) {
+      if (this.hasSubmitted) return;
       this.selectedIndex = index;
     },
   },
@@ -202,7 +187,7 @@ export default {
 
 .submit-btn {
   margin: 1.5rem;
-  color:  black;
+  color: black;
   font-weight: bold;
   padding: 0.75rem 1.5rem;
   border: none;
@@ -237,7 +222,6 @@ export default {
   box-shadow: none;
 }
 
-
 .footer-actions {
   display: flex;
   justify-content: center;
@@ -266,5 +250,4 @@ export default {
   justify-content: center;
   gap: 10px;
 }
-
 </style>

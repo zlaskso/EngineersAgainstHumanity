@@ -1,5 +1,9 @@
 <template>
-  <div class="card" :class="{ selected: selected, 'no-hover': isHost }" @click="$emit('select', index)">
+  <div
+    class="card"
+    :class="{ selected: selected, 'no-hover': isHost }"
+    @click="$emit('select', index)"
+  >
     <p>{{ prompt }}</p>
     <div v-if="showName && playerName" class="player-name-tag">
       {{ playerName }}
@@ -17,8 +21,8 @@ export default {
     playerName: String,
     showName: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   methods: {
     toggleSelect() {
@@ -28,8 +32,8 @@ export default {
   computed: {
     isHost() {
       return sessionStorage.getItem("hostPlayerID") !== null;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -81,5 +85,10 @@ export default {
   margin-right: -70px;
   margin-bottom: -10px;
   font-size: 1.1rem;
+}
+.white-card.disabled {
+  cursor: default;
+  transform: none !important;
+  box-shadow: none !important;
 }
 </style>

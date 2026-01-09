@@ -69,7 +69,8 @@
 		"otherCards": "Förlorande kort:",
 		"nextRound": "Nästa runda om ",
 		"WaitingForHost": "Väntar på nästa runda...",
-		"yourScore": "Din poäng"
+		"yourScore": "Din poäng",
+		"seeFinalScore": "Se slutpoäng om"
 	},
 
 	"voteView": {
@@ -82,6 +83,8 @@
 		"selectionPhase": "Välj era kort!",
     	"votingPhase": "Dags att rösta!",
     	"toSelect": "att välja svar",
-    	"toVote": "att rösta"
+    	"toVote": "att rösta",
+		"currentRound": "Nuvarande runda: ",
+		"numOfSubmissions": "Antal inskickade svar: "
 	}
 }

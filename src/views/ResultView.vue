@@ -1,59 +1,73 @@
 <template>
   <div class="result-container">
-    
     <div v-if="amIHost" class="host-view">
-      
       <div class="winner-section">
-        <h1>{{ uiLabels.resultView?.roundWinner}}</h1>
+        <h1>{{ uiLabels.resultView?.roundWinner }}</h1>
         <h2 class="winner-name">{{ formattedWinnerNames }}</h2>
-        
-      <div class="winning-combo">
-        <div class="result-black-card">
-          <BlackCard :prompt="uiCardLabels?.blackCards?.[blackCardIndex]" />
-        </div>
 
-        <div class="white-cards-column">
-          <div class="winners-grid">
-            <div v-for="(cardIndex, idx) in winningCardIndexes" :key="idx" class="winner-white-card" :style="dynamicWinnerStyle">
-              <WhiteCard 
-                  :prompt="uiCardLabels?.whiteCards?.[cardIndex]" 
+        <div class="winning-combo">
+          <div class="result-black-card">
+            <BlackCard :prompt="uiCardLabels?.blackCards?.[blackCardIndex]" />
+          </div>
+
+          <div class="white-cards-column">
+            <div class="winners-grid">
+              <div
+                v-for="(cardIndex, idx) in winningCardIndexes"
+                :key="idx"
+                class="winner-white-card"
+                :style="dynamicWinnerStyle"
+              >
+                <WhiteCard
+                  :prompt="uiCardLabels?.whiteCards?.[cardIndex]"
                   :playerName="playerWithSubmissions[cardIndex]"
                   :showName="true"
                 />
+              </div>
             </div>
-          </div>
 
-          <div class="others-section">
-            <div class="cards-grid">
-              <div v-for="(card, index) in losingCards" :key="index" class="small-card-wrapper">
-                <WhiteCard 
-                    :prompt="uiCardLabels?.whiteCards?.[card.cardIndex]" 
+            <div class="others-section">
+              <div class="cards-grid">
+                <div
+                  v-for="(card, index) in losingCards"
+                  :key="index"
+                  class="small-card-wrapper"
+                >
+                  <WhiteCard
+                    :prompt="uiCardLabels?.whiteCards?.[card.cardIndex]"
                     :playerName="playerWithSubmissions[card.cardIndex]"
                     :showName="true"
                   />
+                </div>
               </div>
             </div>
           </div>
         </div>
-        </div>
       </div>
 
       <div class="footer-actions">
-        <button @click="nextRound" class="next-round-btn">
-          {{uiLabels.resultView?.nextRound}}{{ this.timeLeft }}
+        <button
+          v-if="currentRoundNumber < totalRounds"
+          @click="nextRound"
+          class="next-round-btn"
+        >
+          {{ uiLabels.resultView?.nextRound }} {{ timeLeft }}
+        </button>
+
+        <button v-else @click="nextRound" class="next-round-btn final-btn">
+          {{ uiLabels.resultView?.seeFinalScore }} {{ timeLeft }}
         </button>
       </div>
     </div>
 
     <div v-else class="player-waiting-view">
       <h1>{{ uiLabels.resultView?.WaitingForHost }}</h1>
-      
+
       <div class="my-score-box">
         <h1>{{ uiLabels.resultView?.yourScore }}</h1>
         <span class="score-number">{{ myScore }}</span>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -68,28 +82,30 @@ export default {
   name: "ResultView",
   components: {
     BlackCard,
-    WhiteCard
+    WhiteCard,
   },
 
   props: {
     uiLabels: Object,
-    uiCardLabels: Object
+    uiCardLabels: Object,
   },
 
   data() {
     return {
       gameID: "",
       localPlayerID: sessionStorage.getItem("playerID"),
+      currentRoundNumber: 0,
+      totalRounds: 0,
       winnerNames: [],
       blackCardIndex: null,
       winningCardIndexes: [],
-      allSubmittedCards: [], 
+      allSubmittedCards: [],
       participants: [],
       playerWithSubmissions: {},
-      timeLeft: 10,
+      timeLeft: null,
       timerID: null,
       columnWidth: 600, // Available width for winning cards
-      baseCardWidth: 200 // Original width from WhiteCard.vue
+      baseCardWidth: 200, // Original width from WhiteCard.vue
     };
   },
 
@@ -107,32 +123,32 @@ export default {
     },
     // Filtrerar bort alla vinnarkort
     losingCards() {
-      const winningIds = this.winningCardIndexes.map(id => Number(id));
-      return this.allSubmittedCards.filter(submission => {
+      const winningIds = this.winningCardIndexes.map((id) => Number(id));
+      return this.allSubmittedCards.filter((submission) => {
         return !winningIds.includes(Number(submission.cardIndex));
       });
     },
     myScore() {
-      const me = this.participants.find(p => p.id === this.localPlayerID);
+      const me = this.participants.find((p) => p.id === this.localPlayerID);
       return me ? me.points : 0;
     },
     dynamicWinnerStyle() {
       const count = this.winningCardIndexes.length || 1;
       const totalGap = 10 * (count - 1);
       const availableSpace = this.columnWidth - totalGap;
-      
+
       // Calculate max width allowed per card to stay within 650px
       const allowedWidthPerCard = availableSpace / count;
       let calculatedScale = allowedWidthPerCard / this.baseCardWidth;
-      
+
       // Cap scale at 0.9 so single winners aren't too massive
       const finalScale = Math.min(0.9, calculatedScale);
 
       return {
         transform: `scale(${finalScale})`,
-        transformOrigin: 'top left',
+        transformOrigin: "top left",
       };
-    }
+    },
   },
 
   created() {
@@ -140,42 +156,58 @@ export default {
     socket.emit("join", this.gameID);
     socket.emit("getRoundResult", { gameID: this.gameID });
 
+    socket.emit("getGameSettings", { gameID: this.gameID });
+    socket.on("gameSettings", (data) => {
+      this.totalRounds = data.gameSettings.numOfRounds;
+    });
+
+    socket.emit("getRoundCounter", { gameID: this.gameID });
+    socket.on("roundCounter", (data) => {
+      this.currentRoundNumber = data.roundCounter;
+    });
+
     if (this.amIHost) {
-        this.startTimer();
-      }
+      socket.emit("requestCurrentTime", { gameID: this.gameID }); // NYTT: Fråga efter tid direkt
+      socket.on("timerUpdate", (data) => {
+        if (data.timeLeft !== undefined) {
+          this.timeLeft = data.timeLeft;
+          console.log("Timer updated:", this.timeLeft);
+        }
+      });
+    }
 
     socket.on("roundResult", (data) => {
       this.winnerNames = data.winnerNames || [];
       this.blackCardIndex = Number(data.blackCardIndex);
       this.winningCardIndexes = data.winningCardIndexes || [];
-      this.allSubmittedCards = data.allSubmittedCards || []; 
+      this.allSubmittedCards = data.allSubmittedCards || [];
       this.participants = data.participants;
       socket.emit("getPlayerSubmissions", this.gameID);
     });
 
     socket.on("roundFinished", (data) => {
-  this.winnerNames = data.winnerNames || [];
-  this.blackCardIndex = Number(data.blackCardIndex);
-  this.winningCardIndexes = data.winningCardIndexes || [];
-  this.allSubmittedCards = data.allSubmittedCards || [];
-  this.participants = data.participants || [];
-
-  if (this.amIHost && !this.timerID) {
+      this.winnerNames = data.winnerNames || [];
+      this.blackCardIndex = Number(data.blackCardIndex);
+      this.winningCardIndexes = data.winningCardIndexes || [];
+      this.allSubmittedCards = data.allSubmittedCards || [];
+      this.participants = data.participants || [];
+      /* 
+      if (this.amIHost && !this.timerID) {
         this.startTimer();
-      }
-  socket.emit("getPlayerSubmissions", this.gameID);
-});
+      } */
+      socket.emit("getPlayerSubmissions", this.gameID);
+    });
     socket.on("newRoundStarted", () => {
-      if (this.timerID) {
+      /*       if (this.timerID) {
         clearInterval(this.timerID);
-      }
+      } */
       if (this.amIHost) {
         this.$router.push(`/black/${this.gameID}`);
       } else {
         this.$router.push(`/cards/${this.gameID}`);
       }
     });
-    
+
     socket.on("returnSubmissions", (submissions) => {
       this.playerWithSubmissions = submissions;
     });
@@ -191,45 +223,19 @@ export default {
         this.$router.push(`/end/${this.gameID}`);
       }
     });
-
   },
 
-  beforeUnmount() {
+  /*   beforeUnmount() {
     if (this.timerID) {
       clearInterval(this.timerID);
     }
-  },
+  }, */
 
   methods: {
-    startTimer() {
-      if (!this.amIHost) return;
-      
-      if (this.timerID) {
-        clearInterval(this.timerID);
-      };
-      
-      this.timeLeft = 10;
-
-      this.timerID = setInterval(() => {
-        this.timeLeft; //Om ni vill stoppa timern så ni kan ändra koden utan att den går vidare automatiskt kan ni kommentera hela denna rad
-
-          if (this.timeLeft <= 0) {
-          clearInterval(this.timerID);
-            this.timeID = null;
-            this.timeLeft = 0;
-            this.nextRound();
-      }
-      }, 1000);
-    },
     nextRound() {
-      if (this.timerID) {
-        clearInterval(this.timerID);
-        this.timerID = null;
-      }
-
       socket.emit("startNextRound", { gameID: this.gameID });
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -286,9 +292,9 @@ export default {
   align-items: flex-start;
   gap: 10px;
   padding-top: 40px;
-  }
+}
 
-  .white-cards-column {
+.white-cards-column {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -315,10 +321,10 @@ export default {
 
 .small-card-wrapper {
   margin-bottom: 0px;
-  transform: scale(0.65); 
-  transform-origin: 'top left';
+  transform: scale(0.65);
+  transform-origin: "top left";
   opacity: 0.6;
-  width: 160px; 
+  width: 160px;
   height: 300px;
 }
 

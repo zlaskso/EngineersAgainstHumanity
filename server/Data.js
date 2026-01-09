@@ -305,22 +305,6 @@ Data.prototype.getWinningCardIndexes = function (gameID) {
   return winningCardIndexes; // Returnerar en array av kort-index
 };
 
-// Resetta röster för nästa omgång
-Data.prototype.resetVotes = function(gameID) {
-  const room = this.getGameRoom(gameID);
-  if (!room) return;
-  room.currentRound.votes = {};
-  room.currentRound.voteCount = 0;
-};
-
-Data.prototype.prepareNextRound = function (gameID) {
-  const room = this.getGameRoom(gameID);
-  if (room) {
-    room.currentRound.roundNumber++;
-    room.currentRound.submissions = {}; // Clear old cards!
-    console.log(`[DATA] Room ${gameID} moved to round ${room.currentRound.roundNumber}`);
-  }
-};
 
 Data.prototype.getSubmissions = function (gameID) {
   const room = this.getGameRoom(gameID);
@@ -339,8 +323,18 @@ Data.prototype.resetForNewRound = function (gameID) {
   const room = this.getGameRoom(gameID);
   if (!room) return;
 
-  // nytt svartkort nästa runda
+  room.currentRound.roundNumber++;
+  console.log(`[DATA] Room ${gameID} moved to round ${room.currentRound.roundNumber}`);
+  //console.log(`[DATA] Resetting data for new round in room ${room}`);
+
+
+  // resetta inlämnade kort
+  room.currentRound.submissions = {};
+
+  // resetta röster
   room.currentRound.blackCardIndex = null;
+  room.currentRound.votes = {};
+  room.currentRound.voteCount = 0;
 
   // ny hand för alla (så requestCurrentHand delar ut nytt)
   for (const p of room.participants) {

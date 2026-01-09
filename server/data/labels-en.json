@@ -46,8 +46,6 @@
 		"explanation7": "The choices are shown anonymously, and you vote for which one is the funniest.",
 		"explanation8": "The player with the most voted option wins the round.",
 		"explanation9": "The player with the most won rounds wins"
-		
-		
 	},
 	"lobbyView": {
 		"joinInstructions": "Enter your nickname and press Join to participate in the game.",
@@ -68,20 +66,21 @@
 		"otherCards": "Losing cards:",
 		"nextRound": "Next round in ",
 		"WaitingForHost": "Waiting for next round...",
-		"yourScore": "Your score"
+		"yourScore": "Your score",
+		"seeFinalScore": "See final score in"
 	},
 	"blackCardView": {
-    "selectionPhase": "Choose your cards!",
-    "votingPhase": "Time to vote!",
-    "toSelect": "to choose",
-    "toVote": "to vote"
+		"selectionPhase": "Choose your cards!",
+		"votingPhase": "Time to vote!",
+		"toSelect": "to choose",
+		"toVote": "to vote",
+		"currentRound": "Current round: ",
+		"numOfSubmissions": "Number of submissions: "
 	},
-
 	"voteView": {
-    "header": "Vote for the funniest card!",
-    "vote": "Vote",
-    "voteReceived": "Vote received, waiting for other players..."
-    
+		"header": "Vote for the funniest card!",
+		"vote": "Vote",
+		"voteReceived": "Vote received, waiting for other players..."
 	}
 	
 }

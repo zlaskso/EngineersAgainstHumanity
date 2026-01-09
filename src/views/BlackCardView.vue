@@ -16,7 +16,16 @@
       >
       <span v-if="gamePhase === 'VOTING'"> {{ uiLabels.blackCardView?.toVote }}</span>
     </div>
-    <div>Current round {{ this.roundCounter }}/{{ this.gameSettings.numOfRounds }}</div>
+    <div>
+      {{ uiLabels.blackCardView?.currentRound }}{{ this.roundCounter }}/{{
+        this.gameSettings.numOfRounds
+      }}
+    </div>
+    <div>
+      {{ uiLabels.blackCardView?.numOfSubmissions }}{{ this.numOfSubmissions }}/{{
+        this.numOfPlayers
+      }}
+    </div>
   </div>
 </template>
 
@@ -39,15 +48,15 @@ export default {
   data: function () {
     return {
       currentBlackIndex: null,
-      timeLeft: 10,
+      timeLeft: null,
       gamePhase: "SELECTION",
       gameID: "",
-      answerTime: 20, // Sparar tiden från inställningarna
-      timerId: null,
+      //timerId: 0,
       roundCounter: 0,
+      numOfSubmissions: 0,
+      numOfPlayers: 0,
       gameSettings: {
         lobbyName: "",
-        maxPlayerAmount: 0,
         numOfRounds: 0,
         cardsOnHand: 0,
         answerTime: 0,
@@ -68,6 +77,13 @@ export default {
   created() {
     this.gameID = this.$route.params.id;
     socket.emit("getGameSettings", { gameID: this.gameID });
+    socket.emit("requestCurrentTime", { gameID: this.gameID }); // NYTT: Fråga efter tid direkt
+    socket.on("timerUpdate", (data) => {
+      if (data.timeLeft !== undefined) {
+        this.timeLeft = data.timeLeft;
+        console.log("Timer updated:", this.timeLeft);
+      }
+    });
 
     socket.on("gameSettings", (data) => {
       console.log("[CLIENT] Received gameSettings:", data);
@@ -85,9 +101,11 @@ export default {
 
     socket.on("connect", () => {
       socket.emit("join", this.gameID);
-      // Hämta aktuellt svart kort om man laddar om sidan
+      // hämta samma svarta kort även vid omladdning
       socket.emit("requestCurrentBlackCard", { gameID: this.gameID });
       socket.emit("getRoundCounter", { gameID: this.gameID });
+      socket.emit("getNumOfPlayers", { gameID: this.gameID });
+      socket.emit("getNumOfSubmissions", { gameID: this.gameID });
     });
 
     // Lyssnare för svart kort
@@ -101,12 +119,21 @@ export default {
         this.roundCounter = data.roundCounter;
       }
     });
+    socket.on("numOfPlayers", (data) => {
+      if (data.numOfPlayers !== undefined) {
+        this.numOfPlayers = data.numOfPlayers;
+      }
+    });
+    socket.on("numOfSubmissions", (data) => {
+      if (data.numOfSubmissions !== undefined) {
+        this.numOfSubmissions = data.numOfSubmissions;
+      }
+    });
 
     // Lyssnare för FAS-BYTE (När servern säger att vi ska rösta)
     socket.on("votingPhaseStarted", () => {
       console.log("Server says: Voting phase started!");
       this.gamePhase = "VOTING";
-      this.timeLeft = 30; // Ge spelarna 30 sekunder att rösta
     });
 
     // Lyssnare för RESULTAT
@@ -114,55 +141,30 @@ export default {
       this.$router.push(`/result/${this.gameID}`);
     });
 
-    socket.on("newRoundStarted", () => {
-      this.currentBlackIndex = null;
+    socket.on("newRoundStarted", (data) => {
       socket.emit("requestCurrentBlackCard", { gameID: this.gameID });
+      console.log("Ny runda mottagen:", data);
+      socket.emit("getRoundCounter", { gameID: this.gameID });
+      socket.emit("getNumOfPlayers", { gameID: this.gameID });
+      this.numOfSubmissions = 0; // Nollställ lokalt
+      this.gamePhase = "SELECTION"; // Säkerställ att vi är i rätt fas
     });
-  },
 
-  mounted() {
-    this.startTimer();
+    // Timer-logik
   },
 
   methods: {
-    startTimer() {
-      // 1. Hämta inställningar först för att få rätt tid
-      socket.emit("getGameSettings", { gameID: this.gameID });
-
-      socket.once("gameSettings", (d) => {
-        this.answerTime = d.gameSettings.answerTime || 20;
-        this.timeLeft = this.answerTime;
-
-        // Starta intervallet
-        const interval = setInterval(() => {
-          this.timeLeft--;
-
-          if (this.timeLeft < 0) {
-            if (this.gamePhase === "SELECTION") {
-              // Tiden ute för att VÄLJA -> Be servern starta röstning
-              // Vi nollställer inte tiden här, vi väntar på "votingPhaseStarted"
-              // för att vara säkra på att servern är med.
-              if (this.timeLeft === -1) {
-                // Kör bara en gång precis när den går under 0
-                console.log("Time up! Requesting vote phase...");
-                socket.emit("startVotePhase", this.gameID);
-              }
-            } else if (this.gamePhase === "VOTING") {
-              // Tiden ute för att RÖSTA -> Gå till resultat
-              console.log("Voting time up!");
-              clearInterval(interval);
-              // Tvinga fram resultat om servern inte redan skickat oss vidare
-              // (Servern borde sköta detta via allPlayersVoted, men detta är en säkerhet)
-            }
-          }
-        }, 1000);
-      });
-    },
-
     toggleNav() {
       this.hideNav = !this.hideNav;
     },
   },
+
+  /*   beforeUnmount() {
+  socket.off("timerUpdate");
+  socket.off("newRoundStarted");
+  socket.off("numOfSubmissions");
+  console.log("Vy stängd, lyssnare rensade.");
+} */
 };
 </script>
 
