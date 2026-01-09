@@ -151,8 +151,8 @@ export default {
               // Tiden ute för att RÖSTA -> Gå till resultat
               console.log("Voting time up!");
               clearInterval(interval);
-              // Tvinga fram resultat om servern inte redan skickat oss vidare
-              // (Servern borde sköta detta via allPlayersVoted, men detta är en säkerhet)
+              
+              socket.emit("timeUpVoting", this.gameID);
             }
           }
         }, 1000);
