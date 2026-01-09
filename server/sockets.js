@@ -263,17 +263,24 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
     });
   });
 
-  socket.on("getPlayerSubmissions", (d) => {
-    const room = data.getGameRoom(d.gameID)
-    if (room) {
-      submissions = data.getSubmissions(d.gameID)
-      socket.emit("displaySubmissions", submissions)
-    }
-    socket.emit("currentHand", {
-      handIndexes: player.currentHandIndexes,
-      rerollsLeft: player.rerollsLeft
+  socket.on("getPlayerSubmissions", (gameID) => {
+  const room = data.getGameRoom(gameID);
+  if (room) {
+    const submissions = data.getSubmissions(gameID); // This is { playerID: cardIndex }
+    const indexToNameMap = {};
+
+    // Map the card index to the player's actual nickname
+    Object.entries(submissions).forEach(([playerID, cardIndex]) => {
+      const player = room.participants.find(p => p.id === playerID);
+      if (player) {
+        indexToNameMap[cardIndex] = player.name;
+      }
     });
-  });
+
+    console.log("[SERVER] Sending name map:", indexToNameMap);
+    socket.emit("returnSubmissions", indexToNameMap);
+  }
+});
 
   socket.on("getSubmissions", (d) => {
     const room = data.getGameRoom(d.gameID);

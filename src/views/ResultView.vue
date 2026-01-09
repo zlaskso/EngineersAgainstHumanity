@@ -17,7 +17,7 @@
             <div v-for="(cardIndex, idx) in winningCardIndexes" :key="idx" class="winner-white-card" :style="dynamicWinnerStyle">
               <WhiteCard 
                   :prompt="uiCardLabels?.whiteCards?.[cardIndex]" 
-                  :playerName="winnerNames[idx]"
+                  :playerName="playerWithSubmissions[cardIndex]"
                   :showName="true"
                 />
             </div>
@@ -28,7 +28,7 @@
               <div v-for="(card, index) in losingCards" :key="index" class="small-card-wrapper">
                 <WhiteCard 
                     :prompt="uiCardLabels?.whiteCards?.[card.cardIndex]" 
-                    :playerName="card.playerName"
+                    :playerName="playerWithSubmissions[card.cardIndex]"
                     :showName="true"
                   />
               </div>
@@ -85,6 +85,7 @@ export default {
       winningCardIndexes: [],
       allSubmittedCards: [], 
       participants: [],
+      playerWithSubmissions: {},
       timeLeft: 10,
       timerID: null,
       columnWidth: 600, // Available width for winning cards
@@ -149,6 +150,7 @@ export default {
       this.winningCardIndexes = data.winningCardIndexes || [];
       this.allSubmittedCards = data.allSubmittedCards || []; 
       this.participants = data.participants;
+      socket.emit("getPlayerSubmissions", this.gameID);
     });
 
     socket.on("roundFinished", (data) => {
@@ -161,6 +163,7 @@ export default {
   if (this.amIHost && !this.timerID) {
         this.startTimer();
       }
+  socket.emit("getPlayerSubmissions", this.gameID);
 });
     socket.on("newRoundStarted", () => {
       if (this.timerID) {
@@ -171,6 +174,10 @@ export default {
       } else {
         this.$router.push(`/cards/${this.gameID}`);
       }
+    });
+    
+    socket.on("returnSubmissions", (submissions) => {
+      this.playerWithSubmissions = submissions;
     });
 
     socket.on("gameSeshOver", () => {
@@ -204,7 +211,7 @@ export default {
       this.timeLeft = 10;
 
       this.timerID = setInterval(() => {
-        this.timeLeft--; //Om ni vill stoppa timern så ni kan ändra koden utan att den går vidare automatiskt kan ni kommentera hela denna rad
+        this.timeLeft; //Om ni vill stoppa timern så ni kan ändra koden utan att den går vidare automatiskt kan ni kommentera hela denna rad
 
           if (this.timeLeft <= 0) {
           clearInterval(this.timerID);
@@ -309,6 +316,7 @@ export default {
 .small-card-wrapper {
   margin-bottom: 0px;
   transform: scale(0.65); 
+  transform-origin: 'top left';
   opacity: 0.6;
   width: 160px; 
   height: 300px;
