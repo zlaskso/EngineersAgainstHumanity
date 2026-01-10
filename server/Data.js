@@ -79,12 +79,14 @@ Data.prototype.participateInGame = function (
     rerollsLeft: room.gameSettings.nrOfRerolls,
     currentHandIndexes: [],
     points: 0,
+    laidVotes: [],
+    hasSubmittedIndex: null
   };
 
   room.participants.push(newPlayer);
 
   console.log("ADDING PLAYER:", newPlayer);
-  console.log("ROOM NOW:", room.participants);
+  //console.log("ROOM NOW:", room.participants); //participants är en array av alla spelare i rummet
 
   return newPlayer;
 };
@@ -195,24 +197,38 @@ Data.prototype.createPlayerID = function () {
   return 'player-' + Math.random().toString(36).substring(2, 10);
 };
 
-Data.prototype.saveSubmission = function (gameID, playerID, cardIndex) {
+Data.prototype.saveSubmission = function (gameID, submittingPlayerID, cardIndex) {
   const room = this.getGameRoom(gameID);
   if (room) {
-    room.currentRound.submissions[playerID] = cardIndex;
+    room.currentRound.submissions[submittingPlayerID] = cardIndex;
   }
 };
 
-Data.prototype.saveVote = function (gameID, cardIndex) {
+Data.prototype.saveVote = function (gameID, cardIndex, votingPlayerID) {
   const room = this.getGameRoom(gameID);
   console.log("[SERVER] voteCount:", room.currentRound.voteCount, "participants:", room.participants.length);
-  if (room) {
-    // Om detta kort inte fått röster än, sätt till 0
-    if (!room.currentRound.votes[cardIndex]) {
-      room.currentRound.votes[cardIndex] = 0;
-    }
-    room.currentRound.votes[cardIndex] += 1;
-    room.currentRound.voteCount += 1;
+
+  const submissions = room.currentRound.submissions;
+  const playerWhoSubmittedCard = Object.keys(submissions).find(
+    (playerId) => submissions[playerId] === cardIndex
+  );
+
+  const voter = room.participants.find(p => p.id === votingPlayerID);
+
+  if (voter && playerWhoSubmittedCard) {
+    // lägg till id i den som röstades lista
+    voter.laidVotes.push(playerWhoSubmittedCard);
+    
+    // logga på den spelarens laid votes
+    console.log(`[SERVER] Spelare ${voter.name} röstade på ${playerWhoSubmittedCard}`);
+    console.log(`[SERVER] ${voter.name} har nu röstat på:`, voter.laidVotes);
   }
+
+  if (!room.currentRound.votes[cardIndex]) {
+    room.currentRound.votes[cardIndex] = 0;
+    }
+  room.currentRound.votes[cardIndex] += 1;
+  room.currentRound.voteCount += 1;
 };
 
 Data.prototype.allPlayersVoted = function (gameID) {
@@ -341,6 +357,138 @@ Data.prototype.resetForNewRound = function (gameID) {
     p.currentHandIndexes = [];
     p.rerollsLeft = room.gameSettings.nrOfRerolls;
   }
+};
+
+Data.prototype.getMostCompatiblePairs = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return [];
+
+  const pairs = [];
+  const participants = room.participants;
+
+  for (let i = 0; i < participants.length; i++) {
+    for (let j = i + 1; j < participants.length; j++) {
+      const p1 = participants[i];
+      const p2 = participants[j];
+
+      // hur många gånger p1 röstade på p2
+      const p1VotesOnP2 = p1.laidVotes.filter(id => id === p2.id).length;
+      // hur många gånger p2 röstade på p1
+      const p2VotesOnP1 = p2.laidVotes.filter(id => id === p1.id).length;
+
+      pairs.push({
+        names: [p1.name, p2.name],
+        score: p1VotesOnP2 + p2VotesOnP1,
+        details: `${p1.name} röstade ${p1VotesOnP2} ggr på ${p2.name}, och vice versa ${p2VotesOnP1} ggr.`
+      });
+    }
+  }
+
+  // Sortera så de med högst sammanlagd score kommer först
+  return pairs.sort((a, b) => b.score - a.score);
+};
+
+Data.prototype.getSecretAdmirers = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return [];
+
+  const admirers = [];
+
+  room.participants.forEach(voter => {
+    // Räkna röster per person för denna väljare
+    const voteCounts = {};
+    voter.laidVotes.forEach(targetId => {
+      voteCounts[targetId] = (voteCounts[targetId] || 0) + 1;
+    });
+
+    for (const [targetId, count] of Object.entries(voteCounts)) {
+      const target = room.participants.find(p => p.id === targetId);
+      if (!target) continue;
+
+      // Kolla hur många gånger target röstade tillbaka på voter
+      const returnVotes = target.laidVotes.filter(id => id === voter.id).length;
+
+      admirers.push({
+        admirer: voter.name,
+        target: target.name,
+        votesGiven: count,
+        votesReceived: returnVotes,
+        intensity: count - returnVotes // Högt värde = väldigt ensidigt
+      });
+    }
+  });
+
+  return admirers.sort((a, b) => b.intensity - a.intensity);
+};
+
+Data.prototype.getLeastCompatiblePairs = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return [];
+
+  const results = [];
+  const participants = room.participants;
+
+  for (let i = 0; i < participants.length; i++) {
+    for (let j = i + 1; j < participants.length; j++) {
+      const p1 = participants[i];
+      const p2 = participants[j];
+
+      const totalMutualVotes = 
+        p1.laidVotes.filter(id => id === p2.id).length + 
+        p2.laidVotes.filter(id => id === p1.id).length;
+
+      results.push({
+        names: [p1.name, p2.name],
+        score: totalMutualVotes
+      });
+    }
+  }
+
+  // Sortera med lägst score först
+  return results.sort((a, b) => a.score - b.score);
+};
+
+Data.prototype.getFunnyStatistics = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return {};
+  console.log("[DATA} BERÄKNAR FUNNY STATISTiC FÖR:", gameID);
+
+  const allCompatible = this.getMostCompatiblePairs(gameID);
+  const allLeastCompatible = this.getLeastCompatiblePairs(gameID);
+  const allAdmirers = this.getSecretAdmirers(gameID);
+
+  // Hjälpfunktion för att hämta alla med högsta poäng
+  const getTopScorers = (list, key) => {
+    if (list.length === 0) return [];
+    const topScore = list[0][key];
+    return list.filter(item => item[key] === topScore);
+  };
+
+  // Hämta ut topplistorna
+  let mostCompatible = getTopScorers(allCompatible, 'score');
+  let leastCompatible = getTopScorers(allLeastCompatible, 'score');
+  let secretAdmirers = getTopScorers(allAdmirers, 'intensity');
+
+  //  Om högsta poängen är 0 betyder det att ingen röstat på någon
+  if (mostCompatible.length > 0 && mostCompatible[0].score === 0) {
+    mostCompatible = [];
+  }
+
+  //  Om ingen gett en röst alls (votesGiven är 0)
+  if (secretAdmirers.length > 0 && secretAdmirers[0].votesGiven === 0) {
+    secretAdmirers = [];
+  }
+  
+//filtrera främlingar
+  if (leastCompatible.length > 0 && room.currentRound.roundNumber <= 1) {
+    leastCompatible = [];
+  }
+
+  return {
+    mostCompatiblePairs: mostCompatible,
+    leastCompatiblePairs: leastCompatible,
+    secretAdmirers: secretAdmirers
+  };
 };
 
 export { Data };

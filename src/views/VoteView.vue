@@ -148,6 +148,7 @@
       socket.emit("submitVote", {
         gameID: this.gameID,
         voteCardIndex: this.selectedVoteIndex,
+        votingPlayerID: this.localPlayerID
       });
 
       this.hasVoted = true; // Dölj knappen och visa "Tack för din röst"

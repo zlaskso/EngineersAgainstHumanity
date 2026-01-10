@@ -152,7 +152,7 @@ export default {
 
         socket.emit("submitCard", {
           gameID: this.gameID,
-          playerID: this.localPlayerID,
+          submittingPlayerID: this.localPlayerID,
           cardIndex: selectedCard,
         });
 

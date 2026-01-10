@@ -212,9 +212,9 @@ io.to(gameID).emit("newRoundStarted", {
     }
   });
 
-socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
-    console.log(`[SERVER] Submitting card ${cardIndex}`);
-    data.saveSubmission(gameID, playerID, cardIndex);
+socket.on("submitCard", ({ gameID, submittingPlayerID, cardIndex }) => {
+    console.log(`[SERVER] ${submittingPlayerID} Submitting card ${cardIndex}`);
+    data.saveSubmission(gameID, submittingPlayerID, cardIndex);
     const submissionsMap = data.getSubmissions(gameID);
     const count = Object.keys(submissionsMap).length;
     io.to(gameID).emit("numOfSubmissions", { numOfSubmissions: count });
@@ -227,9 +227,9 @@ socket.on("submitCard", ({ gameID, playerID, cardIndex }) => {
     }
   });
 
-  socket.on("submitVote", ({ gameID, voteCardIndex }) => {
+  socket.on("submitVote", ({ gameID, voteCardIndex, votingPlayerID }) => {
     console.log(`[SERVER] Vote received for card ${voteCardIndex}`);
-    data.saveVote(gameID, voteCardIndex);
+    data.saveVote(gameID, voteCardIndex, votingPlayerID);
 
     if (data.allPlayersVoted(gameID)){
       const room = data.getGameRoom(gameID);
@@ -311,7 +311,7 @@ socket.on("startNextRound", ({gameID}) => {
       const nrCards = room.gameSettings.cardsOnHand;
       player.currentHandIndexes = data.dealWhiteCards(gameID, playerID, nrCards);
       player.rerollsLeft = room.gameSettings.nrOfRerolls;
-      console.log("SERVER emitting initialHand", player.currentHandIndexes, "to player", playerID, "in game", gameID);
+      console.log("[SERVER] emitting initialHand", player.currentHandIndexes, "to", playerID, "in game", gameID);
     }
      // skickar aktuell hand och antal rerolls kvar
     socket.emit("currentHand", {
@@ -395,6 +395,20 @@ socket.on("startNextRound", ({gameID}) => {
     if (timerValues[gameID] !== undefined) {
         socket.emit("timerUpdate", { timeLeft: timerValues[gameID] });
     }
+});
+socket.on("getFunnyStatistics", (gameID) => { 
+    console.log("[SERVER] getFunnyStatistics anropat för:", gameID);
+    const room = data.getGameRoom(gameID);
+    
+    if (!room) {
+        console.log("[SERVER] Rummet hittades inte!");
+        return;
+    }
+
+    const funnyStats = data.getFunnyStatistics(gameID);
+    
+
+    socket.emit("funnyStatistics", funnyStats); 
 });
 
 
