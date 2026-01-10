@@ -83,21 +83,20 @@ export default {
   button {
     cursor: pointer;
   }
+
+  .logo {
+    margin-bottom: 100px;
+  }
+
   input[type=text] {
     margin: 20px;
-    margin-top: 100px;
     padding: 10px;
     height: 50px;
     width: 350px;
     font-size: 20pt;
     border-radius: 10px;
     outline: none;
-    border: 2px solid gray;
-  }
-  input[type=text] {
-    border-color: black;
-    border-radius: 10px;
-    outline: none;
+    border: 2px solid black;
   }
 
   #join {
