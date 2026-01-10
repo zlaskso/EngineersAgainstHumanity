@@ -410,8 +410,17 @@ socket.on("getFunnyStatistics", (gameID) => {
     socket.emit("funnyStatistics", funnyStats); 
 });
 
+socket.on("playAgain", ({ gameID }) => {
+    const room = data.getGameRoom(gameID);
+    if (!room) return;
 
+    // Återställ speldata på servern (poäng, kort, rösthistorik)
+    data.resetGameData(gameID); 
 
+    //  meddelande till ALLA i rummet (inklusive host)
+
+    io.to(gameID).emit("redirectToLobby", { gameID: gameID });
+});
 };
 
 export { sockets };

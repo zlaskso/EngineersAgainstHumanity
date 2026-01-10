@@ -20,6 +20,9 @@
       </div>
     </div>
   </div>
+  <div class="button-container">
+    <button class="default-btn" @click="playAgain"> Spela igen</button>
+  </div>
   <div class="ticker-wrap">
     <div class="ticker">
       <div v-for="n in 2" :key="'group-' + n" class="ticker__group">
@@ -51,6 +54,10 @@ export default {
       funnyStats: null, // Ny variabel
     };
   },
+  props: {
+    uiLabels: Object,
+    uiCardLabels: Object,
+  },
 
   created() {
     this.gameID = this.$route.params.id;
@@ -78,6 +85,10 @@ export default {
     socket.on("funnyStatistics", (data) => {
       console.log("STATISTIK MOTTAGEN FRÅN SERVER:", data);
       this.funnyStats = data;
+    });
+    socket.on("redirectToLobby", (data) => {
+      // Alla spelare (och host) reagerar på detta och byter sida
+      this.$router.push("/lobby/" + data.gameID);
     });
   },
 
@@ -142,6 +153,9 @@ export default {
     thirdPlace() {
       if (!this.sortedParticipants.length) return "Laddar...";
       return this.sortedParticipants[2];
+    },
+    playAgain() {
+      socket.emit("playAgain", { gameID: this.gameID });
     },
   },
 };
@@ -248,7 +262,7 @@ export default {
   bottom: 0;
   left: 0;
   width: 100%;
-  overflow: hidden; /* Döljer texten utanför skärmen */
+  overflow: hidden; /* Dölj texten */
   background-color: rgba(0, 0, 0, 0.9);
   padding: 15px 0;
   z-index: 100;
@@ -263,7 +277,7 @@ export default {
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-  /* Justera hastigheten här (30s) */
+  /* Justera hastigheten här */
   animation: scroll-horizontal 30s linear infinite;
 }
 
@@ -288,8 +302,12 @@ export default {
     transform: translateX(-100%);
   }
 }
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin: 40px 0; /* Ger lite luft så den inte nuddar prispallen eller tickern */
+}
 
-/* Fix för din reveal-animation (ändra duration från 800s till något rimligt) */
 #winner1,
 #winner2,
 #winner3 {

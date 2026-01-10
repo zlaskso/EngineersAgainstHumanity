@@ -232,9 +232,9 @@ h1 {
 }
 
 @media (min-width: 900px) {
-.default-btn {
-  margin-top: 0px;
-}
+  .default-btn {
+    margin-top: 0px;
+  }
 
   .card-view {
     padding: 2rem;

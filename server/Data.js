@@ -491,6 +491,27 @@ Data.prototype.getFunnyStatistics = function (gameID) {
   };
 };
 
+Data.prototype.resetGameData = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return;
+
+  room.participants.forEach(p => {
+    p.points = 0;
+    p.laidVotes = [];
+    p.hasSubmittedIndex = null;
+    p.currentHandIndexes = [];
+  });
+
+  // Starta om rund-räknaren
+  room.currentRound = {
+    roundNumber: 0, // Markera att spelet inte har startat än
+    submissions: {},
+    votes: {},
+    voteCount: 0,
+    blackCardIndex: null
+  };
+};
+
 export { Data };
 
 

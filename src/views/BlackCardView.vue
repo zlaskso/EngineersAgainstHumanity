@@ -16,15 +16,17 @@
       >
       <span v-if="gamePhase === 'VOTING'"> {{ uiLabels.blackCardView?.toVote }}</span>
     </div>
-    <div class="currentRound">
-      {{ uiLabels.blackCardView?.currentRound }}{{ this.roundCounter }}/{{
-        this.gameSettings.numOfRounds
-      }}
-    </div>
-    <div v-if="this.gamePhase == 'SELECTION'" class="currentRound">
-      {{ uiLabels.blackCardView?.numOfSubmissions }}{{ this.numOfSubmissions }}/{{
-        this.numOfPlayers
-      }}
+    <div class="stats-corner">
+      <div class="currentRound">
+        {{ uiLabels.blackCardView?.currentRound }} {{ roundCounter }}/{{
+          gameSettings.numOfRounds
+        }}
+      </div>
+      <div v-if="gamePhase == 'SELECTION'" class="currentRound">
+        {{ uiLabels.blackCardView?.numOfSubmissions }} {{ numOfSubmissions }}/{{
+          numOfPlayers
+        }}
+      </div>
     </div>
   </div>
 </template>
@@ -190,5 +192,20 @@ export default {
   font-weight: bold;
   text-align: center;
   margin-top: 20px;
+}
+.stats-corner {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  text-align: left;
+  z-index: 10;
+}
+
+.currentRound {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+  font-family: sans-serif;
 }
 </style>

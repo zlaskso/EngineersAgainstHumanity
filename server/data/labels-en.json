@@ -81,6 +81,10 @@
 		"header": "Vote for the funniest card!",
 		"vote": "Vote",
 		"voteReceived": "Vote received, waiting for other players..."
+	},
+	"playerEndView":{
+		"thankYou": "Thank you for playing!"
 	}
+	
 	
 }

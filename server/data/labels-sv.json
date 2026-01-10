@@ -86,5 +86,8 @@
     	"toVote": "att rösta",
 		"currentRound": "Nuvarande runda: ",
 		"numOfSubmissions": "Antal inskickade svar: "
+	},
+	"playerEndView":{
+		"thankYou": "Tack för att du spelade!"
 	}
 }

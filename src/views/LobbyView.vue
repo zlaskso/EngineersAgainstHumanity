@@ -1,10 +1,8 @@
 <template>
   <header>
-    <div v-bind:class="['hamburger', {'close': !hideNav}]" 
-         v-on:click="toggleNav">
-    </div>
+    <div v-bind:class="['hamburger', { close: !hideNav }]" v-on:click="toggleNav"></div>
     <button class="logo" @click="homePage">
-      <img src="/img/logo.png">
+      <img src="/img/logo.png" />
       Engineers Against Humanity
     </button>
   </header>
@@ -152,9 +150,9 @@ export default {
     startGame() {
       socket.emit("startGame", { gameID: this.gameID });
     },
-    homePage: function() {
-    this.$router.push(`/`);
-  }
+    homePage: function () {
+      this.$router.push(`/`);
+    },
   },
   beforeDestroy() {
     socket.off("lobbyNotFound");
@@ -176,7 +174,7 @@ export default {
   font-size: clamp(2rem, 5vw, 3rem);
   text-align: center;
   line-height: 1.1;
-  word-break: break-word; 
+  word-break: break-word;
 }
 
 #gameCode {
@@ -187,15 +185,13 @@ export default {
   margin-bottom: 10px;
 }
 
-
 .gridLayout {
   margin-top: 20px;
-  display: flex;     
+  display: flex;
   flex-direction: column;
   gap: 30px;
-  padding: 0 10px;   
+  padding: 0 10px;
 }
-
 
 .left-column {
   display: flex;
@@ -205,10 +201,9 @@ export default {
   width: 100%;
 }
 
-
 .finalGameRules {
   font-size: 1rem;
-  background: #f9f9f9; 
+  background: #f9f9f9;
   padding: 20px;
   border-radius: 12px;
   border: 1px solid #eee;
@@ -226,7 +221,6 @@ export default {
   font-size: 1.5rem;
 }
 
-
 .player-list {
   list-style-type: none;
   padding: 0;
@@ -241,25 +235,24 @@ export default {
   margin-bottom: 5px;
 }
 
-
 .startGameButton {
   background: black;
   color: white;
   font-weight: bold;
-  
+
   width: 100%;
-  max-width: 400px; 
+  max-width: 400px;
   align-self: center;
 
   padding: 18px;
   border: none;
   border-radius: 50px;
   cursor: pointer;
-  
+
   font-size: 1.2rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
-  
+
   -webkit-tap-highlight-color: transparent;
   user-select: none;
 }
@@ -283,22 +276,20 @@ export default {
   }
 }
 
-
 /* 
    DEL 2: DESKTOP (STORA SKÄRMAR)
  */
 @media (min-width: 900px) {
-  
   #lobbyName {
     margin-top: 40px;
   }
 
   .gridLayout {
     margin-top: 60px;
-    display: grid;   
+    display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 60px;
-    max-width: 1000px; 
+    max-width: 1000px;
     margin-left: auto;
     margin-right: auto;
   }
@@ -325,11 +316,11 @@ export default {
     border: none;
     padding: 0;
   }
-  
+
   .player-list {
     text-align: left;
   }
-  
+
   .player-list li {
     background: none;
     border: none;
