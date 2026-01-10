@@ -215,7 +215,7 @@
     .card-view {
   display: grid;
   transform: scale(0.7);
-  margin-top: -100px;
+  margin-top: -50px;
   grid-template-columns: repeat(2, 1fr); 
   gap: 10px;
   justify-content: center;

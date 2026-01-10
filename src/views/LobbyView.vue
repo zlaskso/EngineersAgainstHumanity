@@ -1,4 +1,13 @@
 <template>
+  <header>
+    <div v-bind:class="['hamburger', {'close': !hideNav}]" 
+         v-on:click="toggleNav">
+    </div>
+    <button class="logo" @click="homePage">
+      <img src="/img/logo.png">
+      Engineers Against Humanity
+    </button>
+  </header>
   <h1 id="lobbyName">{{ gameSettings.lobbyName }}</h1>
   <h1 id="gameCode">{{ uiLabels.lobbyView?.gameCode }} {{ gameID }}</h1>
 
@@ -29,7 +38,7 @@
         v-if="amIHost"
         @click="startGame"
         class="startGameButton"
-        :disabled="participants.length < 1"
+        :disabled="participants.length < 3"
       >
         {{ uiLabels.lobbyView?.startGame }}
       </button>
@@ -143,6 +152,9 @@ export default {
     startGame() {
       socket.emit("startGame", { gameID: this.gameID });
     },
+    homePage: function() {
+    this.$router.push(`/`);
+  }
   },
   beforeDestroy() {
     socket.off("lobbyNotFound");
@@ -204,14 +216,14 @@ export default {
 }
 
 .finalGameRules h2 {
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   margin-bottom: 10px;
 }
 
 .finalGameRules p {
   color: #666;
   margin: 5px 0;
-  font-size: 1.1rem;
+  font-size: 1.5rem;
 }
 
 
@@ -224,6 +236,7 @@ export default {
 
 .player-list li {
   background: white;
+  border-bottom: 1px solid #eee;
   padding: 10px;
   margin-bottom: 5px;
 }

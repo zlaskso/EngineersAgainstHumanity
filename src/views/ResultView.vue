@@ -67,6 +67,11 @@
         <h1>{{ uiLabels.resultView?.yourScore }}</h1>
         <span class="score-number">{{ myScore }}</span>
       </div>
+      <div class="currentRound">
+      {{ uiLabels.blackCardView?.currentRound }}{{ this.currentRoundNumber }}/{{
+        this.gameSettings.numOfRounds
+      }}
+    </div>
     </div>
   </div>
 </template>
@@ -104,8 +109,15 @@ export default {
       playerWithSubmissions: {},
       timeLeft: null,
       timerID: null,
-      columnWidth: 600, // Available width for winning cards
-      baseCardWidth: 200, // Original width from WhiteCard.vue
+      gameSettings: {
+        lobbyName: "",
+        numOfRounds: 0,
+        cardsOnHand: 0,
+        answerTime: 0,
+        nrOfRerolls: 0,
+      },
+      columnWidth: 600,
+      baseCardWidth: 200,
     };
   },
 
@@ -128,6 +140,7 @@ export default {
         return !winningIds.includes(Number(submission.cardIndex));
       });
     },
+    
     myScore() {
       const me = this.participants.find((p) => p.id === this.localPlayerID);
       return me ? me.points : 0;
@@ -155,10 +168,25 @@ export default {
     this.gameID = this.$route.params.id;
     socket.emit("join", this.gameID);
     socket.emit("getRoundResult", { gameID: this.gameID });
+    socket.emit("getGameSettings", { gameID: this.gameID });
 
     socket.emit("getGameSettings", { gameID: this.gameID });
     socket.on("gameSettings", (data) => {
       this.totalRounds = data.gameSettings.numOfRounds;
+    });
+
+    socket.on("gameSettings", (data) => {
+      console.log("[CLIENT] Received gameSettings:", data);
+
+      // lägger till gameSettings från servern
+      this.gameSettings = {
+        lobbyName: data.gameSettings.lobbyName,
+        numOfRounds: data.gameSettings.numOfRounds,
+        cardsOnHand: data.gameSettings.cardsOnHand,
+        answerTime: data.gameSettings.answerTime,
+        nrOfRerolls: data.gameSettings.nrOfRerolls,
+      };
+      this.hostID = data.hostID;
     });
 
     socket.emit("getRoundCounter", { gameID: this.gameID });
@@ -338,6 +366,7 @@ export default {
 }
 
 .next-round-btn {
+  font-weight: bold;
   background-color: white;
   color: black;
   padding: 20px 40px;
@@ -369,6 +398,7 @@ export default {
   color: white;
   padding: 40px;
   border-radius: 20px;
+  margin-bottom: 20px;
   display: inline-block;
   min-width: 200px;
 }
