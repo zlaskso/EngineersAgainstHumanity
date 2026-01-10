@@ -21,12 +21,16 @@
     </div>
   </div>
   <div class="button-container">
-    <button class="default-btn" @click="playAgain"> Spela igen</button>
+    <button class="default-btn" @click="playAgain">Spela igen</button>
   </div>
   <div class="ticker-wrap">
     <div class="ticker">
       <div v-for="n in 2" :key="'group-' + n" class="ticker__group">
-        <div class="ticker__item" v-for="(stat, i) in combinedStats" :key="i">
+        <div
+          class="ticker__item"
+          v-for="(stat, i) in combinedStats"
+          :key="`g${n}-i${i}-${stat.title}-${stat.text}`"
+        >
           <span class="stat-label">{{ stat.title }}:</span> {{ stat.text }}
         </div>
       </div>
@@ -262,15 +266,23 @@ export default {
   bottom: 0;
   left: 0;
   width: 100%;
-  overflow: hidden; /* Dölj texten */
+  height: 6rem;
+  overflow: hidden; /* Döljer texten utanför skärmen */
   background-color: rgba(0, 0, 0, 0.9);
   padding: 15px 0;
   z-index: 100;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
 }
 
 .ticker {
   display: inline-flex;
   white-space: nowrap;
+  align-items: center;
+  animation: scroll-horizontal 40s linear infinite;
 }
 
 .ticker__group {
@@ -279,6 +291,7 @@ export default {
   align-items: center;
   /* Justera hastigheten här */
   animation: scroll-horizontal 30s linear infinite;
+  justify-content: center;
 }
 
 .ticker__item {
