@@ -38,7 +38,7 @@
         v-if="amIHost"
         @click="startGame"
         class="startGameButton"
-        :disabled="participants.length < 1"
+        :disabled="participants.length < 3"
       >
         {{ uiLabels.lobbyView?.startGame }}
       </button>
