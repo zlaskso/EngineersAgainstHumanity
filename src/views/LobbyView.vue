@@ -20,18 +20,6 @@
           <span v-else>{{ p.name }}</span>
         </li>
       </ul>
-
-      <Player
-        v-for="p in participants"
-        :key="p.id"
-        :id="p.id"
-        :userName="p.name"
-        :isHost="p.isHost"
-        :hasPickedCard="p.hasPickedCard"
-        :totalNumPoints="p.points"
-        :isActive="p.isActive"
-        :rerollsLeft="p.rerollsLeft"
-      />
       <button
         v-if="amIHost"
         @click="startGame"
@@ -55,7 +43,6 @@
 <script>
 import io from "socket.io-client";
 const socket = io();
-import Player from "@/components/Player.vue";
 
 export default {
   name: "LobbyView",
