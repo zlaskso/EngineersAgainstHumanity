@@ -366,6 +366,7 @@ export default {
 }
 
 .next-round-btn {
+  font-weight: bold;
   background-color: white;
   color: black;
   padding: 20px 40px;
