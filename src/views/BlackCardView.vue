@@ -16,12 +16,12 @@
       >
       <span v-if="gamePhase === 'VOTING'"> {{ uiLabels.blackCardView?.toVote }}</span>
     </div>
-    <div>
+    <div class="currentRound">
       {{ uiLabels.blackCardView?.currentRound }}{{ this.roundCounter }}/{{
         this.gameSettings.numOfRounds
       }}
     </div>
-    <div>
+    <div v-if="this.gamePhase == 'SELECTION'" class="currentRound">
       {{ uiLabels.blackCardView?.numOfSubmissions }}{{ this.numOfSubmissions }}/{{
         this.numOfPlayers
       }}
@@ -180,6 +180,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 20px;
   width: 25rem; /* kortets faktiska bredd */
   max-width: 80%; /* responsiv max-bredd */
   margin: 2rem auto; /* centrera */

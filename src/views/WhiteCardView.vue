@@ -16,7 +16,7 @@
 
   <div class="action-area">
     <button
-      class="submit-btn"
+      class="default-btn"
       v-if="!hasSubmitted"
       @click="submitSelection"
       :disabled="selectedIndex === null"
@@ -186,7 +186,7 @@ h1 {
 .card-view {
   display: grid;
   transform: scale(0.7);
-  margin-top: -100px;
+  margin-top: -50px;
   margin-bottom: -100px;
   grid-template-columns: repeat(2, 1fr);
   gap: 10px;
@@ -194,11 +194,11 @@ h1 {
 }
 
 .rerollButton {
-  background: gray;
-  color: white;
+  background: white;
+  color: black;
   font-weight: bold;
   padding: 0.75rem 1.5rem;
-  border: none;
+  border: 2px solid black;
   border-radius: 12px;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
@@ -227,7 +227,15 @@ h1 {
   padding-bottom: 2rem;
 }
 
+.default-btn {
+  margin-top: 20px;
+}
+
 @media (min-width: 900px) {
+.default-btn {
+  margin-top: 0px;
+}
+
   .card-view {
     padding: 2rem;
     display: flex;

@@ -47,9 +47,8 @@ function sockets(io, socket, data) {
     // förinställd tid för röstning
     startServerTimer(gameID, 20, () => {
        console.log("Voting time up!");
-       // Här kan du trigga resultatskärmen om alla inte röstat
-        //io.to(gameID).emit("forceEndVoting");
-        io.to(gameID).emit("roundFinished", room.lastRoundResult);
+       io.to(gameID).emit("requestFinalVote");
+       io.to(gameID).emit("roundFinished", room.lastRoundResult);
     });
   };
 

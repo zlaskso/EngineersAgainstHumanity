@@ -56,7 +56,7 @@
 	"cardView": {
 		"submitAnswer": "Pick this card",
     	"waitingForOthers": "Waiting for other players...",
-		"pickFavourite" : "Vote for the funniest card!", 
+		"pickFavourite" : "Pick your card!", 
 		"reroll" : "Reroll",
 		"left" : "left"
 
@@ -66,7 +66,7 @@
 		"otherCards": "Losing cards:",
 		"nextRound": "Next round in ",
 		"WaitingForHost": "Waiting for next round...",
-		"yourScore": "Your score",
+		"yourScore": "Your total score",
 		"seeFinalScore": "See final score in"
 	},
 	"blackCardView": {

@@ -57,7 +57,7 @@
 		"waitingForPlayers": "Väntar på att spelare ska ansluta"
 	},
 	"cardView": {
-		"pickFavourite" : "Välj det roligaste kortet!",
+		"pickFavourite" : "Välj ditt kort!",
 		"reroll" : "Slå igen",
 		"left" : "kvar",
 		"submitAnswer": "Skicka svar",
@@ -69,7 +69,7 @@
 		"otherCards": "Förlorande kort:",
 		"nextRound": "Nästa runda om ",
 		"WaitingForHost": "Väntar på nästa runda...",
-		"yourScore": "Din poäng",
+		"yourScore": "Dina totala poäng",
 		"seeFinalScore": "Se slutpoäng om"
 	},
 

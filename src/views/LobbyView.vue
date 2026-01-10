@@ -236,6 +236,7 @@ export default {
 
 .player-list li {
   background: white;
+  border-bottom: 1px solid #eee;
   padding: 10px;
   margin-bottom: 5px;
 }
