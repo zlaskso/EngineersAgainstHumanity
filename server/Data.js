@@ -537,7 +537,7 @@ Data.prototype.resetGameData = function (gameID) {
 
   // Starta om rund-räknaren
   room.currentRound = {
-    roundNumber: 0, // Markera att spelet inte har startat än
+    roundNumber: 1,
     submissions: {},
     votes: {},
     voteCount: 0,

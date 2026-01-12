@@ -10,7 +10,6 @@
   </header>
   <div>
     <h1>{{ uiLabels.playerEndView?.thankYou }}</h1>
-    <p>{{ $route.params.id }}</p>
   </div>
 </template>
 <script>
