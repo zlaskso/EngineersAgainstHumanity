@@ -51,7 +51,8 @@
 		"joinInstructions": "Enter your nickname and press Join to participate in the game.",
 		"participants": "Participants",
 		"startGame": "Start game",
-		"waitingForPlayers": "Waiting for players to join"
+		"waitingForPlayers": "Waiting for players to join",
+		"gameCode": "Gamecode:"
 	},
 	"cardView": {
 		"submitAnswer": "Pick this card",
@@ -75,16 +76,22 @@
 		"toSelect": "to choose",
 		"toVote": "to vote",
 		"currentRound": "Current round: ",
-		"numOfSubmissions": "Number of submissions: "
+		"numOfSubmissions": "Number of submissions: ",
+		"numOfVotes": "Number of votes"
 	},
 	"voteView": {
 		"header": "Vote for the funniest card!",
 		"vote": "Vote",
 		"voteReceived": "Vote received, waiting for other players..."
 	},
+	"hostFinalView": {
+		"winnerIs": "And the winner is..."
+	},
 	"playerEndView":{
 		"thankYou": "Thank you for playing!"
+
 	}
+
 	
 	
 }

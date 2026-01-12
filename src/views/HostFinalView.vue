@@ -1,7 +1,6 @@
 <template>
   <div>
-    <p>Game: {{ $route.params.id }}</p>
-    <h1>Vinnaren är:</h1>
+    <h1>{{ uiLabels.hostFinalView?.winnerIs }}</h1>
 
     <div class="price">
       <div class="col second">
@@ -25,12 +24,8 @@
   </div>
   <div class="ticker-wrap">
     <div class="ticker">
-      <div v-for="n in 2" :key="'group-' + n" class="ticker__group">
-        <div
-          class="ticker__item"
-          v-for="(stat, i) in combinedStats"
-          :key="`g${n}-i${i}-${stat.title}-${stat.text}`"
-        >
+      <div v-for="n in 2" :key="n" class="ticker__group">
+        <div v-for="(stat, i) in combinedStats" :key="i" class="ticker__item">
           <span class="stat-label">{{ stat.title }}:</span> {{ stat.text }}
         </div>
       </div>
@@ -55,7 +50,7 @@ export default {
       allSubmittedCards: [],
       participants: [],
       playerWithSubmissions: {},
-      funnyStats: null, // Ny variabel
+      funnyStats: null,
     };
   },
   props: {
@@ -79,13 +74,6 @@ export default {
       socket.emit("getFunnyStatistics", this.gameID);
     });
 
-    socket.on("roundFinished", (data) => {
-      this.winnerNames = data.winnerNames || [];
-      this.blackCardIndex = Number(data.blackCardIndex);
-      this.winningCardIndexes = data.winningCardIndexes || [];
-      this.allSubmittedCards = data.allSubmittedCards || [];
-      this.participants = data.participants || [];
-    });
     socket.on("funnyStatistics", (data) => {
       console.log("STATISTIK MOTTAGEN FRÅN SERVER:", data);
       this.funnyStats = data;
@@ -166,8 +154,16 @@ export default {
 </script>
 
 <style scoped>
+h1 {
+  text-align: center;
+  margin-top: 60px;
+  font-size: 4rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #000;
+}
 .price {
-  margin-top: 100px;
+  margin-top: 10px;
   height: 400px;
   display: grid;
   font-size: 2rem;
@@ -204,27 +200,36 @@ export default {
   grid-row: 2;
 }
 
-@keyframes reavealAnimation {
+@keyframes revealAnimation {
   0% {
-    transform: scaleY(0);
+    transform: translateY(20px) scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-10px) scale(1.1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
     opacity: 1;
   }
-  0.5% {
-    transform: scaleY(1.5);
-    opacity: 1;
-  }
-  0.7% {
-    transform: scaleY(0.9);
-    opacity: 1;
-  }
-  1% {
-    transform: scaleY(1.1);
-    opacity: 1;
-  }
-  2% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
+}
+
+#winner1,
+#winner2,
+#winner3 {
+  opacity: 0;
+  display: block;
+  animation: revealAnimation 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+#winner3 {
+  animation-delay: 0.5s;
+}
+#winner2 {
+  animation-delay: 1s;
+}
+#winner1 {
+  animation-delay: 1.5s;
 }
 
 .third {
@@ -233,10 +238,15 @@ export default {
 }
 
 .winner-name {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 800;
   text-align: center;
   width: 100%;
   margin-bottom: 10px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .podium {
@@ -260,71 +270,91 @@ export default {
   height: 50%;
 }
 
-/* Själva behållaren längst ner på skärmen */
 .ticker-wrap {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 6rem;
-  overflow: hidden; /* Döljer texten utanför skärmen */
-  background-color: rgba(0, 0, 0, 0.9);
-  padding: 15px 0;
-  z-index: 100;
-
+  height: 5rem;
+  overflow: hidden;
+  background-color: #000;
+  border-top: 3px solid #fff;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 0;
+  z-index: 1000;
 }
 
 .ticker {
-  display: inline-flex;
-  white-space: nowrap;
-  align-items: center;
-  animation: scroll-horizontal 40s linear infinite;
+  display: flex;
+  width: max-content;
+  /* Öka från 10s till 30s eller 40s för mjukare gång */
+  animation: scroll-horizontal 30s linear infinite;
+  will-change: transform;
 }
 
 .ticker__group {
-  display: inline-flex;
+  display: flex;
   flex-shrink: 0;
   align-items: center;
-  /* Justera hastigheten här */
-  animation: scroll-horizontal 30s linear infinite;
-  justify-content: center;
 }
 
 .ticker__item {
-  padding: 0 3rem;
-  color: white;
-  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  padding: 0 4rem;
+  color: #ffffff;
+  font-size: 2.2rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
 }
 
 .stat-label {
-  color: white;
-  font-weight: bold;
-  margin-right: 10px;
+  color: #ffffff;
+  font-weight: 900;
+  margin-right: 15px;
 }
 
-/* Animationen som flyttar texten */
 @keyframes scroll-horizontal {
-  from {
+  0% {
     transform: translateX(0);
   }
-  to {
-    transform: translateX(-100%);
+  100% {
+    transform: translateX(-50%);
   }
 }
 .button-container {
   display: flex;
   justify-content: center;
-  margin: 40px 0; /* Ger lite luft så den inte nuddar prispallen eller tickern */
+  margin: 40px 0;
 }
 
-#winner1,
-#winner2,
-#winner3 {
-  opacity: 1; /* Ändra till 1 så de syns efter animationen */
-  animation: reavealAnimation 2s ease-out forwards;
+#winner1 {
+  font-size: 2.3rem;
+  color: black;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 800px) {
+  .price {
+    grid-template-columns: repeat(3, 1fr);
+    width: 95vw;
+    font-size: 1rem;
+    gap: 0.5rem;
+  }
+  .podium {
+    font-size: 4rem;
+  }
+  .winner-name {
+    font-size: 1rem;
+  }
+  .ticker-wrap {
+    height: 60px;
+  }
+  .ticker__item {
+    font-size: 1.4rem;
+    padding: 0 2rem;
+  }
 }
 </style>

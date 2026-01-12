@@ -27,6 +27,9 @@
           numOfPlayers
         }}
       </div>
+      <div v-if="gamePhase == 'VOTING'" class="currentRound">
+        {{ uiLabels.blackCardView?.numOfVotes }} {{ numOfVotes }}/{{ numOfPlayers }}
+      </div>
     </div>
   </div>
 </template>
@@ -51,11 +54,12 @@ export default {
     return {
       currentBlackIndex: null,
       timeLeft: null,
-      gamePhase: "SELECTION",
+      gamePhase: null,
       gameID: "",
       //timerId: 0,
       roundCounter: 0,
       numOfSubmissions: 0,
+      numOfVotes: 0,
       numOfPlayers: 0,
       gameSettings: {
         lobbyName: "",
@@ -75,11 +79,11 @@ export default {
       return this.uiLabels.blackCardView?.selectionPhase;
     },
   },
-  // VIKTIGT: Allt ligger nu i EN enda created-funktion
   created() {
     this.gameID = this.$route.params.id;
     socket.emit("getGameSettings", { gameID: this.gameID });
-    socket.emit("requestCurrentTime", { gameID: this.gameID }); // NYTT: Fråga efter tid direkt
+    socket.emit("join", this.gameID);
+    socket.emit("requestCurrentTime", { gameID: this.gameID }); //fråga efter tid
     socket.on("timerUpdate", (data) => {
       if (data.timeLeft !== undefined) {
         this.timeLeft = data.timeLeft;
@@ -107,8 +111,23 @@ export default {
       socket.emit("requestCurrentBlackCard", { gameID: this.gameID });
       socket.emit("getRoundCounter", { gameID: this.gameID });
       socket.emit("getNumOfPlayers", { gameID: this.gameID });
-      socket.emit("getNumOfSubmissions", { gameID: this.gameID });
     });
+
+    socket.emit("getCurrentGamePhase", { gameID: this.gameID });
+
+    socket.on("currentGamePhase", (data) => {
+      console.log("Fas mottagen från server:", data.gamePhase);
+      if (data.gamePhase === "VOTING") {
+        this.gamePhase = "VOTING";
+      } else {
+        this.gamePhase = "SELECTION";
+      }
+      console.log("Fas är nu:", this.gamePhase);
+    });
+
+    socket.emit("getNumOfSubmissions", { gameID: this.gameID });
+
+    socket.emit("getNumOfVotes", { gameID: this.gameID });
 
     // Lyssnare för svart kort
     socket.on("currentBlackCard", (data) => {
@@ -132,7 +151,13 @@ export default {
       }
     });
 
-    // Lyssnare för FAS-BYTE (När servern säger att vi ska rösta)
+    socket.on("numOfVotes", (data) => {
+      if (data.numOfVotes !== undefined) {
+        this.numOfVotes = data.numOfVotes;
+      }
+    });
+
+    // Lyssna på fasbyte
     socket.on("votingPhaseStarted", () => {
       console.log("Server says: Voting phase started!");
       this.gamePhase = "VOTING";
@@ -186,6 +211,7 @@ export default {
   width: 25rem; /* kortets faktiska bredd */
   max-width: 80%; /* responsiv max-bredd */
   margin: 2rem auto; /* centrera */
+  box-sizing: border-box;
 }
 .timer {
   font-size: 2rem;

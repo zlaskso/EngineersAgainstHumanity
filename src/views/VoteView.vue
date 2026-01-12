@@ -1,64 +1,62 @@
 <template>
   <div class="vote-container">
     <div class="header-section">
-      <h1>{{ uiLabels.voteView?.header}}</h1>
+      <h1>{{ uiLabels.voteView?.header }}</h1>
     </div>
-    
-    <div class="card-view"> <div 
-        v-for="(cardData, index) in cardsToVoteOn" 
+
+    <div class="card-view">
+      <div
+        v-for="(cardData, index) in cardsToVoteOn"
         :key="index"
         class="vote-card-wrapper"
         :class="{ 'selected-vote': selectedVoteIndex === cardData.cardIndex }"
         @click="selectVote(cardData.cardIndex)"
       >
-        <WhiteCard 
+        <WhiteCard
           v-if="uiCardLabels?.whiteCards"
-          :prompt="uiCardLabels.whiteCards[cardData.cardIndex]" 
-          :selected="selectedVoteIndex === cardData.cardIndex" 
+          :prompt="uiCardLabels.whiteCards[cardData.cardIndex]"
+          :selected="selectedVoteIndex === cardData.cardIndex"
         />
       </div>
     </div>
 
     <div class="footer-actions">
-      <button 
-        v-if="!hasVoted" 
-        class="default-btn" 
-        @click="submitVote" 
-        :disabled="selectedVoteIndex === null">
+      <button
+        v-if="!hasVoted"
+        class="default-btn"
+        @click="submitVote"
+        :disabled="selectedVoteIndex === null"
+      >
         {{ uiLabels.voteView?.vote }}
       </button>
-      
+
       <div v-else class="waiting-message">
-        <h3>{{ uiLabels.voteView?.voteReceived}}</h3>
+        <h3>{{ uiLabels.voteView?.voteReceived }}</h3>
       </div>
     </div>
   </div>
 </template>
 
-
-
-
-
 <script>
-    import WhiteCard from "@/components/WhiteCard.vue";
-    import BlackCard from "@/components/blackCard.vue";
-    import ResponsiveNav from "@/components/ResponsiveNav.vue";
-    import io from "socket.io-client";
-    const socket = io();
+import WhiteCard from "@/components/WhiteCard.vue";
+import BlackCard from "@/components/blackCard.vue";
+import ResponsiveNav from "@/components/ResponsiveNav.vue";
+import io from "socket.io-client";
+const socket = io();
 
-    export default {
-    name: "VoteView",
-    components: {
+export default {
+  name: "VoteView",
+  components: {
     ResponsiveNav,
     WhiteCard,
     BlackCard,
-    },
+  },
 
   data: function () {
     return {
       gameID: "inactive poll",
       localPlayerID: sessionStorage.getItem("playerID"),
-      submittedAnswers: [],
+      cardsToVoteOn: [],
       selectedVoteIndex: null,
       hasVoted: false,
       ResponsiveNav,
@@ -74,86 +72,52 @@
     };
   },
 
-  computed: {
-    cardsToVoteOn() {
-      return this.submittedAnswers.filter(
-        (card) => card.playerID !== this.localPlayerID
-      );
-    },
-  },
+  computed: {},
 
   props: {
     uiLabels: Object,
     uiCardLabels: Object,
   },
-  
-  mounted: function () {
-    socket.emit("getSubmissions", { 
-    gameID: this.gameID, 
-    playerID: this.localPlayerID 
-    });
-    },
-  created: function () { 
+
+  mounted: function () {},
+  created: function () {
     this.gameID = this.$route.params.id;
     socket.emit("join", this.gameID);
 
-    socket.on("votingPhaseStarted", (data) => {
-      this.submittedAnswers = data.submissions;
+    socket.emit("requestCardsToVoteOn", {
+      gameID: this.gameID,
+      playerID: this.localPlayerID,
     });
 
-    socket.on("requestFinalVote", () => {
-
-      if (this.hasVoted) return;
-
-      console.log("Time is up! Auto-voting...");
-
-      // Kolla att det finns kort att rösta på
-      if (this.cardsToVoteOn && this.cardsToVoteOn.length > 0) {
-        
-
-        const randomIndex = Math.floor(Math.random() * this.cardsToVoteOn.length);
-        const randomCardObj = this.cardsToVoteOn[randomIndex];
-
-
-        this.selectedVoteIndex = randomCardObj.cardIndex;
-
-     
-        this.submitVote();
-      }
+    socket.on("cardsToVoteOn", (data) => {
+      // röstbara kort
+      this.cardsToVoteOn = data.submissions;
     });
-
 
     socket.on("roundFinished", () => {
       this.$router.push("/result/" + this.gameID);
-    })
-
-    socket.on("roundFinished", (data) => {
-    console.log("VOTEVIEW, WINNER DATA:", data);
-    this.$router.push("/result/" + this.gameID);
-  }); 
+    });
   },
-
 
   methods: {
-
     selectVote(index) {
-    if (!this.hasVoted) {
-      this.selectedVoteIndex = index; // OBS: Måste matcha variabeln i data()
-    }
-  },
+      if (!this.hasVoted) {
+        this.selectedVoteIndex = index;
+      }
+    },
 
-  submitVote() {
-    // Kolla att man faktiskt har valt något
-    if (this.selectedVoteIndex !== null) {
-      socket.emit("submitVote", {
-        gameID: this.gameID,
-        voteCardIndex: this.selectedVoteIndex,
-        votingPlayerID: this.localPlayerID
-      });
+    submitVote() {
+      // kolla att det finns val
+      if (this.selectedVoteIndex !== null) {
+        socket.emit("submitVote", {
+          gameID: this.gameID,
+          voteCardIndex: this.selectedVoteIndex,
+          votingPlayerID: this.localPlayerID,
+        });
 
-      this.hasVoted = true; // Dölj knappen och visa "Tack för din röst"
-    }
-  },
+        this.hasVoted = true;
+      }
+    },
     fetchLobbyData: function (gameID) {
       socket.emit("getGameSettings", gameID);
     },
@@ -166,8 +130,6 @@
 </script>
 
 <style scoped>
-
-
 .vote-container {
   padding: 20px;
   text-align: center;
@@ -177,25 +139,25 @@
   flex-wrap: wrap;
   justify-content: center;
   gap: 15px;
-  margin-bottom: 80px; /* Plats för footer */
+  margin-bottom: 80px;
 }
 .vote-card-wrapper {
   transition: transform 0.2s;
 }
 .selected-vote {
   transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(0,0,0,0.3);
-  border-radius: 8px; /* Matcha kortets hörn */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
 }
 .footer-actions {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  background: white; /* Eller genomskinlig/gradient */
+  background: white;
   padding-top: 20px;
   padding-bottom: 20px;
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .card-view {
@@ -206,20 +168,19 @@
 }
 
 @media (max-width: 900px) {
-    h1 {
-  text-align: center;
-  margin-top: 50px;
-  margin-bottom: 1.5rem;
-    }
-
-    .card-view {
-  display: grid;
-  transform: scale(0.7);
-  margin-top: -50px;
-  grid-template-columns: repeat(2, 1fr); 
-  gap: 10px;
-  justify-content: center;
-}
+  h1 {
+    text-align: center;
+    margin-top: 50px;
+    margin-bottom: 1.5rem;
   }
-</style>
 
+  .card-view {
+    display: grid;
+    transform: scale(0.7);
+    margin-top: -50px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    justify-content: center;
+  }
+}
+</style>

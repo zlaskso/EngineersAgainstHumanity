@@ -54,7 +54,9 @@
 		"joinInstructions": "Skriv in ditt smeknamn och tryck på Gå med för att delta i spelet.",
 		"participants": "Deltagare",
 		"startGame": "Starta spel",
-		"waitingForPlayers": "Väntar på att spelare ska ansluta"
+		"waitingForPlayers": "Väntar på att spelare ska ansluta",
+		"gameCode": "Spelkod:"
+
 	},
 	"cardView": {
 		"pickFavourite" : "Välj ditt kort!",
@@ -85,7 +87,12 @@
     	"toSelect": "att välja svar",
     	"toVote": "att rösta",
 		"currentRound": "Nuvarande runda: ",
-		"numOfSubmissions": "Antal inskickade svar: "
+		"numOfSubmissions": "Antal svar: ",
+		"numOfVotes": "Antal röster"
+
+	},
+		"hostFinalView": {
+		"winnerIs": "Och vinnaren är..."
 	},
 	"playerEndView":{
 		"thankYou": "Tack för att du spelade!"

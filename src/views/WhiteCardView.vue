@@ -74,14 +74,15 @@ export default {
   mounted() {},
   created: function () {
     this.gameID = this.$route.params.id;
-
+    socket.emit("join", this.gameID); // obligatoriskt för att ansluta till spelet
     socket.on("connect", () => {
       console.log("Socket connected:", socket.id);
       socket.emit("join", this.gameID); // obligatoriskt för att ansluta till spelet
-      socket.emit("requestCurrentHand", {
-        gameID: this.gameID,
-        playerID: this.localPlayerID,
-      });
+    });
+
+    socket.emit("requestCurrentHand", {
+      gameID: this.gameID,
+      playerID: this.localPlayerID,
     });
 
     socket.on("currentHand", (data) => {
@@ -110,23 +111,6 @@ export default {
       }
     });
 
-    socket.on("forceFinalSelection", () => {
-      if (this.hasSubmitted) {
-        console.log("Card already submitted, ignoring timer force.");
-        return; // Avbryt, vi behöver inte skicka igen
-      }
-      // If no card is selected, default to marked card or the first card (index 0)
-      const indexToSubmit = this.selectedIndex !== null ? this.selectedIndex : 0;
-      const selectedCard = this.currentHandIndexes[indexToSubmit];
-
-      socket.emit("submitCard", {
-        gameID: this.gameID,
-        playerID: this.localPlayerID,
-        cardIndex: selectedCard,
-      });
-      this.hasSubmitted = true;
-    });
-
     // ready move to vote view
     socket.on("votingPhaseStarted", () => {
       this.$router.push(`/vote/${this.gameID}`);
@@ -135,7 +119,6 @@ export default {
 
   methods: {
     reroll() {
-      // Ändra logiken till att begära reroll från servern
       console.log("Requesting reroll from server...", this.localPlayerID);
       if (this.rerollsLeft > 0) {
         socket.emit("requestReroll", {
@@ -157,15 +140,6 @@ export default {
         });
 
         this.hasSubmitted = true;
-      }
-    },
-
-    requestInitialHand() {
-      if (this.gameID && this.localPlayerID) {
-        socket.emit("requestInitialHand", {
-          gameID: this.gameID,
-          playerID: this.localPlayerID,
-        });
       }
     },
 

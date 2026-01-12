@@ -85,7 +85,7 @@ Data.prototype.participateInGame = function (
 
   room.participants.push(newPlayer);
 
-  console.log("ADDING PLAYER:", newPlayer);
+  console.log("[DATA] ADDING PLAYER:", newPlayer);
   //console.log("ROOM NOW:", room.participants); //participants är en array av alla spelare i rummet
 
   return newPlayer;
@@ -93,7 +93,7 @@ Data.prototype.participateInGame = function (
 
 Data.prototype.getParticipants = function (gameID) {
   if (this.roomExists(gameID)) {
-    console.log("getParticipants -> Data.js", this.gameRooms[gameID].participants);
+    //console.log("getParticipants -> Data.js", this.gameRooms[gameID].participants);
     return this.gameRooms[gameID].participants;
   }
   return [];
@@ -116,13 +116,14 @@ Data.prototype.createGameRoom = function (gameId, gameSettings, hostID, particip
         submissions: {},   
         votes: {}, 
         voteCount: 0,   
-        blackCardIndex: null
+        blackCardIndex: null,
+        gamePhase: "SELECTION"
       }
     }
   } else {
-    console.log("createGameRoom -> Data.js: Missing gameId or gameSettings");
+    console.log("[DATA] createGameRoom: Missing gameId or gameSettings");
   }
-  console.log("createGameRoom -> Data.js", this.gameRooms[gameId]);
+  console.log("[DATA] gameRoom now", this.gameRooms[gameId]);
 };
 
 Data.prototype.getGameRoom = function (gameID) {
@@ -206,7 +207,6 @@ Data.prototype.saveSubmission = function (gameID, submittingPlayerID, cardIndex)
 
 Data.prototype.saveVote = function (gameID, cardIndex, votingPlayerID) {
   const room = this.getGameRoom(gameID);
-  console.log("[SERVER] voteCount:", room.currentRound.voteCount, "participants:", room.participants.length);
 
   const submissions = room.currentRound.submissions;
   const playerWhoSubmittedCard = Object.keys(submissions).find(
@@ -220,8 +220,9 @@ Data.prototype.saveVote = function (gameID, cardIndex, votingPlayerID) {
     voter.laidVotes.push(playerWhoSubmittedCard);
     
     // logga på den spelarens laid votes
-    console.log(`[SERVER] Spelare ${voter.name} röstade på ${playerWhoSubmittedCard}`);
-    console.log(`[SERVER] ${voter.name} har nu röstat på:`, voter.laidVotes);
+    console.log(`[DATA] Spelare ${voter.name} röstade på ${playerWhoSubmittedCard}`);
+    console.log(`[DATA] ${voter.name} har nu röstat på:`, voter.laidVotes);
+
   }
 
   if (!room.currentRound.votes[cardIndex]) {
@@ -229,7 +230,38 @@ Data.prototype.saveVote = function (gameID, cardIndex, votingPlayerID) {
     }
   room.currentRound.votes[cardIndex] += 1;
   room.currentRound.voteCount += 1;
+  console.log("[DATA] voteCount:", room.currentRound.voteCount, "participants:", room.participants.length);
+
 };
+
+Data.prototype.getNumOfVotes = function (gameID){
+    const room = this.getGameRoom(gameID);
+    if (!room) return 0;
+    return room.currentRound.voteCount;
+}
+
+Data.prototype.getNumOfSubmissions = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return 0;
+  const numOfSubmissions = Object.keys(room.currentRound.submissions).length;
+  return numOfSubmissions;
+};
+
+Data.prototype.getCurrentGamePhase = function (gameID) {
+  const room = this.getGameRoom(gameID);
+    if (!room) return ;
+  //const currentGamePhase = room.currentRound.gamePhase;
+  console.log("[DATA] gamePhase är nu", room.currentRound.gamePhase)
+  return room.currentRound.gamePhase;
+};
+
+Data.prototype.nowVotingPhase = function (gameID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return;
+  room.currentRound.gamePhase = "VOTING";
+  console.log("[DATA] gamePhase har ändrats till", room.currentRound.gamePhase)
+};
+
 
 Data.prototype.allPlayersVoted = function (gameID) {
   const room = this.getGameRoom(gameID);
@@ -243,7 +275,7 @@ Data.prototype.getRoundResults = function (gameID) {
   const room = this.getGameRoom(gameID);
   if (!room) return [];
 
-  // Omvandla submissions-objektet till en lista som är lättare för frontend att läsa
+  // Omvandla submissions-objekt till en lista för frontend att läsa
   const results = Object.entries(room.currentRound.submissions).map(([playerID, cardIndex]) => {
     const player = room.participants.find(p => p.id === playerID);
     return {
@@ -351,6 +383,7 @@ Data.prototype.resetForNewRound = function (gameID) {
   room.currentRound.blackCardIndex = null;
   room.currentRound.votes = {};
   room.currentRound.voteCount = 0;
+  room.currentRound.gamePhase = "SELECTION"
 
   // ny hand för alla (så requestCurrentHand delar ut nytt)
   for (const p of room.participants) {
@@ -510,6 +543,15 @@ Data.prototype.resetGameData = function (gameID) {
     voteCount: 0,
     blackCardIndex: null
   };
+};
+
+Data.prototype.hasPlayerVoted = function (gameID, playerID) {
+  const room = this.getGameRoom(gameID);
+  if (!room) return false;
+  
+  const voter = room.participants.find(p => p.id === playerID);
+  // Om antalet röster spelaren lagt är lika med nuvarande rundnummer, har de röstat
+  return voter && voter.laidVotes.length >= room.currentRound.roundNumber;
 };
 
 export { Data };

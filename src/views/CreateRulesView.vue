@@ -1,13 +1,11 @@
 <template>
   <header>
-      <div v-bind:class="['hamburger', {'close': !hideNav}]" 
-         v-on:click="toggleNav">
-    </div>
-  <button class="logo" @click="homePage">
-      <img src="/img/logo.png">
+    <div v-bind:class="['hamburger', { close: !hideNav }]" v-on:click="toggleNav"></div>
+    <button class="logo" @click="homePage">
+      <img src="/img/logo.png" />
       Engineers Against Humanity
     </button>
-    </header>
+  </header>
   <section id="gameRules">
     <h1>{{ uiLabels.createView?.setGameRules }}</h1>
 
@@ -118,9 +116,9 @@ export default {
         this.$router.push(`/lobby/${d.gameID}`);
       });
     },
-    homePage: function() {
-    this.$router.push(`/`);
-  }
+    homePage: function () {
+      this.$router.push(`/`);
+    },
   },
 };
 </script>

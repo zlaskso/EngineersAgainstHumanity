@@ -47,7 +47,7 @@
 
       <div class="footer-actions">
         <button
-          v-if="currentRoundNumber < totalRounds"
+          v-if="currentRoundNumber < gameSettings.numOfRounds"
           @click="nextRound"
           class="next-round-btn"
         >
@@ -68,10 +68,10 @@
         <span class="score-number">{{ myScore }}</span>
       </div>
       <div class="currentRound">
-      {{ uiLabels.blackCardView?.currentRound }}{{ this.currentRoundNumber }}/{{
-        this.gameSettings.numOfRounds
-      }}
-    </div>
+        {{ uiLabels.blackCardView?.currentRound }}{{ this.currentRoundNumber }}/{{
+          this.gameSettings.numOfRounds
+        }}
+      </div>
     </div>
   </div>
 </template>
@@ -140,7 +140,7 @@ export default {
         return !winningIds.includes(Number(submission.cardIndex));
       });
     },
-    
+
     myScore() {
       const me = this.participants.find((p) => p.id === this.localPlayerID);
       return me ? me.points : 0;
@@ -168,12 +168,8 @@ export default {
     this.gameID = this.$route.params.id;
     socket.emit("join", this.gameID);
     socket.emit("getRoundResult", { gameID: this.gameID });
-    socket.emit("getGameSettings", { gameID: this.gameID });
 
     socket.emit("getGameSettings", { gameID: this.gameID });
-    socket.on("gameSettings", (data) => {
-      this.totalRounds = data.gameSettings.numOfRounds;
-    });
 
     socket.on("gameSettings", (data) => {
       console.log("[CLIENT] Received gameSettings:", data);
@@ -205,26 +201,9 @@ export default {
     }
 
     socket.on("roundResult", (data) => {
-      this.winnerNames = data.winnerNames || [];
-      this.blackCardIndex = Number(data.blackCardIndex);
-      this.winningCardIndexes = data.winningCardIndexes || [];
-      this.allSubmittedCards = data.allSubmittedCards || [];
-      this.participants = data.participants;
-      socket.emit("getPlayerSubmissions", this.gameID);
+      this.updateResults(data);
     });
 
-    socket.on("roundFinished", (data) => {
-      this.winnerNames = data.winnerNames || [];
-      this.blackCardIndex = Number(data.blackCardIndex);
-      this.winningCardIndexes = data.winningCardIndexes || [];
-      this.allSubmittedCards = data.allSubmittedCards || [];
-      this.participants = data.participants || [];
-      /* 
-      if (this.amIHost && !this.timerID) {
-        this.startTimer();
-      } */
-      socket.emit("getPlayerSubmissions", this.gameID);
-    });
     socket.on("newRoundStarted", () => {
       /*       if (this.timerID) {
         clearInterval(this.timerID);
@@ -260,6 +239,15 @@ export default {
   }, */
 
   methods: {
+    updateResults(data) {
+      if (!data) return;
+      this.winnerNames = data.winnerNames || [];
+      this.blackCardIndex = data.blackCardIndex;
+      this.winningCardIndexes = data.winningCardIndexes || [];
+      this.allSubmittedCards = data.allSubmittedCards || [];
+      this.participants = data.participants || [];
+      socket.emit("getPlayerSubmissions", this.gameID);
+    },
     nextRound() {
       socket.emit("startNextRound", { gameID: this.gameID });
     },
