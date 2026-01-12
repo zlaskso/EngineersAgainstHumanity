@@ -430,6 +430,7 @@ socket.on("getNumOfSubmissions", ({ gameID }) =>{
           indexToNameMap[cardIndex] = player.name;
         }
       });
+      console.log("Getting player names and submissions", indexToNameMap)
       socket.emit("returnSubmissions", indexToNameMap);
     }
   });

@@ -1,4 +1,13 @@
 <template>
+  <header>
+    <div v-bind:class="['hamburger', {'close': !hideNav}]" 
+         v-on:click="toggleNav">
+    </div>
+    <button class="logo" @click="homePage">
+      <img src="/img/logo.png">
+      Engineers Against Humanity
+    </button>
+  </header>
   <div>
     <h1>{{ uiLabels.hostFinalView?.winnerIs }}</h1>
 
@@ -20,10 +29,10 @@
     </div>
   </div>
   <div class="button-container">
-    <button class="default-btn" @click="playAgain">Spela igen</button>
+    <button class="default-btn" @click="playAgain">{{ uiLabels.hostFinalView.playAgain }}</button>
   </div>
   <div class="ticker-wrap">
-    <div class="ticker">
+    <div class="ticker" :style="{ animationDuration: tickerDuration }" ref="ticker">
       <div v-for="n in 2" :key="n" class="ticker__group">
         <div v-for="(stat, i) in combinedStats" :key="i" class="ticker__item">
           <span class="stat-label">{{ stat.title }}:</span> {{ stat.text }}
@@ -51,11 +60,14 @@ export default {
       participants: [],
       playerWithSubmissions: {},
       funnyStats: null,
+      tickerWidth: 0,
+      pixelsPerSecond: 100
     };
   },
   props: {
     uiLabels: Object,
     uiCardLabels: Object,
+    lang: String
   },
 
   created() {
@@ -91,47 +103,91 @@ export default {
       return sorted;
     },
 
+    tickerDuration() {
+    if (this.tickerWidth === 0) return '30s';
+    // duration = distance / speed
+    // Since we translate -50%, the distance is half the total ticker width
+    const duration = (this.tickerWidth / 2) / this.pixelsPerSecond;
+    return `${duration}s`;
+  },
+
     // ... dina andra computed properties
     combinedStats() {
       if (!this.funnyStats) return [{ title: "INFO", text: "Beräknar statistik..." }];
 
       const s = this.funnyStats;
-      const statsList = [];
+      const statsListENG = [];
+      const statsListSWE = [];
 
       // Hantera Most Compatible
       if (s.mostCompatiblePairs.length > 0) {
         s.mostCompatiblePairs.forEach((pair) => {
-          statsList.push({
+          statsListSWE.push({
             title: "BÄSTA KOMPISAR",
             text: `${pair.names.join(" & ")} - ${pair.score} gemensamma röster!`,
           });
+          statsListENG.push({
+            title: "BEST FRIENDS",
+            text: `${pair.names.join(" & ")} - ${pair.score} mutual votes!`,
+          });
         });
       }
 
-      // Hantera Secret Admirers
       if (s.secretAdmirers.length > 0) {
-        s.secretAdmirers.forEach((adm) => {
-          statsList.push({
-            title: "HEMLIG BEUNDRARE",
-            text: `${adm.admirer} röstade på ${adm.target} ${adm.votesGiven} gånger!`,
-          });
-        });
-      }
+    s.secretAdmirers.forEach((adm) => {
+      statsListSWE.push({
+        title: "HEMLIG BEUNDRARE",
+        text: `${adm.admirer} röstade på ${adm.target} ${adm.votesGiven} gånger!`,
+      });
+      statsListENG.push({
+        title: "SECRET ADMIRER",
+        text: `${adm.admirer} voted for ${adm.target} ${adm.votesGiven} times!`,
+      });
+    });
+  }
 
-      // Hantera Least Compatible
-      if (s.leastCompatiblePairs.length > 0) {
-        s.leastCompatiblePairs.forEach((pair) => {
-          statsList.push({
-            title: "FRÄMLINGAR",
-            text: `${pair.names.join(" & ")} har absolut ingen gemensam humor.`,
-          });
-        });
-      }
+  if (s.leastCompatiblePairs.length > 0) {
+    s.leastCompatiblePairs.forEach((pair) => {
+      const names = pair.names.join(" & ");
+      statsListSWE.push({
+        title: "FRÄMLINGAR",
+        text: `${names} har absolut ingen gemensam humor.`,
+      });
+      statsListENG.push({
+        title: "STRANGERS",
+        text: `${names} have absolutely no common humor.`,
+      });
+    });
+  }
 
-      return statsList;
+      if (this.lang === "sv") {
+    return statsListSWE;
+  } else {
+    return statsListENG;
+  }
     },
   },
+
+  watch: {
+    combinedStats: {
+    handler() {
+      this.$nextTick(() => {
+        this.updateTickerWidth();
+      });
+    },
+    deep: true
+  }
+  },
+
   methods: {
+    homePage: function() {
+    this.$router.push(`/`);
+  },
+    updateTickerWidth() {
+    if (this.$refs.ticker) {
+      this.tickerWidth = this.$refs.ticker.offsetWidth;
+    }
+  },
     firstPlace() {
       if (!this.sortedParticipants.length) return "Laddar...";
       return this.sortedParticipants[0];
@@ -157,7 +213,7 @@ export default {
 h1 {
   text-align: center;
   margin-top: 60px;
-  font-size: 4rem;
+  font-size: 2rem;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: #000;
@@ -287,8 +343,9 @@ h1 {
 .ticker {
   display: flex;
   width: max-content;
-  /* Öka från 10s till 30s eller 40s för mjukare gång */
-  animation: scroll-horizontal 30s linear infinite;
+  animation-name: scroll-horizontal;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
   will-change: transform;
 }
 

@@ -107,7 +107,7 @@ export default {
   </audio>
 
   <LanguageComponent v-bind:lang="lang" v-on:switch-language="switchLanguage" />
-  <RouterView v-bind:uiLabels="uiLabels" :uiCardLabels="uiCardLabels" />
+  <RouterView v-bind:uiLabels="uiLabels" :uiCardLabels="uiCardLabels" :lang="lang"/>
 </template>
 
 <style></style>

@@ -85,7 +85,8 @@
 		"voteReceived": "Vote received, waiting for other players..."
 	},
 	"hostFinalView": {
-		"winnerIs": "And the winner is..."
+		"winnerIs": "And the winner is...",
+		"playAgain": "Play again"
 	},
 	"playerEndView":{
 		"thankYou": "Thank you for playing!"

@@ -1,4 +1,13 @@
 <template>
+  <header>
+    <div v-bind:class="['hamburger', {'close': !hideNav}]" 
+         v-on:click="toggleNav">
+    </div>
+    <button class="logo" @click="homePage">
+      <img src="/img/logo.png">
+      Engineers Against Humanity
+    </button>
+  </header>
   <div>
     <h1>{{ uiLabels.playerEndView?.thankYou }}</h1>
     <p>{{ $route.params.id }}</p>
@@ -29,6 +38,12 @@ export default {
       console.log("Spelet startas om, skickar tillbaka till lobbyn...");
       this.$router.push("/lobby/" + data.gameID);
     });
+  },
+
+  methods: {
+    homePage: function() {
+    this.$router.push(`/`);
+  },
   },
 };
 </script>

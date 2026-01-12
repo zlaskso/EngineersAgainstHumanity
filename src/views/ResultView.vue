@@ -246,7 +246,9 @@ export default {
       this.winningCardIndexes = data.winningCardIndexes || [];
       this.allSubmittedCards = data.allSubmittedCards || [];
       this.participants = data.participants || [];
-      socket.emit("getPlayerSubmissions", this.gameID);
+      if (this.amIHost){
+        socket.emit("getPlayerSubmissions", { gameID: this.gameID })
+      }
     },
     nextRound() {
       socket.emit("startNextRound", { gameID: this.gameID });

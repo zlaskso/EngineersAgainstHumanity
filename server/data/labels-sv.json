@@ -92,7 +92,8 @@
 
 	},
 		"hostFinalView": {
-		"winnerIs": "Och vinnaren är..."
+		"winnerIs": "Och vinnaren är...",
+		"playAgain": "Spela igen"
 	},
 	"playerEndView":{
 		"thankYou": "Tack för att du spelade!"
