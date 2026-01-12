@@ -103,7 +103,7 @@ export default {
         s.mostCompatiblePairs.forEach((pair) => {
           statsList.push({
             title: "BÄSTA KOMPISAR",
-            text: `${pair.names.join(" & ")} (${pair.score} gemensamma röster!)`,
+            text: `${pair.names.join(" & ")} - ${pair.score} gemensamma röster!`,
           });
         });
       }
